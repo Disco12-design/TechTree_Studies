@@ -2,16 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { navLinks } from '../types/assets';
+import { navLinks, images } from '../types/assets';
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
     <aside className="w-72 min-h-screen p-6 bg-brand-50 text-brand-600">
-      <h1 className="mb-10 text-2xl font-bold">TechTree </h1>
-       <div className="mb-10">
-         <img src="/logo.png" alt="TechTree Logo" className="w-16 h-16" />
+   
+       <div className="mb-10 items-center flex justify-center">
+         <img src={images.logo} alt="TechTree Logo" className="w-32 h-32 mix-blend-multiply object-contain" />
        </div>
 
       <nav className="space-y-3">
