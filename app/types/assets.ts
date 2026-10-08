@@ -1,4 +1,4 @@
-import { Home, BookOpen, BarChart3, FileText, CreditCard, User, TrendingUp, ArrowUp, CheckCircle, Trophy } from 'lucide-react';
+import { Home, BookOpen, BarChart3, FileText, CreditCard, User, TrendingUp, ArrowUp, CheckCircle, Trophy, Lock, Zap, Terminal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface NavLink {
@@ -65,7 +65,7 @@ export const examAttempts = [
   {
     id: 1,
     examName: 'CompTIA Security+',
-    examNumber: '501-701',
+    examNumber: 'SY0-701',
     date: 'May 19, 2025',
     time: '12:45 PM',
     score: 782,
@@ -76,20 +76,8 @@ export const examAttempts = [
   },
   {
     id: 2,
-    examName: 'AWS Solutions Architect Associate',
-    examNumber: 'SAA-C03',
-    date: 'May 21, 2025',
-    time: '10:30 AM',
-    score: 773,
-    maxScore: 1000,
-    result: 'PASS',
-    duration: '2 hrs 42 min',
-    status: 'pass',
-  },
-  {
-    id: 3,
     examName: 'CompTIA Security+',
-    examNumber: '601-701',
+    examNumber: 'SY0-601',
     date: 'May 19, 2025',
     time: '9:30 AM',
     score: 791,
@@ -98,16 +86,89 @@ export const examAttempts = [
     duration: '1 hr 45 min',
     status: 'fail',
   },
+];
+
+export interface PracticeExam {
+  id: string;
+  vendor: 'CompTIA';
+  code: string;
+  level: 'Foundational' | 'Associate' | 'Professional';
+  title: string;
+  description: string;
+  access: 'Free' | 'Pro';
+  items: number;
+  timeCap: number;
+  targetPass: number;
+  maxScore: number;
+  domains: string[];
+  icon: LucideIcon;
+  features: string[];
+}
+
+export const practiceExams: PracticeExam[] = [
   {
-    id: 4,
-    examName: 'AWS Certified Cloud Practitioner',
-    examNumber: 'CLF-C02',
-    date: 'May 12, 2025',
-    time: '3:15 PM',
-    score: 823,
-    maxScore: 1000,
-    result: 'PASS',
-    duration: '1 hr 32 min',
-    status: 'pass',
-  },
+  id: 'sy0-701-core',
+  vendor: 'CompTIA',
+  code: 'SY0-701',
+  level: 'Associate',
+  title: 'CompTIA Security+ SY0-701 Practice Exam',
+  description: 'Validate network hardening, host monitoring, zero-trust cryptographic implementations, and standard incident remediation.',
+  access: 'Pro',
+  items: 70,
+  timeCap: 90,
+  targetPass: 750,
+  maxScore: 900,
+  domains: ['Threats & Attacks', 'Cryptography', 'Identity & Access', 'Risk Management'],
+  icon: CheckCircle,
+  features: ['verified', 'Simulated Pearson CBT'],
+},
+{
+  id: 'sy0-701-threats',
+  vendor: 'CompTIA',
+  code: 'SY0-701',
+  level: 'Associate',
+  title: 'Security+ Threat Detection Assessment',
+  description: 'Focus on malware analysis, social engineering attacks, cloud threats, and security monitoring practices.',
+  access: 'Pro',
+  items: 80,
+  timeCap: 100,
+  targetPass: 750,
+  maxScore: 900,
+  domains: ['Threat Intelligence', 'Attack Vectors', 'Monitoring', 'Incident Response'],
+  icon: CheckCircle,
+  features: ['adaptive questions', 'performance analytics'],
+},
+{
+  id: 'sy0-701-crypto',
+  vendor: 'CompTIA',
+  code: 'SY0-701',
+  level: 'Associate',
+  title: 'Security+ Cryptography Challenge',
+  description: 'Test encryption standards, PKI concepts, certificate management, and secure communications.',
+  access: 'Pro',
+  items: 65,
+  timeCap: 85,
+  targetPass: 750,
+  maxScore: 900,
+  domains: ['Cryptography', 'PKI', 'Certificates', 'Secure Protocols'],
+  icon: CheckCircle,
+  features: ['exam-ready', 'detailed explanations'],
+},
+{
+  id: 'sy0-701-iam',
+  vendor: 'CompTIA',
+  code: 'SY0-701',
+  level: 'Associate',
+  title: 'Security+ Identity & Access Control Exam',
+  description: 'Measure knowledge of authentication methods, authorization models, MFA, and privilege management.',
+  access: 'Pro',
+  items: 75,
+  timeCap: 95,
+  targetPass: 750,
+  maxScore: 900,
+  domains: ['Identity Management', 'Access Control', 'Federation', 'Authentication'],
+  icon: CheckCircle,
+  features: ['PBQs included', 'exam simulation'],
+},
+
 ];

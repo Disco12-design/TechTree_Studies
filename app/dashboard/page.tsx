@@ -308,8 +308,8 @@ export default function Dashboard() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
-                        Set Date
-                        <Eye size={14} />
+                        View Results
+                        <Eye size={16} />
                       </button>
                     </td>
                   </tr>
