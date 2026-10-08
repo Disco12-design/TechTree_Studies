@@ -8,7 +8,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 min-h-screen p-6 bg-brand-50 text-brand-600">
+    <aside className="w-72 min-h-screen p-6 bg-brand-200 text-brand-600">
    
        <div className="mb-10 items-center flex justify-center">
          <img src={images.logo} alt="TechTree Logo" className="w-32 h-32 mix-blend-multiply object-contain" />
