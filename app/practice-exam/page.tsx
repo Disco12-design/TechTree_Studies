@@ -40,26 +40,18 @@ function Segmented({ label, options, value, onChange }: SegmentedProps) {
 }
 
 export default function PracticeExam() {
-  const [vendor, setVendor] = useState('All');
   const [level, setLevel] = useState('All');
   const [access, setAccess] = useState('All');
 
-  const vendors = useMemo(
-    () => ['All', ...Array.from(new Set(practiceExams.map((e) => e.vendor)))],
-    []
-  );
-
   const filtered = practiceExams.filter(
     (e) =>
-      (vendor === 'All' || e.vendor === vendor) &&
       (level === 'All' || e.level === level) &&
       (access === 'All' || e.access === access)
   );
 
-  const isFiltered = vendor !== 'All' || level !== 'All' || access !== 'All';
+  const isFiltered = level !== 'All' || access !== 'All';
 
   const reset = () => {
-    setVendor('All');
     setLevel('All');
     setAccess('All');
   };
@@ -96,19 +88,6 @@ export default function PracticeExam() {
 
       {/* Filters */}
       <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 border-y border-gray-200 py-3">
-        <label className="flex items-center gap-3 text-sm text-gray-500">
-          Vendor
-          <select
-            value={vendor}
-            onChange={(e) => setVendor(e.target.value)}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600"
-          >
-            {vendors.map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-        </label>
-
         <Segmented label="Level" options={LEVELS} value={level} onChange={setLevel} />
         <Segmented label="Access" options={ACCESS} value={access} onChange={setAccess} />
 
@@ -152,7 +131,6 @@ export default function PracticeExam() {
                 <p className="text-2xl font-semibold tracking-tight text-gray-900">
                   {exam.code}
                 </p>
-                <p className="mt-1 text-sm text-gray-600">{exam.vendor}</p>
                 <p className="text-sm text-gray-500">{exam.level}</p>
               </div>
 

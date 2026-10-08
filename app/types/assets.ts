@@ -90,7 +90,6 @@ export const examAttempts = [
 
 export interface PracticeExam {
   id: string;
-  vendor: 'CompTIA';
   code: string;
   level: 'Foundational' | 'Associate' | 'Professional';
   title: string;
@@ -108,13 +107,12 @@ export interface PracticeExam {
 export const practiceExams: PracticeExam[] = [
   {
   id: 'sy0-701-core',
-  vendor: 'CompTIA',
   code: 'SY0-701',
   level: 'Associate',
   title: 'CompTIA Security+ SY0-701 Practice Exam',
   description: 'Validate network hardening, host monitoring, zero-trust cryptographic implementations, and standard incident remediation.',
-  access: 'Pro',
-  items: 70,
+  access: 'Free',
+  items: 50,
   timeCap: 90,
   targetPass: 750,
   maxScore: 900,
@@ -124,7 +122,6 @@ export const practiceExams: PracticeExam[] = [
 },
 {
   id: 'sy0-701-threats',
-  vendor: 'CompTIA',
   code: 'SY0-701',
   level: 'Associate',
   title: 'Security+ Threat Detection Assessment',
@@ -140,7 +137,6 @@ export const practiceExams: PracticeExam[] = [
 },
 {
   id: 'sy0-701-crypto',
-  vendor: 'CompTIA',
   code: 'SY0-701',
   level: 'Associate',
   title: 'Security+ Cryptography Challenge',
@@ -156,7 +152,6 @@ export const practiceExams: PracticeExam[] = [
 },
 {
   id: 'sy0-701-iam',
-  vendor: 'CompTIA',
   code: 'SY0-701',
   level: 'Associate',
   title: 'Security+ Identity & Access Control Exam',
@@ -171,4 +166,63 @@ export const practiceExams: PracticeExam[] = [
   features: ['PBQs included', 'exam simulation'],
 },
 
+];
+
+export interface PricingTier {
+  id: string;
+  tier: string;
+  name: string;
+  description: string;
+  price: string;
+  billing: string;
+  currency?: string;
+  badge?: string;
+  passRate?: string;
+  isPopular?: boolean;
+  isCurrentPlan?: boolean;
+  features: string[];
+  buttonLabel: string;
+  buttonAction: string;
+}
+
+export const pricingTiers: PricingTier[] = [
+  {
+    id: 'free',
+    tier: 'Tier 01',
+    name: 'Free Starter',
+    description: 'Essential practice for candidates exploring IT certifications and basic syllabus coverage.',
+    price: 'R0',
+    billing: '/ forever',
+    isCurrentPlan: true,
+    features: [
+      '1 Full-Length Practice Exam per track (Security+)',
+      'Basic Pearson VUE Exam Simulator mode',
+      'Overall score calculation (100–900 Pearson standard)',
+      'Standard question answer explanations',
+      'Community candidate forum & discussion access',
+    ],
+    buttonLabel: 'Current Plan',
+    buttonAction: 'current',
+  },
+  {
+    id: 'pro',
+    tier: 'Tier 02',
+    name: 'Pro Candidate',
+    description: 'Complete CBT simulation suite with unlimited attempts, real timer, and targeted weak-domain training.',
+    price: 'R299',
+    billing: '/ month (billed annually)',
+    badge: 'MOST POPULAR',
+    passRate: '88.4% PASS RATE',
+    isPopular: true,
+    features: [
+      'Unlimited access to all 12+ full-length practice exams',
+      'Authentic Pearson VUE countdown clock & proctor mode',
+      'Custom retake modes (Target incorrect & flagged stems only)',
+      'Domain diagnostic scoring mapped to blueprint (750 pass line)',
+      'Downloadable cheat sheets & PDF study guides',
+      '100% First-Time Pass Guarantee with optional 6-mo extension',
+    ],
+    buttonLabel: 'Upgrade to Pro',
+    buttonAction: 'upgrade',
+  },
 ];
