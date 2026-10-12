@@ -142,12 +142,12 @@ export default function StudyNotesFilter({
 
 function getModuleTitle(domain: string, module: string): string {
   const moduleMap: Record<string, string> = {
-    '1.1': 'Architecture and Infrastructure',
-    '1.2': 'Malicious Activity Indicators',
-    '1.3': 'Threat Intelligence & Hunting',
-    '1.4': 'Security Monitoring',
-    '1.5': 'Security Tools',
-    '1.6': 'Automation & AI',
+    '1.1': 'System and Network Architecture',
+    '1.2': 'Indicators of Malicious Activity',
+    '1.3': 'Security Tools and Scripting',
+    '1.4': 'Threat Intel & Hunting',
+    '1.5': 'Efficiency and Process Improvement',
+    '1.6': 'AI in Security Operations',
     '2.1': 'Vulnerability Discovery',
     '2.2': 'Vulnerability Analysis',
     '2.3': 'Vulnerability Prioritization',

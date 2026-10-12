@@ -16,10 +16,7 @@ export default function StudyNotes() {
     return studyNotes.filter((note) => {
       const matchesSearch =
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.topics.some((topic) =>
-          topic.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        note.description.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesDomain = !selectedDomain || note.domain === selectedDomain;
       const matchesModule = !selectedModule || note.module === selectedModule;

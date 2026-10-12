@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { ChevronLeft, Highlighter, Copy, Check, BookOpen } from "lucide-react";
+import { ChevronLeft, Highlighter, Copy, Check, BookOpen, Lock } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  studyNotes,
-  type StudyNote,
-  type NoteSection,
-  type GlossaryItem,
-  type HighlightedText,
+import type {
+  StudyNote,
+  NoteSection,
+  GlossaryItem,
+  HighlightedText,
 } from "../../types/assets";
 
 function StudyNoteReaderContent() {
@@ -17,6 +16,8 @@ function StudyNoteReaderContent() {
   const noteId = params.id as string;
 
   const [selectedNote, setSelectedNote] = useState<StudyNote | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"sections" | "quick-review" | "glossary">("sections");
   const [selectedSection, setSelectedSection] = useState<NoteSection | null>(null);
   const [highlights, setHighlights] = useState<HighlightedText[]>([]);
@@ -24,17 +25,44 @@ function StudyNoteReaderContent() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const note = studyNotes.find((n) => n.id === noteId);
-    if (note) {
-      setSelectedNote(note);
-      if (note.sections && note.sections.length > 0) {
-        setSelectedSection(note.sections[0]);
+    const fetchNote = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/study-notes/${noteId}`);
+        
+        if (!response.ok) {
+          if (response.status === 403) {
+            setError("Access denied. This content requires a Premium subscription.");
+          } else if (response.status === 404) {
+            setError("Study note not found.");
+          } else {
+            setError("Failed to load study note.");
+          }
+          return;
+        }
+        
+        const note: StudyNote = await response.json();
+        setSelectedNote(note);
+        if (note.sections && note.sections.length > 0) {
+          setSelectedSection(note.sections[0]);
+        }
+        // Reset all state when switching notes
+        setHighlights([]);
+        setActiveTab("sections");
+        setHighlightColor("yellow");
+        setCopied(false);
+      } catch (err) {
+        setError("Failed to load study note.");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      // Reset all state when switching notes
-      setHighlights([]);
-      setActiveTab("sections");
-      setHighlightColor("yellow");
-      setCopied(false);
+    };
+    
+    if (noteId) {
+      fetchNote();
     }
   }, [noteId]);
 
@@ -68,6 +96,40 @@ function StudyNoteReaderContent() {
     { name: "pink", bg: "bg-pink-200", text: "text-pink-700" },
     { name: "purple", bg: "bg-purple-200", text: "text-purple-700" },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-brand-600 mb-4">Loading study note...</p>
+          <Link
+            href="/study-notes"
+            className="text-brand-600 hover:text-brand-900 underline"
+          >
+            Back to Notes
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <Lock size={48} className="mx-auto text-red-600 mb-4" />
+          <h2 className="text-2xl font-bold text-red-900 mb-2">Access Denied</h2>
+          <p className="text-red-700 mb-6">{error}</p>
+          <Link
+            href="/study-notes"
+            className="inline-block bg-brand-600 hover:bg-brand-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            Back to Study Notes
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!selectedNote) {
     return (
@@ -286,7 +348,16 @@ function StudyNoteReaderContent() {
 
                     {/* Copy Button */}
                     <button
-                      onClick={() => copyToClipboard(selectedSection.explain + "\n\n" + selectedSection.points.join("\n"))}
+                      onClick={() => {
+                        const parts = [];
+                        if (selectedSection.explain) {
+                          parts.push(selectedSection.explain);
+                        }
+                        if (selectedSection.points) {
+                          parts.push(selectedSection.points.join("\n"));
+                        }
+                        copyToClipboard(parts.join("\n\n"));
+                      }}
                       className="flex items-center gap-1 mt-4 text-sm text-brand-600 hover:text-brand-900 transition"
                     >
                       {copied ? (
@@ -382,7 +453,7 @@ function StudyNoteReaderContent() {
                       <div
                         className="bg-brand-600 h-2 rounded-full transition-all"
                         style={{
-                          width: `${(selectedNote.sections!.indexOf(selectedSection!) / selectedNote.sections!.length) * 100}%`,
+                          width: `${((selectedNote.sections!.indexOf(selectedSection!) + 1) / selectedNote.sections!.length) * 100}%`,
                         }}
                       ></div>
                     </div>

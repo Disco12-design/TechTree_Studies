@@ -687,7 +687,7 @@ export const studyNotes: StudyNote[] = [
       {
         heading: 'CVSS Scoring in Detail',
         explain: 'CVSS is the industry standard for expressing vulnerability severity. Scores range 0-10 and break down into measurable metrics.',
-        points: ['Attack Vector (AV): How can the vulnerability be exploited? Network (remotely), adjacent (local network), local, or physical.', 'Attack Complexity (AC): How much effort to exploit? Low (no special skills) or high (requires significant expertise).', 'Privileges Required (PR): Must attacker have prior access? None, low, or high privileges needed.', 'User Interaction (UI): Must a user perform an action? Yes (clicking link) or no (automatic).', 'Scope (S): Does exploitation affect more than the vulnerable component? Unchanged or changed.', 'Impact (I): Effect on confidentiality, integrity, availability if exploited? None, low, or high.', 'CVSS 3.1: Current standard. CVSS 3.0: Older. CVSS 2.0: Legacy, do not use.'],
+        points: ['Attack Vector (AV): How can the vulnerability be exploited? Network (remotely), adjacent (local network), local, or physical.', 'Attack Complexity (AC): How much effort to exploit? Low (no special skills) or high (requires significant expertise).', 'Privileges Required (PR): Must attacker have prior access? None, low, or high privileges needed.', 'User Interaction (UI): Must a user perform an action? Yes (clicking link) or no (automatic).', 'Scope (S): Does exploitation affect more than the vulnerable component? Unchanged or changed.', 'Impact (I): Effect on confidentiality, integrity, availability if exploited? None, low, or high.', 'CVSS 4.0: Current standard. CVSS 3.1: Previous version. CVSS 3.0 and 2.0: Legacy versions, do not use.'],
         remember: 'CVSS is reproducible and objective. Environmental and temporal scores add context.',
         examTip: 'Scenarios asking about "exploitable by anyone on the internet" = AV:N, PR:N = higher CVSS score.'
       },
@@ -811,7 +811,7 @@ export const studyNotes: StudyNote[] = [
       {
         heading: 'Compliance and Regulatory Reporting',
         explain: 'Many frameworks require vulnerability management documentation.',
-        points: ['PCI-DSS: Requires annual external scan, quarterly internal scan. Specific scan requirements.', 'HIPAA: Security risk analysis includes vulnerability assessment.', 'SOC 2: Monitoring and testing of controls, including vulnerability management.', 'ISO 27001: Risk assessment including vulnerability identification and remediation.', 'Documentation: Keep records of scans, findings, remediation plans, and completion dates.'],
+        points: ['PCI-DSS: Requires internal and external vulnerability scans at least once every three months. Specific scan requirements.', 'HIPAA: Security risk analysis includes vulnerability assessment.', 'SOC 2: Monitoring and testing of controls, including vulnerability management.', 'ISO 27001: Risk assessment including vulnerability identification and remediation.', 'Documentation: Keep records of scans, findings, remediation plans, and completion dates.'],
         remember: 'Auditors ask: Did you scan? Did you remediate? Can you prove it? Keep records.'
       }
     ],
