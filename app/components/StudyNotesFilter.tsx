@@ -1,6 +1,7 @@
 'use client';
 
-import { X, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { X, ChevronDown, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 
 interface StudyNotesFilterProps {
@@ -10,30 +11,39 @@ interface StudyNotesFilterProps {
   onModuleChange: (module: string | null) => void;
 }
 
+// Change this if your module pages live somewhere else
+const MODULE_BASE_PATH = '/study-notes';
+
+// '1.1' -> '/study-notes/domain-1-1' (matches your id: 'domain-1-1')
+const getModuleHref = (module: string) =>
+  `${MODULE_BASE_PATH}/domain-${module.replace('.', '-')}`;
+
 const domains = [
   {
     name: 'Domain 1.0',
-    label: 'Security Operations (34%)',
+    title: 'Security Operations',
+    percent: '34%',
     modules: ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6'],
   },
   {
     name: 'Domain 2.0',
-    label: 'Vulnerability Management (26%)',
+    title: 'Vulnerability Management',
+    percent: '26%',
     modules: ['2.1', '2.2', '2.3', '2.4', '2.5'],
   },
   {
     name: 'Domain 3.0',
-    label: 'Incident Response and Management (24%)',
+    title: 'Incident Response and Management',
+    percent: '24%',
     modules: ['3.1', '3.2', '3.3', '3.4', '3.5'],
   },
   {
     name: 'Domain 4.0',
-    label: 'Reporting and Communication (16%)',
+    title: 'Reporting and Communication',
+    percent: '16%',
     modules: ['4.1', '4.2', '4.3', '4.4'],
   },
 ];
-
-
 
 export default function StudyNotesFilter({
   selectedDomain,
@@ -44,13 +54,18 @@ export default function StudyNotesFilter({
   const [expandedDomain, setExpandedDomain] = useState<string | null>(selectedDomain);
 
   const hasActiveFilters = selectedDomain || selectedModule;
-
   const currentModules = domains.find((d) => d.name === expandedDomain)?.modules || [];
 
   return (
-    <div className="bg-white rounded-lg border border-brand-200 p-6 mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-bold text-lg text-brand-900">Filters</h3>
+    <div className="bg-white rounded-2xl border border-brand-200 shadow-sm p-5 sm:p-6 mb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h3 className="font-bold text-lg text-brand-900">Study Notes</h3>
+          <p className="text-sm text-brand-600 mt-0.5">
+            Choose a domain, then select a module to open it.
+          </p>
+        </div>
         {hasActiveFilters && (
           <button
             onClick={() => {
@@ -58,84 +73,111 @@ export default function StudyNotesFilter({
               onModuleChange(null);
               setExpandedDomain(null);
             }}
-            className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-900"
+            className="flex items-center gap-1.5 text-sm font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-full px-3 py-1.5 transition"
           >
-            <X size={16} />
-            Clear All
+            <X size={14} />
+            Clear all
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {/* Domain & Module Filter */}
-        <div>
-          <label className="block text-sm font-semibold text-brand-900 mb-3">
-            Domain & Module
-          </label>
-          <div className="space-y-3">
-            {domains.map((domain) => (
-              <div key={domain.name}>
-                {/* Domain Header */}
-                <button
-                  onClick={() => {
-                    if (expandedDomain === domain.name) {
-                      setExpandedDomain(null);
-                      onDomainChange(null);
-                      onModuleChange(null);
-                    } else {
-                      setExpandedDomain(domain.name);
-                      onDomainChange(domain.name);
-                      onModuleChange(null);
-                    }
-                  }}
-                  className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg border transition text-left font-semibold ${
-                    selectedDomain === domain.name
-                      ? 'bg-brand-100 border-brand-500 text-brand-900'
-                      : 'border-brand-200 text-brand-700 hover:bg-brand-50'
+      {/* Domain cards: expand only, no navigation */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {domains.map((domain) => {
+          const isSelected = selectedDomain === domain.name;
+          const isExpanded = expandedDomain === domain.name;
+
+          return (
+            <button
+              key={domain.name}
+              aria-pressed={isSelected}
+              aria-expanded={isExpanded}
+              onClick={() => {
+                if (isExpanded) {
+                  setExpandedDomain(null);
+                  onDomainChange(null);
+                  onModuleChange(null);
+                } else {
+                  setExpandedDomain(domain.name);
+                  onDomainChange(domain.name);
+                  onModuleChange(null);
+                }
+              }}
+              className={`group relative flex flex-col justify-between text-left rounded-xl border p-4 min-h-27.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
+                isSelected
+                  ? 'bg-brand-600 border-brand-600 text-white shadow-md'
+                  : 'bg-white border-brand-200 text-brand-900 hover:border-brand-400 hover:shadow-md hover:-translate-y-0.5'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span
+                  className={`text-xs font-bold uppercase tracking-wide ${
+                    isSelected ? 'text-white/80' : 'text-brand-600'
                   }`}
                 >
-                  <ChevronDown
-                    size={18}
-                    className={`transition ${
-                      expandedDomain === domain.name ? 'rotate-180' : ''
-                    }`}
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold">{domain.name}</div>
-                    <div className="text-xs text-brand-600">{domain.label}</div>
-                  </div>
-                </button>
-
-                {/* Modules */}
-                {expandedDomain === domain.name && (
-                  <div className="ml-4 mt-2 space-y-2 pb-3 border-l-2 border-brand-200 pl-3">
-                    {domain.modules.map((module) => {
-                      // Get the module title from studyNotes
-                      const moduleTitle = getModuleTitle(domain.name, module);
-                      return (
-                        <label key={module} className="flex items-start gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedModule === module}
-                            onChange={() =>
-                              onModuleChange(selectedModule === module ? null : module)
-                            }
-                            className="w-4 h-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500 mt-1"
-                          />
-                          <div className="text-sm">
-                            <div className="font-semibold text-brand-800">{module}</div>
-                            <div className="text-xs text-brand-600">{moduleTitle}</div>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
+                  {domain.name}
+                </span>
+                <span
+                  className={`text-xs font-bold rounded-full px-2 py-0.5 ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-brand-100 text-brand-700'
+                  }`}
+                >
+                  {domain.percent}
+                </span>
               </div>
+
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-semibold leading-snug">{domain.title}</div>
+                  <div
+                    className={`text-xs mt-1 ${
+                      isSelected ? 'text-white/70' : 'text-brand-600'
+                    }`}
+                  >
+                    {domain.modules.length} modules
+                  </div>
+                </div>
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 transition-transform duration-200 ${
+                    isExpanded ? 'rotate-180' : ''
+                  } ${isSelected ? 'text-white' : 'text-brand-500'}`}
+                />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Modules: each one is a link that opens its page */}
+      {expandedDomain && (
+        <div className="mt-5 rounded-xl bg-brand-50 border border-brand-200 p-4 sm:p-5">
+          <div className="text-xs font-bold uppercase tracking-wide text-brand-600 mb-3">
+            {expandedDomain} modules
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {currentModules.map((module) => (
+              <Link
+                key={module}
+                href={getModuleHref(module)}
+                onClick={() => onModuleChange(module)}
+                className="group flex items-center gap-3 rounded-lg border border-brand-200 bg-white text-brand-800 px-3 py-2.5 transition-all duration-150 hover:border-brand-500 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+              >
+                <span className="shrink-0 flex items-center justify-center w-9 h-9 rounded-md text-sm font-bold bg-brand-100 text-brand-700 group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                  {module}
+                </span>
+                <span className="flex-1 text-sm font-medium leading-snug">
+                  {getModuleTitle(expandedDomain, module)}
+                </span>
+                <ArrowRight
+                  size={16}
+                  className="shrink-0 text-brand-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition"
+                />
+              </Link>
             ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

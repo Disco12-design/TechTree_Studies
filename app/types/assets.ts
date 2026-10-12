@@ -328,7 +328,7 @@ export const studyNotes: StudyNote[] = [
     ]
   },
   {
-    id: 'domain-1-2',
+        id: 'domain-1-2',
     title: 'Analyzing Indicators of Malicious Activity',
     domain: 'Domain 1.0',
     domainName: 'Security Operations',
@@ -343,42 +343,49 @@ export const studyNotes: StudyNote[] = [
       {
         heading: 'Network-related indicators',
         points: ['Rogue devices: Unauthorized devices connected to the network that could be used to steal data, spread malware, or gain unauthorized access.', 'Enumeration: An attacker gathers information about systems, users, ports, or services to identify potential targets and vulnerabilities.', 'Anomalous activity: Unusual network behavior, such as unexpected traffic spikes or connections, that may indicate an attack.', 'Activity on unexpected ports: Network communication occurring on ports not normally used by the organization, which could indicate malware or unauthorized services.'],
-        remember: 'Analyze network traffic patterns to identify deviations from normal behavior.'
+        remember: 'Think of a burglar casing a neighborhood. Enumeration = knocking on every door and checking every window. Rogue device = a stranger who slipped inside the gate. Unexpected port = a back door nobody knew existed. Knowing your normal traffic is how you spot the abnormal.',
+        examTip: 'Match the clue to the indicator. One host trying many ports or many hosts quickly = enumeration (scanning). An unknown MAC address or device on the network = rogue device. Connections at regular intervals to an outside IP = beaconing (C2). A service running on a strange port (like SSH on 443) = unexpected port activity.'
       },
       {
         heading: 'Host-related indicators',
         points: ['Resource consumption: Excessive CPU, memory, disk, or network usage that may indicate malware, cryptomining, or unauthorized processes.', 'Unauthorized software: Programs installed without approval that may introduce security risks or malware.', 'Anomalous activity: Unusual system behavior such as unexpected crashes, slow performance, or strange user actions that may indicate compromise.', 'Suspicious or rogue processes: Unknown or unauthorized processes running on a system that could be malicious or performing unauthorized actions.', 'Living Off the Land Binaries (LOLBins) and Scripts: Attackers abuse legitimate system tools such as PowerShell, cmd, or Windows utilities to avoid detection.', 'File system changes: Unexpected creation, deletion, modification, or encryption of files that may indicate malware activity.', 'Data exfiltration: Unauthorized transfer of sensitive data from a system to an external location controlled by an attacker.', 'Unauthorized configuration: Security settings, permissions, or system configurations changed without approval, potentially weakening security controls.'],
-        remember: 'Monitor system resources, processes, and file changes to detect compromise.'
+        remember: 'Think of a thief who uses the house\'s own tools. LOLBins = a burglar using your own ladder and crowbar, so nothing looks "foreign." Exfiltration = carrying the valuables out the door. Resource spike = the lights and meter running hot when nobody is home.',
+        examTip: 'Spot the keyword. Unexplained high CPU with no user activity = cryptominer. PowerShell with -enc or a hidden window, or certutil/mshta/rundll32 used oddly = LOLBins. Mass file renames or new file extensions = ransomware. Large archive created then a big outbound upload = data exfiltration. AV or firewall suddenly turned off = unauthorized configuration.'
       },
       {
         heading: 'Application-related indicators',
         points: ['Service disruption: An application becomes unavailable or performs poorly due to attacks such as DoS, malware, or unauthorized changes.', 'Anomalous activity: Unexpected application behavior, errors, or transactions that may indicate compromise or abuse.'],
-        remember: 'Watch for service disruptions and unusual application behavior.'
+        remember: 'Think of a shop. Service disruption = the doors are jammed shut with customers locked out. Anomalous activity = the cash register doing things nobody told it to do, like odd refunds at 3 AM.',
+        examTip: 'App suddenly slow or down, with a flood of requests = DoS. Strange errors, odd database queries, or unexpected input in the logs = injection attempt (SQLi or XSS). A new or unknown account created inside the app, or an unusual spike in API calls = application anomaly, so check the app logs first.'
       },
       {
         heading: 'Cloud-related indicators',
         points: ['Anomalous activity: Unusual cloud actions such as unexpected logins, resource creation, or changes in usage patterns that may indicate compromise.', 'Resource compromise: Cloud resources such as virtual machines, storage, or databases being accessed or controlled by unauthorized users.'],
-        remember: 'Monitor cloud environments for unexpected activity and resource changes.'
+        remember: 'Think of a company credit card for the cloud. If someone steals it, you see strange purchases: servers in countries you never use, and a bill that suddenly jumps. The bill and the audit log tell on the thief.',
+        examTip: 'Unexpected VMs in a new region plus a huge cost spike = cryptomining on compromised cloud resources. Storage bucket suddenly public = misconfiguration or compromise. Logs showing API calls with leaked access keys from an unusual location = compromised credentials. Look for CloudTrail or activity log evidence.'
       },
       {
         heading: 'Social engineering attacks',
         points: ['Typosquatting: Attackers create fake websites or domains with names similar to legitimate ones to trick users into visiting them.', 'URL shorteners: Shortened links hide the actual destination and can be used to redirect victims to malicious websites.'],
-        remember: 'Always verify URLs before clicking, especially suspicious shortened links.'
+        remember: 'Typosquatting = a fake shop sign with one letter changed (rnicrosoft = "rn" pretending to be "m"). URL shortener = a wrapped gift box: you cannot see what is inside until you open it. Look before you click.',
+        examTip: 'A domain that is one character off from a real brand = typosquatting. A short link (bit.ly style) in an unexpected email = expand it safely and check the destination before opening. Also check WHOIS: a domain registered only days ago is a red flag.'
       },
       {
         heading: 'Identity-based indicators',
         points: ['IAM account compromise: An identity and access management account is taken over by an attacker and used to perform unauthorized actions.', 'Unauthorized access: Users gain access to systems, applications, or data they are not permitted to use.', 'Impossible travel: The same user account appears to log in from geographically distant locations within an impossible timeframe, indicating possible account compromise.'],
-        remember: 'Monitor identity systems for unauthorized access and impossible travel events.'
+        remember: 'Impossible travel = you swipe your card in New York, and 10 minutes later it is used in Tokyo. Nobody flies that fast, so one of those swipes is a thief. The same logic applies to logins.',
+        examTip: 'Two logins from far-apart locations minutes apart = impossible travel (account compromise). Many failed logins across many accounts with one password = password spraying. Repeated MFA push prompts the user did not start = MFA fatigue. User opening data outside their job role = unauthorized access or privilege escalation.'
       },
       {
         heading: 'Email-related attacks',
         points: ['Business Email Compromise (BEC): Attackers impersonate executives, vendors, or trusted contacts through email to trick users into transferring money or revealing sensitive information.'],
-        remember: 'Verify requests through secondary channels and watch for impersonation attempts.'
+        remember: 'BEC = a con artist wearing your boss\'s face. There is often no virus and no bad link, just a believable request like "Wire the payment today, I am in a meeting." The trick is trust and urgency.',
+        examTip: 'Urgent payment request from an "executive," a vendor suddenly changing bank details, or a reply-to address that does not match the sender = BEC. No malware or attachment is involved, so the best defense is verifying by a second channel (phone call). Check SPF, DKIM, and DMARC results in the email header.'
       }
     ]
   },
   {
-    id: 'domain-1-3',
+        id: 'domain-1-3',
     title: 'Tools to Determine Malicious Activity',
     domain: 'Domain 1.0',
     domainName: 'Security Operations',
@@ -393,72 +400,85 @@ export const studyNotes: StudyNote[] = [
       {
         heading: 'Decoding/Parsing',
         points: ['CyberChef: A web-based tool used to decode, encode, decrypt, convert, and analyze suspicious data without writing code.'],
-        remember: 'CyberChef is your first stop for encoded or obfuscated data.'
+        remember: 'CyberChef is a translator for secret messages. Attackers hide their commands in scrambled text (Base64, hex), and CyberChef turns it back into plain words you can read.',
+        examTip: 'See a long string of random letters and numbers, or a PowerShell command with -enc? Think Base64, then CyberChef to decode it. Any question about "decoding," "deobfuscating," or "converting" data without writing code = CyberChef.'
       },
       {
         heading: 'Packet Analysis',
         points: ['Wireshark: A packet capture and analysis tool used to inspect network traffic and identify suspicious communications.', 'tcpdump: A command-line packet analyzer used to capture and investigate network traffic directly from a system.', 'Snort: An intrusion detection and prevention system (IDS/IPS) that analyzes network traffic and generates alerts for suspicious activity.', 'Suricata: A high-performance IDS/IPS that performs deep packet inspection and threat detection on network traffic.', 'Zeek: A network monitoring platform that generates detailed logs and metadata to help investigate security incidents.'],
-        remember: 'Wireshark to analyze, tcpdump to capture, Snort/Suricata to alert, Zeek to understand behavior.'
+        remember: 'Think of a phone line. tcpdump = recording the calls from the command line. Wireshark = a screen where you read the call transcripts. Snort and Suricata = security guards who sound the alarm when they hear a known bad phrase. Zeek = a note-taker who writes a summary of every conversation.',
+        examTip: 'Match the keyword. GUI to inspect or follow a stream = Wireshark. Quick command-line capture on a server = tcpdump. Signature-based alerts or blocking = Snort or Suricata (Suricata is multi-threaded and faster). Rich connection, DNS, and HTTP logs for behavior analysis and hunting = Zeek.'
       },
       {
         heading: 'Log Analysis',
         points: ['Security Information and Event Management (SIEM): A centralized platform that collects, correlates, and analyzes logs from multiple systems to detect threats and security incidents.'],
-        remember: 'SIEM = central point for collecting, correlating, and analyzing all logs.'
+        remember: 'A SIEM is a security control room with a wall of screens. Cameras (logs) from every system feed into one room, and the software connects the dots between them to raise the alarm.',
+        examTip: 'Key words: "correlate," "aggregate," "centralized," or "alert across multiple sources" = SIEM. One failed login means nothing, but 500 failed logins followed by a success from the same IP is the kind of pattern a SIEM correlation rule catches.'
       },
       {
         heading: 'Threat-Intelligence Platforms',
         points: ['Open Threat Exchange (OTX): A community-driven threat intelligence platform that provides indicators of compromise (IOCs) shared by security researchers.', 'Malware Information Sharing Platform (MISP): A threat intelligence platform used to collect, share, and analyze cyber threat information between organizations.', 'Open Cyber Threat Intelligence (OpenCTI): An open-source platform that organizes and visualizes cyber threat intelligence data for investigation and analysis.'],
-        remember: 'OTX, MISP, and OpenCTI share threat intelligence and indicators.'
+        remember: 'Think of a neighborhood watch group chat. OTX = the public community board where anyone posts warnings. MISP = a trusted group where organizations swap detailed reports. OpenCTI = the wall of photos and red string that connects who is behind what.',
+        examTip: 'Crowdsourced IoCs from researchers, shared as "pulses" = OTX. Sharing structured threat data between organizations = MISP. Organizing, linking, and visualizing intel as a knowledge graph = OpenCTI. All three are open-source or free-to-use options.'
       },
       {
         heading: 'Endpoint Security',
         points: ['Endpoint Detection and Response (EDR) and Extended Detection and Response (XDR): Security solutions that monitor endpoints and enterprise environments to detect, investigate, and respond to threats.', 'Mobile Device Management (MDM): A platform used to manage, monitor, and secure mobile devices across an organization.'],
-        remember: 'EDR monitors endpoints, XDR correlates across multiple sources.'
+        remember: 'EDR = a bodyguard on each laptop and server, watching everything and able to lock the door. XDR = the head of security who also sees email, network, and cloud so the whole picture comes together. MDM = the rulebook and remote control for company phones.',
+        examTip: 'Need to isolate a host, kill a process, or investigate endpoint activity = EDR. Correlating endpoint plus email plus network plus cloud data = XDR. Lost or stolen phone, enforce passcodes, or remote wipe = MDM.'
       },
       {
         heading: 'Domain and IP Reputation',
         points: ['WHOIS: A service used to obtain information about domain ownership, registration dates, and contact details.', 'AbuseIPDB: A reputation database that helps identify IP addresses associated with malicious activities.', 'Geolocation by IP Address (GEO-IP): A service that identifies the geographical location of an IP address to support investigations.'],
-        remember: 'Use reputation tools to judge the trustworthiness of domains and IPs.'
+        remember: 'Think of checking a stranger before you trust them. WHOIS = who owns it and when was it created (ID check). AbuseIPDB = has anyone reported this IP (criminal record check). GEO-IP = where in the world is it coming from (address check).',
+        examTip: 'A domain registered only a few days ago = suspicious, check WHOIS. Need to know if an IP has been reported for attacks = AbuseIPDB. Login from an unexpected country, or checking impossible travel = GEO-IP.'
       },
       {
         heading: 'File Analysis',
         points: ['Strings: A utility that extracts readable text from files to help identify hidden indicators, URLs, commands, or malware artifacts.', 'VirusTotal: An online platform that scans files, URLs, and hashes using multiple antivirus engines to identify malicious content.', 'Yet Another Recursive Acronym (YARA): A rule-based malware analysis tool used to identify and classify malicious files based on specific patterns.'],
-        remember: 'Strings extracts text, VirusTotal scans hashes and files, YARA identifies patterns.'
+        remember: 'Strings = reading the text on the outside of a suspicious package. VirusTotal = asking 70 antivirus experts for a second opinion. YARA = a wanted poster that matches any file with the same suspicious features.',
+        examTip: 'Pull readable URLs, IPs, or commands out of a binary without running it = Strings. Check a file hash or URL against many AV engines = VirusTotal (upload only non-sensitive files, since uploads can be shared). Write rules to match malware families by pattern = YARA.'
       },
       {
         heading: 'Sandboxing',
         points: ['Joe Sandbox: An automated malware analysis environment that safely executes suspicious files and reports their behavior.', 'Cuckoo Sandbox: An open-source malware analysis platform that observes how files behave in an isolated environment.'],
-        remember: 'Sandboxes safely detonate suspicious files in isolation.'
+        remember: 'A sandbox is a bomb-disposal chamber. You open the suspicious package inside a sealed room, watch what it does (files, registry, network), and nothing escapes into the real world.',
+        examTip: 'Safely run an unknown file to see its behavior = sandbox (dynamic analysis). Joe Sandbox is commercial and Cuckoo is open-source. Remember that some malware detects sandboxes and stays quiet, so a clean result does not prove the file is safe.'
       },
       {
         heading: 'Pattern Recognition',
         points: ['Regular Expressions (Regex): Patterns used to search, match, and analyze text for indicators such as IP addresses, hashes, emails, and other artifacts.', 'Interpreting Suspicious Commands: Analyzing command-line activity to identify actions commonly used by attackers for persistence, execution, or data theft.'],
-        remember: 'Regex finds patterns in text, command analysis reveals attacker intent.'
+        remember: 'Regex = a super-powered Ctrl+F. Instead of searching one word, you describe a pattern like "any four numbers with dots between them" and it finds every IP address in a huge log. Command analysis = reading the attacker\'s handwriting.',
+        examTip: 'Extract all IPs, emails, or hashes from a large log = regex. Red-flag commands to know: powershell -enc (hidden encoded script), certutil -urlcache (downloading a file), curl or wget piped to bash (remote script execution), and bash -i >& /dev/tcp (reverse shell).'
       },
       {
         heading: 'Email Analysis',
         points: ['MXToolbox: A diagnostic tool used to analyze email servers, DNS records, domains, and email security configurations.'],
-        remember: 'MXToolbox helps verify email security and DNS settings.'
+        remember: 'MXToolbox is the email detective. Paste in a domain or header and it tells you where the mail came from, whether the domain is on a blacklist, and whether it passes the email safety checks.',
+        examTip: 'Verifying SPF, DKIM, and DMARC, checking MX records, blacklist lookups, or analyzing email headers for a spoofed sender = MXToolbox. If a phishing email claims to be from your CEO, this is where you check if the sending server is really allowed to send for that domain.'
       },
       {
         heading: 'User and Entity Behavior Analysis (UEBA)',
         points: ['Open User and Entity Behavior Analytics (OpenUBA): A platform that analyzes user and system behavior to detect unusual activities that may indicate insider threats or compromised accounts.'],
-        remember: 'UEBA detects deviations from normal behavior patterns.'
+        remember: 'UEBA is like a store clerk who knows every regular customer. When Sam, who always shops at 10 AM, suddenly shows up at 3 AM and asks for the safe, the clerk knows something is off. It learns "normal" and flags the change.',
+        examTip: 'Questions about baselining normal behavior, insider threats, or a user suddenly downloading huge amounts of data or logging in at odd hours = UEBA. It catches things signature-based tools miss, because nothing is "known bad," just unusual.'
       },
       {
         heading: 'File Formats',
         points: ['JSON (JavaScript Object Notation): A lightweight, structured data format commonly used for log files, APIs, and security tool outputs.', 'XML (eXtensible Markup Language): A tag-based data format frequently used for application configuration files and data exchange.', 'YAML (YAML Ain\'t Markup Language): A human-readable configuration format commonly used in automation and cloud environments.', 'EVTX: The native Windows Event Log file format used to store security, application, and system logs.'],
-        remember: 'JSON uses braces, XML uses tags, YAML uses indentation, EVTX is Windows logs.'
+        remember: 'Spot them by looks. JSON = curly braces { } and "key": "value". XML = angle-bracket tags like <user>. YAML = clean indentation with no braces. EVTX = the Windows event log file you open in Event Viewer.',
+        examTip: 'Cloud and API logs or tool output in {"key": "value"} form = JSON. Tags with opening and closing brackets = XML. Indentation-based config for Kubernetes, playbooks, or Sigma rules = YAML (a wrong indent breaks it). Windows Security, System, or Application logs = EVTX.'
       },
       {
         heading: 'Programming/Scripting Languages',
         points: ['Python: A versatile programming language commonly used for automation, threat hunting, log analysis, and security scripting.', 'PowerShell: A Windows command-line and scripting language used for system administration but also frequently abused by attackers.', 'Shell Script: A scripting language used in Linux and Unix environments to automate administrative and security-related tasks.'],
-        remember: 'Python for cross-platform automation, PowerShell for Windows, Shell for Linux.'
+        remember: 'Pick the right tool for the platform. Python = the all-purpose Swiss Army knife that works anywhere. PowerShell = the Windows toolbox (and a favorite of attackers). Shell/Bash = the Linux toolbox.',
+        examTip: 'Parse logs, call APIs, or automate across platforms = Python. Windows administration or an attack using built-in tools (LOLBins) = PowerShell. Automate tasks or process logs on Linux = Shell/Bash. PowerShell is both an admin tool and an attacker tool, so look at context.'
       }
     ]
   },
   {
-    id: 'domain-1-4',
+        id: 'domain-1-4',
     title: 'Threat Intelligence and Threat Hunting',
     domain: 'Domain 1.0',
     domainName: 'Security Operations',
@@ -473,47 +493,56 @@ export const studyNotes: StudyNote[] = [
       {
         heading: 'Threat Actors',
         points: ['Advanced Persistent Threat (APT): A highly skilled and well-funded attacker that gains unauthorized access to a network and remains hidden for a long period while continuously stealing data or conducting espionage.', 'Insider Threat: An employee, contractor, or trusted individual who intentionally or unintentionally causes harm to an organization\'s systems, data, or resources.'],
-        remember: 'APT = highly skilled, well-funded, and patient. Insider = already has access.'
+        remember: 'APT = a professional spy who sneaks in, hides for months, and quietly copies secrets. Insider = someone who already has the house keys, so no break-in is needed. One is patient and outside, the other is trusted and inside.',
+        examTip: 'Nation-state, long-term, stealthy, well-funded, or espionage = APT. Employee, contractor, or former staff with access, whether malicious or careless = insider threat. A user clicking a phishing link by accident is still an unintentional insider threat.'
       },
       {
         heading: 'Tactics, Techniques, and Procedures (TTPs)',
         points: ['Tactics: The overall goal an attacker is trying to achieve during a cyberattack, such as stealing credentials or disrupting operations.', 'Techniques: The methods attackers use to accomplish their objectives, such as phishing, malware installation, or privilege escalation.', 'Procedures: The specific steps, tools, and actions an attacker follows to carry out a technique against a target.', 'MITRE ATT&CK: A knowledge base that documents real-world attacker tactics and techniques to help security teams understand and detect threats.', 'Heat Maps: A visual chart that highlights areas with the highest security risks, vulnerabilities, or attack activity levels.', 'Pyramid of Pain: A cybersecurity model that shows how difficult it becomes for attackers when defenders can detect and block higher-level indicators such as TTPs.', 'Attribution: The process of identifying the individual, group, or nation responsible for a cyberattack.'],
-        remember: 'Tactic = goal, Technique = method, Procedure = exact steps.'
+        remember: 'Think of a bank robbery. Tactic = the goal (get the money). Technique = the method (go through the vault door). Procedure = the exact recipe (this crew, this drill, this time). Pyramid of Pain = the lower you block (a hash), the easier the robber swaps it. The higher you block (their habits), the more it hurts them.',
+        examTip: 'Pyramid of Pain order, easiest to hardest for the attacker to change: hash values, IP addresses, domain names, network/host artifacts, tools, TTPs. Blocking TTPs causes the most pain. MITRE ATT&CK = mapping behavior to known techniques. Heat map = showing which techniques you cover or miss. Attribution is difficult and should never be treated as certain.'
       },
       {
         heading: 'Confidence-Level Impacts',
         points: ['Timeliness: Threat intelligence must be received quickly enough to help organizations respond before significant damage occurs.', 'Relevance: Threat intelligence should relate directly to an organization\'s environment, systems, and potential threats.', 'Accuracy: Threat intelligence must be correct and reliable so that security teams can make informed decisions without wasting resources.'],
-        remember: 'TRA: Timeliness, Relevance, Accuracy.'
+        remember: 'Think of a weather forecast. If it arrives late (timeliness), is for another city (relevance), or is often wrong (accuracy), you will not trust it and will not plan around it. Intel works the same way.',
+        examTip: 'Match the problem to the factor. Old indicators that are no longer in use = timeliness. A report about a threat to an industry or technology you do not use = relevance. Many false positives or unverified claims = accuracy. Lower confidence means you should verify before acting.'
       },
       {
         heading: 'Collection Methods and Sources',
         points: ['Open-Source Intelligence (OSINT): Information collected from publicly available sources such as websites, social media, news reports, and public databases.', 'Closed-Source Intelligence: Information obtained from private, restricted, or subscription-based sources that are not publicly accessible.', 'Threat Intelligence Sharing: The exchange of threat information between organizations, vendors, and security communities to improve collective cybersecurity awareness.'],
-        remember: 'OSINT is public, closed-source is restricted, sharing builds collective defense.'
+        remember: 'OSINT = reading the public noticeboard. Closed-source = a paid private newsletter or a secret briefing. Sharing = neighbors telling each other which houses were burgled so everyone locks up.',
+        examTip: 'Free and public (news, social media, WHOIS, public databases) = OSINT. Paid feeds, vendor subscriptions, or restricted government reports = closed-source. Industry groups exchanging indicators (like ISACs, or tools like MISP and OTX) = threat intelligence sharing.'
       },
       {
         heading: 'Indicator of Compromise (IoC)',
         points: ['Collection: The process of gathering evidence such as suspicious files, IP addresses, domains, or logs that may indicate an attack.', 'Analysis: The examination of collected indicators to determine whether malicious activity has occurred or is occurring.', 'Application/Usage: The use of indicators within security tools and processes to detect, monitor, block, or investigate threats.'],
-        remember: 'IoC lifecycle: Collect, Analyze, Apply.'
+        remember: 'IoCs are fingerprints and footprints at a crime scene. First collect them (gather the prints), then analyze them (do they match a known criminal?), then apply them (put the suspect on the watchlist in your SIEM, firewall, or EDR).',
+        examTip: 'Follow the order: collect, analyze, apply. Gathering hashes and IPs from logs = collection. Checking whether they are really malicious (VirusTotal, AbuseIPDB) = analysis. Loading them into the SIEM, firewall, or EDR to block or alert = application. Skipping analysis can cause false positives.'
       },
       {
         heading: 'Types of IoCs',
         points: ['Atomic: A single piece of observable evidence, such as an IP address, file hash, domain name, or email address, that may indicate malicious activity.', 'Behavioral: A pattern of activity or attacker behavior that suggests malicious intent, such as repeated failed login attempts or unusual data transfers.'],
-        remember: 'Atomic = single value, Behavioral = pattern of actions.'
+        remember: 'Atomic = a single clue, like one fingerprint. Behavioral = a pattern, like "this person always checks the cameras, then picks the lock, then leaves at 3 AM." A fingerprint is easy to change, but a habit is hard to hide.',
+        examTip: 'A single value you can copy and paste (IP, hash, domain, email address) = atomic. A sequence or pattern (many failed logins then a success, Word spawning PowerShell, large night-time uploads) = behavioral. Behavioral IoCs sit higher on the Pyramid of Pain and last longer.'
       },
       {
         heading: 'Threat Modeling (STRIDE)',
         points: ['Spoofing: An attacker pretends to be a legitimate user, device, or system to gain unauthorized access.', 'Tampering: An attacker modifies data, files, configurations, or software without authorization.', 'Repudiation: A user performs an action and later denies carrying out that action because there is insufficient evidence to prove it.', 'Information Disclosure: Sensitive information is exposed to individuals who are not authorized to access it.', 'Denial of Service (DoS): An attacker overwhelms a system or service to make it unavailable to legitimate users.', 'Elevation of Privilege: An attacker gains permissions or access rights beyond those originally granted.'],
-        remember: 'STRIDE: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege.'
+        remember: 'Match each letter to a simple story. S = wearing a fake name tag. T = changing the numbers in the ledger. R = "it was not me" with no proof. I = a secret left on the open table. D = a crowd blocking the shop door. E = a visitor walking into the manager\'s office.',
+        examTip: 'Match the scenario. Fake login or forged email sender = spoofing. Altered file or database record = tampering. User denies an action and there are no logs = repudiation (fix with logging and digital signatures). Data leak or exposed records = information disclosure. Service flooded = DoS. Normal user gains admin rights = elevation of privilege.'
       },
       {
         heading: 'Threat Mapping',
         points: ['Threat Mapping: The process of associating known threats, attack techniques, vulnerabilities, and security controls to understand how attackers may target an environment.'],
-        remember: 'Map threats to assets and defenses to identify coverage gaps.'
+        remember: 'Threat mapping is a treasure map in reverse. You draw where the attacker could go (threats and techniques), then mark where your guards are (controls). Any path with no guard is a gap you need to fix.',
+        examTip: 'Linking known threats and techniques (often using MITRE ATT&CK) to your assets, vulnerabilities, and controls to find coverage gaps = threat mapping. The goal is to decide where to add detection or protection first.'
       },
       {
         heading: 'Cyber Deception',
         points: ['Cyber Deception: A security technique that uses fake systems, files, credentials, or services to lure attackers and observe their activities without exposing real assets.', 'Honeypot: A decoy system designed to attract attackers and capture information about their methods and activities.', 'Honeynet: A network of multiple connected honeypots created to simulate a realistic environment for observing attacker behavior.', 'Decoy Assets: Fake files, databases, servers, or accounts intentionally placed within an environment to detect unauthorized access attempts.', 'Fake Credentials: False usernames, passwords, API keys, or tokens planted in systems to alert security teams when attackers attempt to use them.'],
-        remember: 'Honeypots and honeytokens provide high-confidence alerts with minimal false positives.'
+        remember: 'Cyber deception is bait in a trap. A honeypot = a fake jar of honey that attracts the bear. A honeynet = a whole fake village. Fake credentials = a planted wallet with a tracker inside. No real employee should ever touch it, so if anyone does, you know it is an intruder.',
+        examTip: 'A single decoy system = honeypot. A network of decoys = honeynet. Fake files or credentials that should never be used = honeytokens. Any interaction with a decoy is suspicious, which gives high-confidence alerts with very few false positives. It also lets you study attacker behavior safely.'
       }
     ]
   },
