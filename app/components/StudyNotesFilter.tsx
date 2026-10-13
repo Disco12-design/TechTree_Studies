@@ -29,7 +29,7 @@ const domains = [
     name: 'Domain 2.0',
     title: 'Vulnerability Management',
     percent: '26%',
-    modules: ['2.1', '2.2', '2.3', '2.4', '2.5'],
+    modules: ['2.1', '2.2', '2.3', '2.4'],
   },
   {
     name: 'Domain 3.0',
@@ -194,7 +194,6 @@ function getModuleTitle(domain: string, module: string): string {
     '2.2': 'Vulnerability Analysis',
     '2.3': 'Vulnerability Prioritization',
     '2.4': 'Vulnerability Mitigation',
-    '2.5': 'Vulnerability Reporting',
     '3.1': 'Attack Methodologies',
     '3.2': 'IR Process',
     '3.3': 'Digital Forensics',

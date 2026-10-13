@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Search, Plus } from 'lucide-react';
 import { studyNotes } from '../types/assets';
 import StudyNoteCard from '../components/StudyNoteCard';
@@ -25,6 +26,12 @@ export default function StudyNotes() {
     });
   }, [searchTerm, selectedDomain, selectedModule]);
 
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedDomain(null);
+    setSelectedModule(null);
+  };
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -33,12 +40,20 @@ export default function StudyNotes() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-brand-900">Study Notes</h1>
-              <p className="text-brand-600 m  t-1">Comprehensive cybersecurity learning materials</p>
+              {/* Fixed typo: "m  t-1" -> "mt-1" */}
+              <p className="text-brand-600 mt-1">
+                Comprehensive cybersecurity learning materials
+              </p>
             </div>
-            <button className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition">
+
+            {/* Navigates to the notes page */}
+            <Link
+              href="/study-notes/notes"
+              className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition"
+            >
               <Plus size={20} />
               New Note
-            </button>
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -74,11 +89,7 @@ export default function StudyNotes() {
         {filteredNotes.length === 0 && searchTerm && (
           <div className="mb-6 text-center">
             <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedDomain(null);
-                setSelectedModule(null);
-              }}
+              onClick={clearFilters}
               className="text-sm text-brand-600 hover:text-brand-900 underline"
             >
               Clear all filters
@@ -100,14 +111,10 @@ export default function StudyNotes() {
             </div>
             <h3 className="text-xl font-bold text-brand-900 mb-2">No study notes found</h3>
             <p className="text-brand-600 mb-6">
-              Try adjusting your filters or search terms to find what you're looking for.
+              Try adjusting your filters or search terms to find what you&apos;re looking for.
             </p>
             <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedDomain(null);
-                setSelectedModule(null);
-              }}
+              onClick={clearFilters}
               className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition"
             >
               <Plus size={18} />
