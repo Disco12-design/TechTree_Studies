@@ -10,8 +10,9 @@ export default function Sidebar() {
   return (
     <aside className="w-72 min-h-screen p-6 bg-brand-200 text-brand-600">
    
-       <div className="mb-10 items-center flex justify-center">
+       <div className="mb-10 items-center flex justify-center flex-col">
          <img src={images.logo} alt="TechTree Logo" className="w-32 h-32 mix-blend-multiply object-contain" />
+         <p className="text-xl font-bold text-brand-950">TechTree Studies</p>
        </div>
 
       <nav className="space-y-3">
