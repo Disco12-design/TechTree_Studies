@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { profile, metrics, examAttempts } from "../types/assets";
 import {
   Search,
@@ -13,7 +15,23 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const router = useRouter();
   const ProfileIcon = profile.icon;
+
+  const [examDate, setExamDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("examDate");
+    if (!saved) return;
+    const [y, m, d] = saved.split("-").map(Number);
+    setExamDate(
+      new Date(y, m - 1, d).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    );
+  }, []);
 
   return (
     <div className="w-full">
@@ -76,7 +94,9 @@ export default function Dashboard() {
             <Calendar size={18} />
             <span className="font-semibold">Target Exam Date</span>
           </div>
-          <p className="text-2xl font-bold text-brand-900">June 14, 2025</p>
+          <p className="text-2xl font-bold text-brand-900">
+            {examDate ?? "No date set"}
+          </p>
         </div>
 
         {/* Action Cards */}
@@ -92,7 +112,10 @@ export default function Dashboard() {
                 prepare for upcoming exam
               </p>
             </div>
-            <button className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
+            <button 
+              onClick={() => router.push("/dashboard/calendar")}
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700"
+            >
               Set Date
               <Plus size={14} />
             </button>

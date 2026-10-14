@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Sidebar from "./components/Sidebar";
+import { ToasterProvider } from "./providers/ToasterProvider";
 import "./globals.css";
 
 
@@ -13,6 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex h-screen">
+        <ToasterProvider />
         <Suspense fallback={<div className="w-72 min-h-screen p-6 bg-brand-200" />}>
           <Sidebar />
         </Suspense>
