@@ -318,7 +318,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Network,
-    estimatedTime: "3 hours",
+    estimatedTime: "1.4 hours",
     sections: [
       {
         heading: "Logging Concepts",
@@ -447,7 +447,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Search,
-    estimatedTime: "3 hours",
+    estimatedTime: "1.3 hours",
     sections: [
       {
         heading: "Network-related indicators",
@@ -548,7 +548,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Wrench,
-    estimatedTime: "5 hours",
+    estimatedTime: "1 hours",
     sections: [
       {
         heading: "Decoding/Parsing",
@@ -712,7 +712,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Crosshair,
-    estimatedTime: "3 hours",
+    estimatedTime: "1.3 hours",
     sections: [
       {
         heading: "Threat Actors",
@@ -841,7 +841,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Workflow,
-    estimatedTime: "2 hours",
+    estimatedTime: "1.1 hours",
     sections: [
       {
         heading: "Standardize Processes",
@@ -962,7 +962,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 13, 2026",
     access: "Free",
     icon: Search,
-    estimatedTime: "2 hours",
+    estimatedTime: "1.2 hours",
     sections: [
       {
         heading: "Asset Inventory",
@@ -1089,7 +1089,8 @@ export const studyNotes: StudyNote[] = [
     ],
   },
 
-  {    id: "domain-2-2",
+  {
+    id: "domain-2-2",
     title: "Analyzing Output from Vulnerability Assessment Tools",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
@@ -1100,7 +1101,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 13, 2026",
     access: "Free",
     icon: Search,
-    estimatedTime: "4 hours",
+    estimatedTime: "1 hours",
     sections: [
       {
         heading: "Network Scanning and Mapping",
@@ -1190,7 +1191,7 @@ export const studyNotes: StudyNote[] = [
   },
 
   {
-        id: "domain-2-3",
+    id: "domain-2-3",
     title: "Analyzing Data to Prioritize Vulnerabilities",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
@@ -1201,7 +1202,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 13, 2026",
     access: "Free",
     icon: ListOrdered,
-    estimatedTime: "4 hours",
+    estimatedTime: "1.5 hours",
     sections: [
       {
         heading: "Prioritization Criteria",
@@ -1299,8 +1300,9 @@ export const studyNotes: StudyNote[] = [
     ],
   },
 
-  
-  {    id: "domain-2-4",
+
+  {
+    id: "domain-2-4",
     title: "Vulnerability Response, Handling, and Management",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
@@ -1311,7 +1313,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 13, 2026",
     access: "Free",
     icon: ShieldCheck,
-    estimatedTime: "4 hours",
+    estimatedTime: "2 hours",
     sections: [
       {
         heading: "Control Types",
@@ -1432,7 +1434,7 @@ export const studyNotes: StudyNote[] = [
     lastUpdated: "Oct 9, 2026",
     access: "Free",
     icon: Brain,
-    estimatedTime: "4 hours",
+    estimatedTime: "2 hours",
     sections: [
       {
         heading: "Cyber Kill Chain Framework",
@@ -1494,36 +1496,8 @@ export const studyNotes: StudyNote[] = [
           "Threat hunters assume breach and go looking. Use ATT&CK to guide the hunt.",
       },
     ],
-    quickReview: [
-      "Kill chain: Recon → Weaponization → Delivery → Exploitation → Installation → C2 → Actions.",
-      "Detect and stop at ANY stage to prevent attack success.",
-      "MITRE ATT&CK = crowd-sourced knowledge of real attacks.",
-      "Tactics = goal (Initial Access). Techniques = method (Phishing). Procedures = real-world example.",
-      "Persistence mechanisms vary: accounts, tasks, registry, services, cron, SSH keys.",
-      "Lateral movement requires network access and permissions. Segmentation limits options.",
-    ],
-    glossary: [
-      {
-        term: "Kill Chain",
-        meaning:
-          "Seven-stage model of attacker progression from recon to achieving objectives.",
-      },
-      {
-        term: "Persistence",
-        meaning:
-          "Mechanism attacker uses to maintain access after reboot or logout.",
-      },
-      {
-        term: "C2",
-        meaning:
-          "Command and Control, communication channel between attacker and compromised system.",
-      },
-      {
-        term: "ATT&CK",
-        meaning: "MITRE knowledge base of adversary tactics and techniques.",
-      },
-    ],
   },
+
   {
     id: "domain-3-2",
     title: "Incident Response and Detection Process",
