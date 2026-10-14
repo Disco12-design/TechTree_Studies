@@ -45,6 +45,8 @@ export const navLinks: NavLink[] = [
 
 export const images = {
   logo: "/logo.png",
+  logo2: "/TechTree Studies Network Logo.png",
+  smallLogo: "/Magenta Purple Circuit Tree.png",
 };
 
 export const profile = {
