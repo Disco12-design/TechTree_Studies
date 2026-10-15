@@ -35,7 +35,7 @@ const domains = [
     name: 'Domain 3.0',
     title: 'Incident Response and Management',
     percent: '24%',
-    modules: ['3.1', '3.2', '3.3', '3.4', '3.5'],
+    modules: ['3.1', '3.2', '3.3'],
   },
   {
     name: 'Domain 4.0',

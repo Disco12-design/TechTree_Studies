@@ -1302,7 +1302,6 @@ export const studyNotes: StudyNote[] = [
     ],
   },
 
-
   {
     id: "domain-2-4",
     title: "Vulnerability Response, Handling, and Management",
@@ -1439,27 +1438,27 @@ export const studyNotes: StudyNote[] = [
     estimatedTime: "2 hours",
     sections: [
       {
-        heading: "Cyber Kill Chain Framework",
+        heading: "Cyber kill chain",
         explain:
-          "The kill chain models the stages an attacker progresses through. Understanding each stage helps detect and stop attacks.",
+          "Scanning and mapping the network to understand its structure, devices, and potential vulnerabilities.",
         points: [
-          "Reconnaissance: Attacker gathers intelligence. Website research, social media, WHOIS, DNS queries. No direct contact yet.",
-          "Weaponization: Attacker prepares tools. Malware, exploit kit, phishing kit. Off your network.",
-          "Delivery: Attacker sends the weapon. Email, USB drop, website compromise. First contact.",
-          "Exploitation: Weapon executes on target system. Vulnerability exploited, user clicks link.",
-          "Installation: Malware establishes persistence. Backdoor created, service installed, scheduled task.",
-          "Command & Control (C2): Attacker gains remote access. Reverse shell, API callback, agent check-in.",
-          "Actions on Objectives: Attacker achieves goal. Steal data, ransom, sabotage, espionage.",
+          "Reconnaissance: The attacker gathers information about the target, such as users, systems, email addresses, and network infrastructure.",
+          "Weaponization: The attacker creates or prepares a malicious payload, such as malware or a phishing document, to use against the target.",
+          "Delivery: The attacker delivers the malicious payload to the target through methods such as email, websites, USB devices, or malicious downloads.",
+          "Exploitation: The attacker exploits a vulnerability or weakness to execute malicious code on the target system.",
+          "Installation: The attacker installs malware or other malicious tools on the compromised system to maintain access.",
+          "Command and Control (C2): The compromised system communicates with the attacker's server, allowing the attacker to remotely control the device.",
+          "Actions on Objectives: The attacker performs their final objective, such as stealing data, encrypting files, disrupting services, or conducting espionage."
         ],
         remember:
-          "Seven stages from recon to goal. Detect and stop at any stage to prevent attack success.",
+          "The kill chain is a linear, 7-step sequence: Recon, Weaponization, Delivery, Exploitation, Installation, C2, Actions on Objectives. Break the chain at any step and the attack fails.",
         examTip:
-          'Scenarios asking where to "detect early" usually mean reconnaissance or delivery phases.',
+          'Memorize the order and match scenarios to phases. A phishing email being sent is Delivery. Code running after a user opens the attachment is Exploitation. A backdoor being planted is Installation. Beaconing to an external server is C2. Also remember that the kill chain is linear, while ATT&CK is not.',
       },
       {
-        heading: "MITRE ATT&CK Framework",
+        heading: "Diamond Model Analysis",
         explain:
-          "Comprehensive, crowd-sourced knowledge base of attacker techniques observed in the real world.",
+          "Analytical model to understand and describe cyber attacks through four core features: adversary, capability, infrastructure, and victim.",
         points: [
           'Tactics: The "why" or goal. Examples: Initial Access, Persistence, Privilege Escalation, Defense Evasion, Discovery, Lateral Movement, Execution, Collection, Exfiltration, Impact.',
           'Techniques: The "how" or method. Example: Phishing (tactic: Initial Access), PowerShell (tactic: Execution).',
@@ -1467,35 +1466,34 @@ export const studyNotes: StudyNote[] = [
           "Mitigations: How to defend. Example: User training for phishing defense.",
           "Detection: How to detect the technique. Example: Monitor for PowerShell child processes.",
         ],
-        remember:
-          "Tactic = goal. Technique = method. Procedure = real-world example.",
-        examTip:
-          'Questions about "detecting technique X" refer to ATT&CK and how defenders should see it.',
+       remember:
+        "Every intrusion event has four corners: Adversary, Capability, Infrastructure, Victim. Analysts pivot between them. For example, a known C2 domain can lead you to the adversary and to other victims.",
+      examTip:
+        "Capability means the tools (malware, exploits). Infrastructure means what the attacker uses to reach the victim (IPs, domains, C2 servers). If a question asks which model relates adversary, victim, and tools to support attribution or pivoting, the answer is the Diamond Model.",
       },
       {
-        heading: "Initial Access and Persistence",
+        heading: "MITRE ATT&CK Initial",
         explain:
-          "Attacker must get in, then stay in. Initial access and persistence are critical stages.",
+          "MITRE ATT&CK is a knowledge base and framework that documents real-world attacker behavior by organizing tactics and techniques used throughout the attack lifecycle.",
         points: [
-          "Initial Access methods: Phishing (user action), exploit (vulnerability), supply chain (trusted vendor), physical access, credential reuse.",
-          "Persistence mechanisms: New user account, scheduled task, service installation, registry run key, cron job, SSH key.",
-          "Lateral Movement: After initial compromise, move to other systems. Network path depends on network segmentation and permissions.",
+          "Reconnaissance: The attacker gathers information about the target before launching an attack.",
+          "Resource Development: The attacker acquires or develops resources such as domains, infrastructure, accounts, or malware.",
+          "Initial Access: The attacker gains entry into a target environment.",
+          "Execution: The attacker runs malicious code on a target system.",
+          "Persistence: The attacker maintains long-term access to compromised systems.",
+          "Privilege Escalation: The attacker gains higher levels of access or permissions.",
+          "Defense Evasion: The attacker attempts to avoid detection by security controls.",
+          "Credential Access: The attacker attempts to steal usernames, passwords, or authentication tokens.",
+          "Discovery: The attacker gathers information about systems, users, and network resources.",
+          "Lateral Movement: The attacker moves from one system to another within the environment.",
+          "Collection: The attacker gathers data of interest from compromised systems.",
+          "Command and Control: The attacker communicates with compromised systems remotely.",
+          "Exfiltration: The attacker transfers stolen data out of the environment.",
         ],
         remember:
-          "Attackers must get in. Then they must stay in and move around. Detect each stage.",
-      },
-      {
-        heading: "Detection and Hunting",
-        explain:
-          "Knowing attacker patterns helps defenders hunt for compromises.",
-        points: [
-          "Anomalies: Behavior that does not match baseline. Unusual process, odd time of day, strange destination.",
-          "Known patterns: Attacker techniques from ATT&CK. PowerShell child processes, unusual registry access.",
-          "Threat hunting: Proactive search for signs of compromise. Assume breach mindset.",
-          "Timeline analysis: Piece together events to reconstruct attack chain.",
-        ],
-        remember:
-          "Threat hunters assume breach and go looking. Use ATT&CK to guide the hunt.",
+        "Attackers must get in. Then they must stay in and move around. Detect each stage. Tactics are the why, techniques are the how, and procedures are specific real-world implementations.",
+      examTip:
+        "Know the difference: tactic is the goal (Persistence), technique is the method (Scheduled Task), procedure is how a specific group does it (APT28 spear-phishing). ATT&CK is not a strict linear sequence. Attackers can skip or repeat tactics. It is used for threat hunting, detection gap analysis, and red or purple team planning.",
       },
     ],
   },
@@ -1514,102 +1512,27 @@ export const studyNotes: StudyNote[] = [
     icon: Zap,
     estimatedTime: "5 hours",
     sections: [
-      {
-        heading: "Detection and Initial Response",
-        explain:
-          "An incident must first be detected. Detection comes from alerts, user reports, or threat hunting.",
-        points: [
-          "Alert sources: SIEM alerts, EDR detections, IDS/IPS alerts, user reports, vendor notifications.",
-          "Triage: Determine if the alert is real or false positive. Is this actually a security incident?",
-          "Escalation: If real, escalate to incident response team. Assign severity (Critical/High/Medium/Low).",
-          "Initial containment: Quick actions to stop immediate harm. Isolate affected system if compromised.",
-        ],
-        remember: "Detection starts the clock. Fast response limits damage.",
-        examTip:
-          'Scenarios asking "first thing to do" usually mean containment (stop the bleeding) not investigation.',
-      },
-      {
-        heading: "Analysis Phase",
-        explain:
-          "Understand the incident. What happened? How? Who did it? What was accessed?",
-        points: [
-          "Scope determination: How many systems affected? Which departments?",
-          "Timeline: When did it start? When was it detected? How long was attacker present?",
-          "Root cause: How did the attacker get in? Vulnerability, phishing, credential reuse, insider?",
-          "Evidence collection: Gather data for investigation and possible legal action. Preserve chain of custody.",
-        ],
-        remember:
-          'Analysis answers the "what" and "how." Do not skip proper investigation.',
-        examTip:
-          'Questions about "how many systems affected" are asking about scope determination.',
-      },
-      {
-        heading: "Containment and Eradication",
-        explain: "Stop the attack and remove the attacker.",
-        points: [
-          "Short-term containment: Immediate actions to stop ongoing damage. Network isolation, disable account.",
-          "Long-term containment: Fix the vulnerability while maintaining operations. Patch with workarounds.",
-          "Eradication: Remove attacker access. Reset passwords, remove backdoors, patch vulnerabilities, update credentials.",
-          "Verification: Confirm attacker is gone. Re-scan, test for backdoors, monitor for signs of return.",
-        ],
-        remember:
-          "Containment stops harm. Eradication removes the attacker. Both are necessary.",
-      },
-      {
-        heading: "Recovery and Restoration",
-        explain: "Return to normal operations after threat is eliminated.",
-        points: [
-          "Restore from clean backups: If malware is present, rebuild from known-good backup.",
-          "Rebuild if needed: Severe compromise may require full OS reinstall.",
-          "Test: Confirm systems work and are not re-infected.",
-          "Restore data: Return data from backups if it was encrypted or deleted.",
-          "Monitor: Watch closely for weeks after recovery for signs of returning attacker.",
-        ],
-        remember: "Do not trust infected system. Rebuild cleanly if possible.",
-      },
-      {
-        heading: "Post-Incident and Lessons Learned",
-        explain: "After the incident is resolved, learn from it and improve.",
-        points: [
-          "Lessons learned meeting: Team debrief. What went right? What went wrong? How do we improve?",
-          "Documentation: Update runbooks and IR procedures based on what you learned.",
-          "Improvements: Patch the initial vulnerability. Implement the detective control you missed. Improve monitoring.",
-          "Communication: Inform leadership and affected parties. Be transparent about what happened.",
-        ],
-        remember:
-          "Every incident is a learning opportunity. Use it to improve your security posture.",
-      },
-    ],
-    quickReview: [
-      "IR phases: Detection → Analysis → Containment → Eradication → Recovery → Lessons Learned.",
-      "Detection sources: SIEM, EDR, IDS/IPS, user reports, vendors.",
-      "Scope: How many systems? Timeline: When did it start and end?",
-      "Containment stops harm. Eradication removes attacker. Recovery restores operations.",
-      "Always verify attacker is gone before returning to normal.",
-      "Post-incident lessons learned improve future response.",
-    ],
-    glossary: [
-      {
-        term: "Triage",
-        meaning:
-          "Initial assessment to determine if an alert is a real incident.",
-      },
-      {
-        term: "Scope",
-        meaning:
-          "The extent of an incident (number of systems, users, departments affected).",
-      },
-      {
-        term: "Eradication",
-        meaning: "Complete removal of attacker access and malicious artifacts.",
-      },
-      {
-        term: "Chain of Custody",
-        meaning:
-          "Documented evidence preservation procedures for legal admissibility.",
-      },
+     {
+       heading: "Incident Response Process",
+       explain:
+         "IR phases: preparation, detection, analysis, containment, eradication, recovery, and post-incident activities.",
+       points: [
+         "Preparation: Establish policies, procedures, tools, training, and resources before incidents occur.",
+         "Detection: Identify potential security incidents through monitoring systems, alerts, logs, security tools, and threat intelligence.",
+         "Analysis: Investigate an incident to determine its cause, scope, severity, affected systems, and potential business impact.",
+         "Containment: Limit the spread and impact of an incident by isolating affected systems, accounts, or network segments.",
+         "Eradication: Remove the root cause of an incident, including malware, vulnerabilities, malicious accounts, or unauthorized access.",
+         "Recovery: Restore systems, applications, and services to normal operation while ensuring they are secure and functioning properly.",
+         "Post-Incident: Review the incident, document lessons learned, perform root cause analysis, and implement improvements to prevent future incidents.",
+       ],
+       remember:
+         "Effective incident response requires preparation and structured handling of each phase.",
+       examTip:
+         "Understand the sequence and purpose of each IR phase. Know key activities and responsibilities.",
+     },
     ],
   },
+  
   {
     id: "domain-3-3",
     title: "Digital Forensics and Evidence Handling",
@@ -1625,336 +1548,143 @@ export const studyNotes: StudyNote[] = [
     estimatedTime: "5 hours",
     sections: [
       {
-        heading: "Evidence Collection Principles",
+        heading: "Developing Plans",
         explain:
-          "Digital evidence can be fragile and easily corrupted. Proper collection is critical for both investigation and legal proceedings.",
+          "Planning for digital forensics involves preparing procedures, tools, and responsibilities before an incident occurs.",
         points: [
-          "Minimize changes: Do not modify evidence. Read-only access when possible.",
-          "Document everything: Record what, when, where, and by whom. Timestamp all actions.",
-          "Chain of custody: Track evidence from collection through investigation. Who handled it? When? Why?",
-          "Volatile data first: RAM disappears on reboot. Collect memory before disk.",
-          "Hash everything: Create cryptographic hash of evidence. Proves evidence has not been modified.",
+          "Incident Response Plan: An incident response plan is a documented set of procedures that outlines how an organization prepares for, detects, responds to, and recovers from security incidents.",
+          "Communication Plan: A communication plan defines how incident-related information will be communicated to employees, management, customers, vendors, and other stakeholders during a security incident."
         ],
         remember:
-          "Digital evidence is fragile. One mistake and it is inadmissible in court.",
+          "Preparation is key. Have your plan written, reviewed, and tested before an incident strikes. The IR Plan is the master procedure; the Communication Plan controls who gets told what.",
         examTip:
-          'Scenarios asking "first action" on a live system often mean collect memory (volatility) before shutdown.',
+          'Questions about "notifying stakeholders" or "reporting to executives" = Communication Plan. Questions about "procedures for handling" an incident = Incident Response Plan.',
       },
       {
-        heading: "Chain of Custody",
+        heading: "Creating Playbooks",
         explain:
-          "Legal requirement for evidence admissibility. Every interaction must be documented.",
+          "Creating playbooks involves defining step-by-step procedures for handling incidents, ensuring consistency and compliance.",
         points: [
-          "Documentation: Name, date, time, action taken, reason, signature for every interaction.",
-          "Custody transfer: When evidence moves to a new person, document the handoff.",
-          "Integrity verification: Use hashes to prove evidence is unchanged.",
-          "Storage security: Locked storage, limited access, environmental controls.",
-          "Labeling: Clear identification of evidence, date collected, collector name.",
+          "Creating Playbooks: Creating playbooks involves developing step-by-step procedures that guide responders through handling specific types of security incidents."
         ],
         remember:
-          "Proper documentation = admissible evidence. Sloppy handling = evidence thrown out of court.",
-      },
-      {
-        heading: "Memory Forensics",
-        explain:
-          "RAM contains running processes, network connections, and sensitive data. Capturing memory is critical.",
-        points: [
-          "Volatile data: RAM is lost on reboot. Collect ASAP.",
-          "Memory dump: Tools like dd, FTK Imager, Memdump to capture RAM image.",
-          "Analysis: Analyze dump for running processes, open network connections, loaded modules, credentials in memory.",
-          "Tools: Volatility, Rekall for analyzing memory dumps.",
-          "What to look for: Malicious processes, hidden processes, injected code, credentials.",
-        ],
-        remember:
-          "Memory is volatile. Collect it immediately before power loss or reboot.",
+          "Playbooks = the script. They give responders consistent, repeatable steps for a specific type of incident (phishing, ransomware, data breach, etc.).",
         examTip:
-          "Scenarios about live systems with potential malware should mention memory capture before other actions.",
+          'Scenarios asking "what should the responder do" or needing "step-by-step procedures for a specific incident type" = Playbook.',
       },
       {
-        heading: "Disk Forensics",
+        heading: "Defining Roles",
         explain:
-          "Disk contains files, file system metadata, and deleted data. Disk analysis reveals what happened and who did it.",
+          "Defining roles assigns clear responsibilities and authority so nobody is guessing during an incident.",
         points: [
-          "Disk imaging: Create sector-by-sector copy of entire disk. Write-blocker used to prevent modification.",
-          "File analysis: Timeline of file creation/modification/access. When was malware created?",
-          "Deleted files: File system marks space as unused but data remains. Carving recovers deleted files.",
-          "Slack space: Unused area in allocated file. Sometimes contains partial data.",
-          "Registry (Windows): Configuration, user info, recently used files, installed software. Rich forensic artifact.",
+          "Defining Roles: Defining roles ensures that each team member understands their responsibilities and authority during incident response activities."
         ],
         remember:
-          "Disk contains history. File timestamps and deleted files reveal what happened.",
+          "Roles = who says their lines. Everyone must know their part, and who has the authority to make decisions, before the incident starts.",
         examTip:
-          'Questions about "proving file was modified" usually mean timestamp analysis or hash comparison.',
+          'Scenarios asking "who is responsible" or "who has the authority to decide" = Defining Roles.',
       },
       {
-        heading: "Log Analysis and Timeline",
+        heading: "Performing Training",
         explain:
-          "Logs from systems, applications, and network devices build a complete picture of what happened.",
+          "Regular training ensures responders can execute incident response procedures effectively.",
         points: [
-          "Event logs: Windows Event Viewer, Linux syslog, application logs. Who logged in? What ran? What changed?",
-          "Web logs: Web server access logs show requests. HTTP 403 = access denied, 200 = success.",
-          "Network logs: Firewall logs, proxy logs show connections. Who connected to what? When?",
-          "Timeline: Reconstruct chronological sequence of events. What happened first? How did attack progress?",
-          "Log retention: Keep logs long enough for investigation. Usually 90 days minimum, compliance may require longer.",
+          "Tabletop: A tabletop exercise is a discussion-based training session where participants review and walk through a simulated incident scenario.",
+          "Simulation: A simulation is a hands-on exercise that allows responders to practice handling realistic security incidents in a controlled environment.",
         ],
         remember:
-          "Logs are your audit trail. Keep them and analyze them thoroughly.",
+          "Tabletop = talking through it. Simulation = doing it for real (but in a safe sandbox). Both are essential.",
         examTip:
-          'Scenarios asking "when did the attacker first connect" require log timeline analysis.',
-      },
-    ],
-    quickReview: [
-      "Volatile data (memory) collected before disk. Minimize changes to evidence.",
-      "Hash everything to prove integrity. Document who touched evidence and when (chain of custody).",
-      "Memory forensics finds running processes, hidden malware, and credentials.",
-      "Disk forensics recovers deleted files and reveals file modification timeline.",
-      "Logs build comprehensive timeline of attack from initial access to final actions.",
-      "Write-blockers prevent accidental modification of evidence during collection.",
-    ],
-    glossary: [
-      {
-        term: "Chain of Custody",
-        meaning:
-          "Documentation of evidence handling from collection through investigation.",
+          'Questions about "discussion-based training" or "walking through a scenario" = Tabletop. Questions about "hands-on practice" or "controlled environment testing" = Simulation.',
       },
       {
-        term: "Volatile Data",
-        meaning: "Data stored in RAM that is lost on reboot.",
+        heading: "Log Management",
+        explain:
+          "Effective log collection and analysis during incidents reveals how the attack unfolded.",
+        points: [
+          "Log Collection: Log collection is the process of gathering logs from systems, applications, devices, and security tools for monitoring and investigation.",
+          "Log Correlation: Log correlation is the process of analyzing and connecting related events from multiple log sources to identify suspicious activity.",
+          "Log Augmentation and Enrichment: Log augmentation and enrichment involve adding additional context, metadata, or threat intelligence to logs to improve analysis.",
+        ],
+        remember:
+          "Collect everything. Correlate to find patterns. Enrich with context to understand meaning.",
+        examTip:
+          "Collecting raw data = Log Collection. Connecting dots between different sources = Log Correlation. Adding threat intel or IP geolocation = Log Augmentation and Enrichment.",
       },
       {
-        term: "Write-Blocker",
-        meaning:
-          "Device preventing writing to evidence media while allowing reads.",
+        heading: "Incident Handling",
+        explain:
+          "Detecting and categorizing incidents properly ensures critical issues are handled first.",
+        points: [
+          "Alerts and Notifications: Alerts and notifications inform security personnel when suspicious activity or potential security incidents are detected.",
+          "Triage: Triage is the process of assessing and categorizing incidents based on their urgency, severity, and business impact.",
+          "Establishment of a Timeline: Establishing a timeline involves creating a chronological sequence of events to better understand how an incident occurred.",
+          "Determining Severity and Impact: Determining severity and impact involves evaluating the seriousness of an incident and its effect on systems, data, and business operations.",
+          "Prioritization: Prioritization is the process of ranking incidents according to risk level, impact, and urgency to ensure the most critical issues are addressed first.",
+        ],
+        remember:
+          "Alert fires. Triage decides which patient is sickest. Timeline shows how it happened. Severity tells you how bad. Prioritization tells you what to fix first.",
+        examTip:
+          'Scenario with multiple incidents = use Triage and Prioritization to determine order. Scenario asking "when did it start" = Establishment of a Timeline. Scenario about "which data was exposed" = Determining Severity and Impact.',
       },
       {
-        term: "Memory Dump",
-        meaning: "Complete image of RAM contents at a point in time.",
+        heading: "Evidence Gathering",
+        explain:
+          "Proper evidence handling ensures admissibility in legal proceedings and supports thorough investigations.",
+        points: [
+          "Chain of Custody: Chain of custody is the documented process of tracking evidence from collection to final disposition to ensure accountability and legal admissibility.",
+          "Data Integrity Validation: Data integrity validation is the process of confirming that collected evidence has not been altered, modified, or corrupted.",
+          "Preservation: Preservation is the process of protecting evidence in its original state to support investigations and potential legal proceedings.",
+          "Legal Hold: A legal hold is a requirement to preserve relevant data and evidence because of current or anticipated legal action.",
+        ],
+        remember:
+          "Evidence is fragile. Protect it, document who touches it, prove it has not changed, and never let it be deleted.",
+        examTip:
+          'Questions about "admissible in court" or "tracking who handled evidence" = Chain of Custody. Questions about "proof the file was not modified" = Data Integrity Validation. Questions about "protecting evidence in its original state" = Preservation. Questions about "must not delete data" due to legal action = Legal Hold.',
+      },
+      {
+        heading: "Containment and Escalation",
+        explain:
+          "Stopping the attack from spreading and escalating when additional expertise is needed.",
+        points: [
+          "Isolating Affected Targets: Isolating affected targets involves separating compromised devices, systems, or accounts from the network to prevent further damage.",
+          "Escalation: Escalation is the process of transferring an incident to higher-level personnel or specialized teams when additional expertise or authority is required.",
+        ],
+        remember:
+          "Isolation = build a firewall around the problem. Escalation = call in the specialists or decision makers.",
+        examTip:
+          "Scenario with compromised system = Isolate it immediately. Scenario needing executive decision or specialized knowledge = Escalate.",
+      },
+      {
+        heading: "Recovery Activities",
+        explain:
+          "Returning systems to normal operation after the incident is contained and resolved.",
+        points: [
+          "Remediation and Verification: Remediation and verification involve fixing identified security issues and confirming that the corrective actions successfully resolved the problem.",
+          "Release from Isolation: Release from isolation occurs when a previously compromised system is confirmed secure and allowed to reconnect to the production environment.",
+          "Performing Restoration: Performing restoration involves returning systems, services, and data to normal operational status after an incident.",
+        ],
+        remember:
+          "Fix it. Verify it is fixed. Release it back carefully. Restore everything to normal.",
+        examTip:
+          'Scenario about "fixing the vulnerability" = Remediation. Scenario about "testing before reconnecting" = Verification. Scenario about "reconnecting a cleaned system" = Release from Isolation. Scenario about "resuming normal service" = Restoration.',
+      },
+      {
+        heading: "Post-Incident Activities",
+        explain:
+          "Learning from incidents and improving defenses prevents future occurrences.",
+        points: [
+          "Root Cause Analysis (RCA): Root cause analysis is the process of identifying the underlying cause of an incident to prevent similar incidents from occurring in the future.",
+          "Corrective Action Development: Corrective action development involves creating and implementing improvements to security controls, processes, and procedures based on lessons learned from the incident.",
+        ],
+        remember:
+          "RCA finds the root problem, not just the symptom. Corrective actions fix it so it never happens again.",
+        examTip:
+          'Questions about "why did this happen" or "what allowed the attack" = RCA. Questions about "how do we prevent this" or "process improvements" = Corrective Action Development.',
       },
     ],
   },
-  {
-    id: "domain-3-4",
-    title: "Incident Investigation and Rootcause Analysis",
-    domain: "Domain 3.0",
-    domainName: "Incident Response and Management",
-    module: "3.4",
-    moduleName: "Incident Investigation",
-    description:
-      "Root cause analysis techniques, scope determination, timeline reconstruction, indicator analysis, and hypothesis validation.",
-    lastUpdated: "Oct 9, 2026",
-    access: "Premium",
-    icon: Brain,
-    estimatedTime: "4 hours",
-    sections: [
-      {
-        heading: "Root Cause Analysis Methods",
-        explain:
-          "Finding the root cause is critical. Patch the root cause, not just the symptom, or the attack will happen again.",
-        points: [
-          'Five Whys: Ask "why" five times to get to root cause. Example: System hacked → why → default password → why → no password policy → why → no one enforced it → why → no process.',
-          "5 Ws and H: Who, What, When, Where, Why, How? Answers build complete picture.",
-          "Common root causes: Unpatched vulnerability (patch it), weak credential (change policy), misconfiguration (fix config), no monitoring (add detection).",
-          'Do not stop at symptom: "Malware found" is not root cause. Root cause is "how did malware get in" (unpatched server).',
-        ],
-        remember:
-          "Fix root cause, not symptom. Otherwise, attacker exploits same path again.",
-        examTip:
-          'Questions about "preventing recurrence" usually point to root cause vs symptom.',
-      },
-      {
-        heading: "Scope and Impact Determination",
-        explain:
-          "How many systems, users, and data are affected? Scope determines response urgency and resource allocation.",
-        points: [
-          "Affected systems: Which servers, workstations, cloud instances? Network scanning helps.",
-          "Affected users: Which user accounts were compromised? How many accounts does attacker control?",
-          "Affected data: What data was accessed or stolen? Passwords? Customer data? Trade secrets?",
-          "Blast radius: If attacker has admin access, assume all systems are compromised. Start from there and narrow down.",
-        ],
-        remember:
-          "Assume worst case initially. Expand scope until you have confidence in boundaries.",
-        examTip: 'Scenarios asking "how bad is it" need scope determination.',
-      },
-      {
-        heading: "Timeline Reconstruction",
-        explain:
-          "When did the attack start? How long was attacker present? Reconstruction uses logs, timestamps, and evidence.",
-        points: [
-          "Initial compromise: When did attacker first get in? First malware execution? First C2 callback?",
-          "Persistence establishment: When did attacker set up backdoor for future access?",
-          "Lateral movement: When did attacker move to other systems?",
-          "Objective achievement: When did attacker steal data, encrypt files, or achieve goal?",
-          "Detection: When was the incident discovered? Dwell time = detection time - compromise time.",
-        ],
-        remember:
-          "Dwell time is typically measured in days or weeks. Reduce detection time to limit damage.",
-        examTip:
-          'Questions about "how long was attacker present" need timeline from logs.',
-      },
-      {
-        heading: "Indicator of Compromise (IoC) Analysis",
-        explain:
-          "IoCs are evidence of compromise. Analyze them to understand scope and find more affected systems.",
-        points: [
-          "File hashes: MD5, SHA-256 of malware. Use to find if malware exists elsewhere.",
-          "IP addresses: Attacker C2 server IPs. Use to find connections to C2 in logs.",
-          "Domains: C2 domains. Check DNS logs for queries, firewall for connections.",
-          "Registry keys: Windows malware often creates registry entries. Scan systems for matching keys.",
-          "Process signatures: Known malware process names, behaviors, parent processes.",
-        ],
-        remember:
-          "IoCs are your hunting tools. Find one and hunt for more compromised systems.",
-      },
-      {
-        heading: "Hypothesis Testing and Validation",
-        explain:
-          "During investigation, develop and test hypotheses about what happened.",
-        points: [
-          'Develop hypothesis: "Attacker got in via unpatched web server."',
-          "Gather evidence: Find logs of initial web request that exploited vulnerability.",
-          "Test: Can you reproduce the attack path? Can you find evidence of exploitation?",
-          "Validate or refute: Evidence supports or refutes hypothesis. Adjust and continue.",
-          "Do not assume: Test theories. Wrong theory wastes investigation time and misses real issue.",
-        ],
-        remember: "Follow evidence, not assumptions. Test your theories.",
-      },
-    ],
-    quickReview: [
-      "Root cause is why the attack succeeded, not just how malware got in.",
-      "Five Whys method: Ask why repeatedly until you find the real underlying issue.",
-      "Scope: How many systems, users, and what data affected?",
-      "Timeline: Initial compromise → Persistence → Lateral Movement → Objective → Detection.",
-      "Dwell time: How long attacker was present before detection. Reduce this metric.",
-      "IoCs: File hashes, IPs, domains, registry keys for hunting compromised systems.",
-    ],
-    glossary: [
-      {
-        term: "Root Cause",
-        meaning: "Underlying reason why the attack succeeded.",
-      },
-      {
-        term: "Dwell Time",
-        meaning: "Duration between initial compromise and detection.",
-      },
-      {
-        term: "Hypothesis",
-        meaning:
-          "Proposed explanation for the incident to be tested with evidence.",
-      },
-      {
-        term: "IoC",
-        meaning:
-          "Indicator of Compromise, evidence that a system is compromised.",
-      },
-    ],
-  },
-  {
-    id: "domain-3-5",
-    title: "Post-Incident Activities and Continuous Improvement",
-    domain: "Domain 3.0",
-    domainName: "Incident Response and Management",
-    module: "3.5",
-    moduleName: "Post-Incident Activities",
-    description:
-      "Lessons learned process, corrective actions, process improvements, documentation, metrics, and communication with stakeholders.",
-    lastUpdated: "Oct 9, 2026",
-    access: "Free",
-    icon: FileText,
-    estimatedTime: "3 hours",
-    sections: [
-      {
-        heading: "Lessons Learned Process",
-        explain:
-          "After the incident, team gathers to extract learning and improve processes.",
-        points: [
-          "Timing: Hold meeting 1-2 weeks after resolution. Wait for emotions to settle but while details are fresh.",
-          "Participants: IR team, system owners, management, process owners. Diverse perspectives.",
-          'Blameless culture: Focus on process, not blaming individuals. "Why did system not alert us?" not "Why did Fred miss the alert?"',
-          "Questions to ask: What went well? What went badly? What did we miss? How do we prevent? How do we detect faster?",
-        ],
-        remember:
-          "Blameless lessons learned = people speak honestly = team improves.",
-        examTip:
-          "Questions about post-incident improvement usually mention lessons learned meeting.",
-      },
-      {
-        heading: "Corrective and Preventive Actions",
-        explain: "Translate lessons learned into concrete actions.",
-        points: [
-          "Preventive: Stop the attack from happening again. Patch vulnerability, fix misconfiguration, implement control.",
-          "Detective: Detect if it happens despite prevention. New alert, new monitoring rule, new hunt.",
-          "Corrective: Fix the process that failed. Improve runbook, update playbook, add tool.",
-          "Assign owners: Each action needs an owner and deadline. Track to completion.",
-        ],
-        remember:
-          "Preventive is ideal. Detective is practical when prevention not possible.",
-      },
-      {
-        heading: "Process Improvements",
-        explain: "Use incident to improve IR capability.",
-        points: [
-          "Runbooks: Update incident response runbooks with new procedures discovered.",
-          "Playbooks: Specific procedures for similar incidents. Automate responses where possible.",
-          "Tools: Do you need new tools? Better alert tuning? Improved SIEM searches?",
-          "Training: Did team lack knowledge? Schedule training. Did new tool fail? Train on it.",
-          "Detection: Could this have been detected faster? Earlier? Add new detection rules.",
-        ],
-        remember:
-          "Each incident reveals gaps. Fill the gap before next incident.",
-      },
-      {
-        heading: "Incident Metrics and KPIs",
-        explain:
-          "Measure response effectiveness to track improvement over time.",
-        points: [
-          "MTTR (Mean Time To Respond): How long from detection to beginning response? Goal: minutes.",
-          "MTTI (Mean Time To Identify): How long to determine what is actually wrong? Goal: hours.",
-          "MTTC (Mean Time To Contain): How long from identification to stopping the attack? Goal: hours.",
-          "MTTR (Mean Time To Recover): How long to return to normal operations? Goal: hours/days.",
-          "Dwell time: How long attacker was present. Trend should decrease as detection improves.",
-        ],
-        remember: "Measure metrics. Track trends. Celebrate improvements.",
-      },
-      {
-        heading: "Stakeholder Communication",
-        explain: "Keep leadership and affected parties informed.",
-        points: [
-          "Executive summary: What happened? How bad? How did we respond? What did we fix?",
-          "Affected users: If their data was breached, notify them. Explain steps taken to protect them.",
-          "Regulatory bodies: Some breaches must be reported. Know your obligations.",
-          "Transparency: Be honest about what went wrong. Attempts to hide hurt trust more than admission.",
-        ],
-        remember:
-          "Communication after incident is as important as response. Restore trust through transparency.",
-      },
-    ],
-    quickReview: [
-      "Lessons learned meeting 1-2 weeks after resolution. Blameless culture.",
-      "Preventive fixes stop reoccurrence. Detective catches it if prevention fails.",
-      "Update runbooks, playbooks, and add new detection rules based on lessons.",
-      "Track metrics: MTTR, MTTI, MTTC, MTTR, Dwell Time. Trends show improvement.",
-      "Communicate with executive, users, and regulators post-incident.",
-      "Each incident is an opportunity to improve. Do not waste it.",
-    ],
-    glossary: [
-      {
-        term: "MTTR",
-        meaning: "Mean Time To Respond or Recover (context-dependent).",
-      },
-      {
-        term: "Dwell Time",
-        meaning: "Duration between compromise and detection.",
-      },
-      {
-        term: "Corrective Action",
-        meaning: "Action taken to fix the process that failed.",
-      },
-      {
-        term: "Preventive Action",
-        meaning: "Action taken to prevent the incident from happening again.",
-      },
-    ],
-  },
+
 
   // Domain 4.0: Reporting and Communication (16%)
   {

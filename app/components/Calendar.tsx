@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+
 
 interface CalendarDay {
   date: Date;
@@ -11,28 +12,32 @@ interface CalendarDay {
   isToday: boolean;
 }
 
+
+// Labels shown at the top of each column in the grid
 const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const EXAM_DATE_STORAGE_KEY = "examDate";
 const REDIRECT_DELAY_MS = 1000;
 const TOTAL_GRID_CELLS = 42;
 
+
+// Returns true if both dates fall on the same calendar day
 const isSameDay = (firstDate: Date, secondDate: Date): boolean => {
   return firstDate.toDateString() === secondDate.toDateString();
 };
-
 const padWithZero = (value: number): string => {
   return String(value).padStart(2, "0");
 };
 
-// Formats a Date object as "YYYY-MM-DD" for storage in localStorage
+// Formats a Date object into a "YYYY-MM-DD" string for storage in localStorage
 const formatDateForStorage = (date: Date): string => {
   const year = date.getFullYear();
-  const month = padWithZero(date.getMonth() + 1); // getMonth() is 0-based
+  const month = padWithZero(date.getMonth() + 1); 
   const day = padWithZero(date.getDate());
 
   return `${year}-${month}-${day}`;
 };
 
+// Converts a Date into a friendly string for the toast message,
 const formatDateForDisplay = (date: Date): string => {
   return date.toLocaleDateString("en-US", {
     weekday: "long",
@@ -42,7 +47,9 @@ const formatDateForDisplay = (date: Date): string => {
   });
 };
 
+// Builds the 6-week grid (42 days) for the month of the given date
 const buildCalendarDays = (month: Date): CalendarDay[] => {
+
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
   const firstWeekday = new Date(year, monthIndex, 1).getDay();
@@ -59,15 +66,29 @@ const buildCalendarDays = (month: Date): CalendarDay[] => {
   });
 };
 
+// Calendar component
 export default function Calendar() {
+
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setCurrentDate(new Date());
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current !== null) {
+        clearTimeout(redirectTimerRef.current);
+        redirectTimerRef.current = null;
+      }
+    };
+  }, []);
+
+
+  // Moves the calendar forward (+1) or backward (-1) by one month
   const changeMonth = (offset: number) => {
     if (!currentDate) return;
 
@@ -79,40 +100,57 @@ export default function Calendar() {
     setCurrentDate(newMonth);
   };
 
+  // Called when the user clicks on a day cell
   const handleDayClick = (day: CalendarDay) => {
-    // Ignore clicks on days from the previous / next month
+  
     if (!day.isCurrentMonth) return;
 
     setSelectedDate(day.date);
   };
 
-  // Saves the chosen exam date and sends the user to the dashboard
+  
   const handleSetExamDate = () => {
     if (!selectedDate) return;
 
-    // Save as "YYYY-MM-DD" so it is easy to parse later
+  
     const dateToStore = formatDateForStorage(selectedDate);
+
     localStorage.setItem(EXAM_DATE_STORAGE_KEY, dateToStore);
     toast.success(`Exam date set to ${formatDateForDisplay(selectedDate)}`);
-    setTimeout(() => {
+
+    if (redirectTimerRef.current !== null) {
+      clearTimeout(redirectTimerRef.current);
+    }
+
+    redirectTimerRef.current = setTimeout(() => {
+      redirectTimerRef.current = null;
       router.push("/dashboard");
     }, REDIRECT_DELAY_MS);
   };
 
+
+  // Determines the CSS classes for each day cell based on its state
   const getDayClasses = (day: CalendarDay): string => {
+    // 1. The day the user selected
     if (selectedDate && isSameDay(day.date, selectedDate)) {
       return "bg-brand-800 font-bold text-white shadow-md cursor-pointer";
     }
 
+    // 2. Today's date
     if (day.isToday) {
       return "bg-brand-200 font-bold text-brand-900 ring-2 ring-brand-600 cursor-pointer";
     }
 
+    // 3. Normal days in the current month
     if (day.isCurrentMonth) {
       return "font-medium text-brand-900 hover:bg-brand-100 cursor-pointer";
     }
+
+    // 4. Days from the previous / next month (not clickable)
     return "text-brand-300 cursor-default";
   };
+
+
 
   if (!currentDate) {
     return (
@@ -120,15 +158,19 @@ export default function Calendar() {
     );
   }
 
+  // Title shown in the header, for example: "October 2026"
   const monthYear = currentDate.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
 
+  // All 42 cells for the month being displayed
   const calendarDays = buildCalendarDays(currentDate);
+
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-xl border border-brand-200 shadow-sm p-4 md:p-6">
+      {/* ---------- Header: previous button, month title, next button ---------- */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <button
           onClick={() => changeMonth(-1)}
@@ -174,7 +216,7 @@ export default function Calendar() {
         ))}
       </div>
 
-     {/* ---------- Confirm button (disabled until a day is selected) ---------- */}
+      {/* ---------- Confirm button (disabled until a day is selected) ---------- */}
       <button
         onClick={handleSetExamDate}
         disabled={!selectedDate}
