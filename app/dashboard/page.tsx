@@ -56,7 +56,7 @@ export default function Dashboard() {
           </div>
 
           {/* User Profile */}
-          <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/profile")} className="flex items-center gap-3">
             <div className="text-right">
               <p className="font-semibold text-brand-900">{profile.name}</p>
               <p className="text-xs text-brand-600">
@@ -66,7 +66,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold">
               <ProfileIcon size={20} />
             </div>
-          </div>
+          </button>
         </div>
       </header>
 
@@ -131,7 +131,7 @@ export default function Dashboard() {
                 Start a new practice test now
               </p>
             </div>
-            <button className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
+            <button onClick={() => router.push("/practice-exam")} className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
               Start test
               <Plus size={14} />
             </button>

@@ -53,6 +53,9 @@ export const profile = {
   name: "Sarah Jenkins",
   candidateId: "#1",
   icon: User,
+  handle: 'trevor_vance',
+  email: 'trevor.vance@university.edu',
+  person: "/user.png"
 };
 
 export const metrics = {
@@ -1466,10 +1469,10 @@ export const studyNotes: StudyNote[] = [
           "Mitigations: How to defend. Example: User training for phishing defense.",
           "Detection: How to detect the technique. Example: Monitor for PowerShell child processes.",
         ],
-       remember:
-        "Every intrusion event has four corners: Adversary, Capability, Infrastructure, Victim. Analysts pivot between them. For example, a known C2 domain can lead you to the adversary and to other victims.",
-      examTip:
-        "Capability means the tools (malware, exploits). Infrastructure means what the attacker uses to reach the victim (IPs, domains, C2 servers). If a question asks which model relates adversary, victim, and tools to support attribution or pivoting, the answer is the Diamond Model.",
+        remember:
+          "Every intrusion event has four corners: Adversary, Capability, Infrastructure, Victim. Analysts pivot between them. For example, a known C2 domain can lead you to the adversary and to other victims.",
+        examTip:
+          "Capability means the tools (malware, exploits). Infrastructure means what the attacker uses to reach the victim (IPs, domains, C2 servers). If a question asks which model relates adversary, victim, and tools to support attribution or pivoting, the answer is the Diamond Model.",
       },
       {
         heading: "MITRE ATT&CK Initial",
@@ -1491,9 +1494,9 @@ export const studyNotes: StudyNote[] = [
           "Exfiltration: The attacker transfers stolen data out of the environment.",
         ],
         remember:
-        "Attackers must get in. Then they must stay in and move around. Detect each stage. Tactics are the why, techniques are the how, and procedures are specific real-world implementations.",
-      examTip:
-        "Know the difference: tactic is the goal (Persistence), technique is the method (Scheduled Task), procedure is how a specific group does it (APT28 spear-phishing). ATT&CK is not a strict linear sequence. Attackers can skip or repeat tactics. It is used for threat hunting, detection gap analysis, and red or purple team planning.",
+          "Attackers must get in. Then they must stay in and move around. Detect each stage. Tactics are the why, techniques are the how, and procedures are specific real-world implementations.",
+        examTip:
+          "Know the difference: tactic is the goal (Persistence), technique is the method (Scheduled Task), procedure is how a specific group does it (APT28 spear-phishing). ATT&CK is not a strict linear sequence. Attackers can skip or repeat tactics. It is used for threat hunting, detection gap analysis, and red or purple team planning.",
       },
     ],
   },
@@ -1512,27 +1515,27 @@ export const studyNotes: StudyNote[] = [
     icon: Zap,
     estimatedTime: "5 hours",
     sections: [
-     {
-       heading: "Incident Response Process",
-       explain:
-         "IR phases: preparation, detection, analysis, containment, eradication, recovery, and post-incident activities.",
-       points: [
-         "Preparation: Establish policies, procedures, tools, training, and resources before incidents occur.",
-         "Detection: Identify potential security incidents through monitoring systems, alerts, logs, security tools, and threat intelligence.",
-         "Analysis: Investigate an incident to determine its cause, scope, severity, affected systems, and potential business impact.",
-         "Containment: Limit the spread and impact of an incident by isolating affected systems, accounts, or network segments.",
-         "Eradication: Remove the root cause of an incident, including malware, vulnerabilities, malicious accounts, or unauthorized access.",
-         "Recovery: Restore systems, applications, and services to normal operation while ensuring they are secure and functioning properly.",
-         "Post-Incident: Review the incident, document lessons learned, perform root cause analysis, and implement improvements to prevent future incidents.",
-       ],
-       remember:
-         "Effective incident response requires preparation and structured handling of each phase.",
-       examTip:
-         "Understand the sequence and purpose of each IR phase. Know key activities and responsibilities.",
-     },
+      {
+        heading: "Incident Response Process",
+        explain:
+          "IR phases: preparation, detection, analysis, containment, eradication, recovery, and post-incident activities.",
+        points: [
+          "Preparation: Establish policies, procedures, tools, training, and resources before incidents occur.",
+          "Detection: Identify potential security incidents through monitoring systems, alerts, logs, security tools, and threat intelligence.",
+          "Analysis: Investigate an incident to determine its cause, scope, severity, affected systems, and potential business impact.",
+          "Containment: Limit the spread and impact of an incident by isolating affected systems, accounts, or network segments.",
+          "Eradication: Remove the root cause of an incident, including malware, vulnerabilities, malicious accounts, or unauthorized access.",
+          "Recovery: Restore systems, applications, and services to normal operation while ensuring they are secure and functioning properly.",
+          "Post-Incident: Review the incident, document lessons learned, perform root cause analysis, and implement improvements to prevent future incidents.",
+        ],
+        remember:
+          "Effective incident response requires preparation and structured handling of each phase.",
+        examTip:
+          "Understand the sequence and purpose of each IR phase. Know key activities and responsibilities.",
+      },
     ],
   },
-  
+
   {
     id: "domain-3-3",
     title: "Digital Forensics and Evidence Handling",
