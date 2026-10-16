@@ -53,7 +53,7 @@ export const profile = {
   name: "Sarah Jenkins",
   candidateId: "#1",
   icon: User,
-  handle: 'trevor_vance',
+  surname: 'trevor_vance',
   email: 'trevor.vance@university.edu',
   person: "/user.png"
 };
