@@ -1,142 +1,149 @@
 'use client';
 
-import { Check, Lock, Zap } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  Users,
+  Building2,
+} from 'lucide-react';
 import { pricingTiers } from '../types/assets';
+
+const tierIcons = {
+  PERSONAL: Sparkles,
+  TEAM: Users,
+  CORPORATE: Building2,
+} as const;
 
 export default function PricingBilling() {
   return (
-    <div className="w-full px-5 py-8">
-      {/* Header */}
-      <div className="mb-12 max-w-3xl">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-4">
-          Simple, Transparent Pricing
-        </h1>
-        <p className="text-lg text-gray-600">
-          Choose the plan that fits your certification goals. Upgrade or downgrade anytime with no lock-in contracts.
+    <section className="flex min-h-screen w-full flex-col bg-brand-50 py-16 sm:py-20">
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-6">
+        {/* Header */}
+        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-14">
+          <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-brand-600">
+            Pricing
+          </p>
+          <h2 className="text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">
+            Simple plans for every stage
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-brand-800/80">
+            Choose the plan that fits your team. You can upgrade, downgrade, or
+            cancel at any time.
+          </p>
+        </div>
+
+        {/* Pricing columns */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-4">
+          {pricingTiers.map((tier, index) => {
+            const isFeatured = index === 1;
+            const Icon =
+              tierIcons[tier.tier as keyof typeof tierIcons] ?? Sparkles;
+
+            return (
+              <div
+                key={tier.id}
+                className={`flex flex-col rounded-2xl border p-6 sm:p-8 ${
+                  isFeatured
+                    ? 'border-brand-600 bg-brand-600 text-white shadow-xl lg:-my-4 lg:py-12'
+                    : 'border-brand-200 bg-white text-brand-900'
+                }`}
+              >
+                {/* Plan header */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                        isFeatured
+                          ? 'bg-white/15 text-white'
+                          : 'bg-brand-100 text-brand-600'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+
+                    <h3
+                      className={`text-sm font-semibold uppercase tracking-widest ${
+                        isFeatured ? 'text-brand-100' : 'text-brand-600'
+                      }`}
+                    >
+                      {tier.tier}
+                    </h3>
+                  </div>
+
+                  {isFeatured && (
+                    <span className="hidden rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white sm:inline-block">
+                      Popular
+                    </span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div className="mt-6 sm:mt-7">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-semibold sm:text-4xl">
+                      {tier.price}
+                    </span>
+                    <span
+                      className={`text-sm ${
+                        isFeatured ? 'text-brand-100' : 'text-brand-700/70'
+                      }`}
+                    >
+                      {tier.billing}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div
+                  className={`my-6 h-px w-full sm:my-8 ${
+                    isFeatured ? 'bg-white/20' : 'bg-brand-200'
+                  }`}
+                />
+
+                {/* Features */}
+                <ul className="flex-1 space-y-4">
+                  {tier.features.map((feature, featureIndex) => (
+                    <li
+                      key={featureIndex}
+                      className="flex items-start gap-3 text-sm leading-relaxed"
+                    >
+                      <Check
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${
+                          isFeatured ? 'text-brand-100' : 'text-brand-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          isFeatured ? 'text-brand-50' : 'text-brand-800'
+                        }
+                      >
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Button */}
+                <button
+                  type="button"
+                  className={`mt-8 w-full rounded-lg px-4 py-3 text-sm font-semibold transition-colors sm:mt-10 ${
+                    isFeatured
+                      ? 'bg-white text-brand-700 hover:bg-brand-100'
+                      : 'border border-brand-300 text-brand-700 hover:border-brand-500 hover:bg-brand-50'
+                  }`}
+                >
+                  {tier.buttonLabel}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Trust note */}
+        <p className="mt-10 text-center text-sm text-brand-800/70">
+          All plans include secure hosting, regular updates, and email support.
         </p>
       </div>
-
-      {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl">
-        {pricingTiers.map((tier) => (
-          <div
-            key={tier.id}
-            className={`relative rounded-2xl p-8 border transition-all ${
-              tier.isPopular
-                ? 'border-brand-500 bg-linear-to-br from-brand-50 to-white shadow-xl ring-1 ring-brand-200'
-                : 'border-gray-200 bg-white hover:shadow-lg'
-            }`}
-          >
-            {/* Popular Badge */}
-            {tier.isPopular && (
-              <div className="absolute -top-4 left-8">
-                <div className="bg-brand-600 text-white px-4 py-1.5 rounded-full text-xs font-bold">
-                {tier.badge} • {tier.passRate}
-                </div>
-              </div>
-            )}
-
-            {/* Current Plan Badge */}
-            {tier.isCurrentPlan && !tier.isPopular && (
-              <div className="mb-4 inline-block">
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  Current Active Plan
-                </span>
-              </div>
-            )}
-
-            {/* Tier Info */}
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
-                {tier.tier}
-              </p>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{tier.name}</h2>
-              <p className="text-sm text-gray-600">{tier.description}</p>
-            </div>
-
-            {/* Pricing */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
-                <span className="text-gray-600">{tier.billing}</span>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div className="mb-8">
-              <p className="text-sm font-semibold text-gray-900 mb-4">
-                {tier.isPopular ? 'Everything in Free Starter, plus:' : 'Included Capabilities'}
-              </p>
-              <ul className="space-y-3">
-                {tier.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* CTA Button */}
-            <button
-              className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                tier.buttonAction === 'current'
-                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-default'
-                  : 'bg-brand-600 text-white hover:bg-brand-700'
-              }`}
-              disabled={tier.buttonAction === 'current'}
-            >
-              {tier.buttonAction === 'upgrade' && <Zap className="w-4 h-4" />}
-              {tier.buttonLabel}
-              {tier.buttonAction === 'upgrade' && <Lock className="w-4 h-4" />}
-            </button>
-
-            {/* Additional Info */}
-            {tier.buttonAction === 'upgrade' && (
-              <div className="mt-4 text-center text-xs text-gray-600 space-y-1">
-                <p>✓ Instant Access • 256-bit Stripe Checkout</p>
-                <p>✓ Cancel anytime • Instant CBT Activation</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* FAQ Section */}
-      <div className="mt-16 max-w-2xl">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h3>
-        <div className="space-y-4">
-          <details className="group border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50">
-            <summary className="font-semibold text-gray-900 flex items-center justify-between">
-              Can I switch plans anytime?
-              <span className="group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <p className="mt-3 text-sm text-gray-600">
-              Yes! You can upgrade or downgrade your plan anytime. Changes take effect immediately with prorated billing.
-            </p>
-          </details>
-
-          <details className="group border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50">
-            <summary className="font-semibold text-gray-900 flex items-center justify-between">
-              Is there a free trial for Pro?
-              <span className="group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <p className="mt-3 text-sm text-gray-600">
-              The Free plan gives you full access to 1 practice exam and all basic features. Upgrade to Pro to unlock unlimited exams.
-            </p>
-          </details>
-
-          <details className="group border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50">
-            <summary className="font-semibold text-gray-900 flex items-center justify-between">
-              What payment methods do you accept?
-              <span className="group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <p className="mt-3 text-sm text-gray-600">
-              We accept all major credit cards, debit cards, and digital wallets through Stripe. Your payment information is secure and never stored on our servers.
-            </p>
-          </details>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

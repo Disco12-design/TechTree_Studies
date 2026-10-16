@@ -1,337 +1,402 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { profile, metrics, examAttempts } from "../types/assets";
-import {
-  Search,
-  Calendar,
-  Lock,
-  Award,
-  Clock,
-  Plus,
-  Download,
-  Eye,
-} from "lucide-react";
+import { Calendar, Award, Plus, Eye, type LucideIcon } from "lucide-react";
+
+// Same key the Profile Settings page saves to
+const PROFILE_STORAGE_KEY = "profile-settings:v1";
+
+type SavedProfile = { name: string | null; avatar: string | null };
+
+/** Reads the name + avatar saved by Profile Settings. */
+function loadSavedProfile(): SavedProfile {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!raw) return { name: null, avatar: null };
+    const data = JSON.parse(raw);
+    const name = data?.form?.name;
+    return {
+      name: typeof name === "string" && name.trim() ? name.trim() : null,
+      avatar: typeof data?.avatarDataUrl === "string" ? data.avatarDataUrl : null,
+    };
+  } catch {
+    return { name: null, avatar: null };
+  }
+}
+
+/** Whole days from today until a "YYYY-MM-DD" date (negative if past). */
+function daysUntil(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const target = new Date(y, m - 1, d).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.round((target - today) / 86_400_000);
+}
+
+function countdownLabel(days: number) {
+  if (days === 0) return "Exam day is today";
+  if (days === 1) return "1 day to go";
+  if (days > 1) return `${days} days to go`;
+  return "This date has passed";
+}
+
+/* ------------------------------------------------------------------ */
+/* Small building blocks                                               */
+/* ------------------------------------------------------------------ */
+
+const primaryBtn =
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600";
+
+function MetricCard({
+  label,
+  value,
+  unit,
+  icon: Icon,
+  footer,
+}: {
+  label: string;
+  value: ReactNode;
+  unit?: ReactNode;
+  icon: LucideIcon;
+  footer?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col justify-between rounded-xl border border-brand-200 bg-white p-4 transition hover:shadow-md sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-brand-600 sm:text-sm">{label}</p>
+          <p className="mt-1 flex items-baseline gap-1 text-2xl font-bold text-brand-900 sm:text-3xl">
+            {value}
+            {unit && (
+              <span className="text-xs font-medium text-brand-600 sm:text-sm">/ {unit}</span>
+            )}
+          </p>
+        </div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-600 sm:h-10 sm:w-10">
+          <Icon size={18} />
+        </div>
+      </div>
+      {footer && <div className="mt-3 text-xs text-brand-600">{footer}</div>}
+    </div>
+  );
+}
+
+function ResultBadge({ status, children }: { status: string; children: ReactNode }) {
+  return (
+    <span
+      className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+        status === "pass" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function ActionCard({
+  title,
+  description,
+  cta,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  cta: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-brand-200 bg-white p-5 transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6">
+      <div>
+        <h3 className="text-base font-semibold text-brand-600 sm:text-lg">{title}</h3>
+        <p className="mt-1 text-sm text-brand-950">{description}</p>
+      </div>
+      <button onClick={onClick} className={`${primaryBtn} w-full sm:w-auto sm:shrink-0`}>
+        {cta}
+        <Plus size={14} />
+      </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 export default function Dashboard() {
   const router = useRouter();
   const ProfileIcon = profile.icon;
 
-  const [examDate, setExamDate] = useState<string | null>(null);
+  const [examIso, setExamIso] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedProfile>({ name: null, avatar: null });
+  const [ready, setReady] = useState(false);
+
+  // Saved name wins; fall back to the default from assets
+  const displayName = saved.name ?? profile.name;
+  // Hide the name until localStorage is read so the default never flashes
+  const nameVisibility = ready ? "" : "invisible";
 
   useEffect(() => {
-    const saved = localStorage.getItem("examDate");
-    if (!saved) return;
-    const [y, m, d] = saved.split("-").map(Number);
-    setExamDate(
-      new Date(y, m - 1, d).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
-    );
+    setSaved(loadSavedProfile());
+    setReady(true);
+    setExamIso(localStorage.getItem("examDate"));
   }, []);
 
+  const examDateLabel = examIso
+    ? (() => {
+        const [y, m, d] = examIso.split("-").map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      })()
+    : null;
+  const days = examIso ? daysUntil(examIso) : null;
+
   return (
-    <div className="w-full">
+    <div className="min-h-screen w-full bg-brand-50/50">
       {/* Header */}
-      <header className="border-b border-brand-200 bg-white">
-        <div className="px-8 py-4 flex items-center justify-between">
-          {/* Pro Plan Badge */}
+      <header className="sticky top-0 z-30 border-b border-brand-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8 sm:py-4">
+          <p className="text-sm font-semibold text-brand-900">Dashboard</p>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-sm mx-8">
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brand-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Search practice sets, topics..."
-                className="w-full pl-10 pr-4 py-2 border border-brand-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
-              />
-            </div>
-          </div>
-
-          {/* User Profile */}
-          <button onClick={() => router.push("/profile")} className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="font-semibold text-brand-900">{profile.name}</p>
-              <p className="text-xs text-brand-600">
+          <button
+            onClick={() => router.push("/profile")}
+            aria-label="Open profile settings"
+            className="flex min-w-0 items-center gap-3 rounded-lg p-1 transition hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+          >
+            <div className="min-w-0 text-right">
+              <p className={`truncate text-sm font-semibold text-brand-900 sm:text-base ${nameVisibility}`}>
+                {displayName}
+              </p>
+              <p className="truncate text-xs text-brand-600">
                 Candidate {profile.candidateId}
               </p>
             </div>
-            <div className="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold">
-              <ProfileIcon size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-600 text-white">
+              {saved.avatar ? (
+                <img
+                  src={saved.avatar}
+                  alt=""
+                  width={40}
+                  height={40}
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <ProfileIcon size={20} />
+              )}
             </div>
           </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold text-brand-900">
-              Welcome back, {profile.name}
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8">
+        {/* Welcome */}
+        <section className="mb-6 sm:mb-8">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-2xl font-bold text-brand-900 sm:text-4xl">
+              Welcome back, <span className={nameVisibility}>{displayName}</span>
             </h1>
-            <div className="flex items-center gap-1 bg-brand-800 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-800 px-3 py-1 text-xs font-semibold text-white">
               <Award size={14} />
-              <span>PRO MEMBER</span>
-            </div>
+              PRO MEMBER
+            </span>
           </div>
-          <p className="text-brand-600">
-            CompTIA Security+ & AWS SAA-C03 Candidate
+          <p className="mt-1 text-sm text-brand-600 sm:text-base">
+            CompTIA Security+ &amp; AWS SAA-C03 Candidate
           </p>
-        </div>
+        </section>
 
-        {/* Target Exam Section */}
-        <div className="bg-white rounded-lg border border-brand-200 p-6 mb-8">
-          <div className="flex items-center gap-2 text-brand-600 mb-2">
-            <Calendar size={18} />
-            <span className="font-semibold">Target Exam Date</span>
-          </div>
-          <p className="text-2xl font-bold text-brand-900">
-            {examDate ?? "No date set"}
-          </p>
-        </div>
-
-        {/* Action Cards */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Set Date */}
-          <div className="flex items-center justify-between gap-6 rounded-lg border border-brand-200 bg-white p-6 transition hover:shadow-lg">
-            <div>
-              <h3 className="mb-1 text-lg font-semibold text-brand-600">
-                Set date for exam
-              </h3>
-              <p className="text-sm text-brand-950">
-                Setting the date for your upcoming exam will help you better
-                prepare for upcoming exam
-              </p>
+        {/* Target exam */}
+        <section className="mb-6 flex flex-col gap-3 rounded-xl border border-brand-200 bg-white p-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div>
+            <div className="mb-1 flex items-center gap-2 text-brand-600">
+              <Calendar size={18} />
+              <span className="text-sm font-semibold">Target exam date</span>
             </div>
-            <button 
-              onClick={() => router.push("/dashboard/calendar")}
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700"
+            <p className="text-xl font-bold text-brand-900 sm:text-2xl">
+              {examDateLabel ?? "No date set"}
+            </p>
+          </div>
+          {days !== null && (
+            <span
+              className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+                days < 0 ? "bg-amber-100 text-amber-800" : "bg-brand-100 text-brand-700"
+              }`}
             >
-              Set Date
-              <Plus size={14} />
-            </button>
-          </div>
+              {countdownLabel(days)}
+            </span>
+          )}
+        </section>
 
-          {/* Start New Test */}
-          <div className="flex items-center justify-between gap-6 rounded-lg border border-brand-200 bg-white p-6 transition hover:shadow-lg">
-            <div>
-              <h3 className="mb-1 text-lg font-semibold text-brand-600">
-                Begin your preparation
-              </h3>
-              <p className="text-sm text-brand-950">
-                Start a new practice test now
-              </p>
-            </div>
-            <button onClick={() => router.push("/practice-exam")} className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
-              Start test
-              <Plus size={14} />
-            </button>
-          </div>
-        </div>
+        {/* Actions */}
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
+          <ActionCard
+            title="Set date for exam"
+            description="Setting the date for your upcoming exam will help you better prepare for it."
+            cta="Set date"
+            onClick={() => router.push("/dashboard/calendar")}
+          />
+          <ActionCard
+            title="Begin your preparation"
+            description="Start a new practice test now."
+            cta="Start test"
+            onClick={() => router.push("/practice-exam")}
+          />
+        </section>
 
-        {/* Metrics Section */}
-        <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold text-brand-900 mb-6">
-            Your Performance
+        {/* Metrics */}
+        <section className="mt-10 sm:mt-12">
+          <h2 className="mb-4 text-xl font-bold text-brand-900 sm:mb-6 sm:text-2xl">
+            Your performance
           </h2>
-          <div className="grid grid-cols-4 gap-6">
-            {/* Exams Taken */}
-            <div className="bg-white rounded-lg border border-brand-200 p-6 hover:shadow-lg transition">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  {/* <p className="text-xs font-semibold text-brand-600 mb-1 uppercase tracking-wide">{metrics.examsTaken.label}</p> */}
-                  <p className="text-3xl font-bold text-brand-900">
-                    {metrics.examsTaken.value}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600">
-                  {(() => {
-                    const Icon = metrics.examsTaken.icon;
-                    return <Icon size={20} />;
-                  })()}
-                </div>
-              </div>
-              <p className="text-xs text-brand-600">
-                <span className="font-semibold text-brand-600">
-                  {metrics.examsTaken.change}
-                </span>{" "}
-                {metrics.examsTaken.changeLabel}
-              </p>
-            </div>
-
-            {/* Average Score */}
-            <div className="bg-white rounded-lg border border-brand-200 p-6 hover:shadow-lg transition">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs font-semibold text-brand-600 mb-1 uppercase tracking-wide">
-                    {metrics.averageScore.label}
-                  </p>
-                  <p className="text-3xl font-bold text-brand-900">
-                    {metrics.averageScore.value}
-                  </p>
-                  <p className="text-xs text-brand-600">
-                    / {metrics.averageScore.maxValue}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600">
-                  {(() => {
-                    const Icon = metrics.averageScore.icon;
-                    return <Icon size={20} />;
-                  })()}
-                </div>
-              </div>
-              <p className="text-xs text-brand-600">
-                <span className="font-semibold text-brand-600">
-                  {metrics.averageScore.change}
-                </span>{" "}
-                {metrics.averageScore.changeLabel}
-              </p>
-            </div>
-
-            {/* Best Score */}
-            <div className="bg-white rounded-lg border border-brand-200 p-6 hover:shadow-lg transition">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs font-semibold text-brand-600 mb-1 uppercase tracking-wide">
-                    {metrics.bestScore.label}
-                  </p>
-                  <p className="text-3xl font-bold text-brand-900">
-                    {metrics.bestScore.value}
-                  </p>
-                  <p className="text-xs text-brand-600">
-                    / {metrics.bestScore.maxValue}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600">
-                  {(() => {
-                    const Icon = metrics.bestScore.icon;
-                    return <Icon size={20} />;
-                  })()}
-                </div>
-              </div>
-            </div>
-
-            {/* Pass Rate */}
-            <div className="bg-white rounded-lg border border-brand-200 p-6 hover:shadow-lg transition">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-xs font-semibold text-brand-600 mb-1 uppercase tracking-wide">
-                    {metrics.passRate.label}
-                  </p>
-                  <p className="text-3xl font-bold text-brand-900">
-                    {metrics.passRate.value}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600">
-                  {(() => {
-                    const Icon = metrics.passRate.icon;
-                    return <Icon size={20} />;
-                  })()}
-                </div>
-              </div>
-              <p className="text-xs text-brand-600">
-                <span className="font-semibold">{metrics.passRate.detail}</span>
-              </p>
-              <p className="text-xs text-brand-500 mt-1">
-                ({metrics.passRate.cutScore})
-              </p>
-            </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
+            <MetricCard
+              label={metrics.examsTaken.label}
+              value={metrics.examsTaken.value}
+              icon={metrics.examsTaken.icon}
+              footer={
+                <>
+                  <span className="font-semibold">{metrics.examsTaken.change}</span>{" "}
+                  {metrics.examsTaken.changeLabel}
+                </>
+              }
+            />
+            <MetricCard
+              label={metrics.averageScore.label}
+              value={metrics.averageScore.value}
+              unit={metrics.averageScore.maxValue}
+              icon={metrics.averageScore.icon}
+              footer={
+                <>
+                  <span className="font-semibold">{metrics.averageScore.change}</span>{" "}
+                  {metrics.averageScore.changeLabel}
+                </>
+              }
+            />
+            <MetricCard
+              label={metrics.bestScore.label}
+              value={metrics.bestScore.value}
+              unit={metrics.bestScore.maxValue}
+              icon={metrics.bestScore.icon}
+            />
+            <MetricCard
+              label={metrics.passRate.label}
+              value={metrics.passRate.value}
+              icon={metrics.passRate.icon}
+              footer={
+                <>
+                  <span className="font-semibold">{metrics.passRate.detail}</span>
+                  <span className="mt-0.5 block text-brand-500">
+                    ({metrics.passRate.cutScore})
+                  </span>
+                </>
+              }
+            />
           </div>
-        </div>
+        </section>
 
-        {/* Recent Practice Exam Attempts */}
-        <div className="mt-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-brand-900">
-              Recent Practice Exam Attempts
+        {/* Attempts */}
+        <section className="mt-10 sm:mt-12">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
+            <h2 className="text-xl font-bold text-brand-900 sm:text-2xl">
+              Recent practice exam attempts
             </h2>
-            <button className="text-white text-sm font-semibold bg-brand-800 py-2 px-4 rounded-full">
-              View all 14 Attempts
+            <button className="rounded-full bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+              View all attempts
             </button>
           </div>
 
-          <div className="bg-white rounded-lg border border-black overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-brand-50 border-b border-black">
+          {/* Mobile: card list */}
+          <ul className="space-y-3 md:hidden">
+            {examAttempts.map((attempt) => (
+              <li
+                key={attempt.id}
+                className="rounded-xl border border-brand-200 bg-white p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-brand-900">
+                      {attempt.examName}
+                    </p>
+                    <p className="text-xs text-brand-600">{attempt.examNumber}</p>
+                  </div>
+                  <ResultBadge status={attempt.status}>{attempt.result}</ResultBadge>
+                </div>
+
+                <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <dt className="text-brand-600">Date</dt>
+                    <dd className="font-semibold text-brand-900">{attempt.date}</dd>
+                    <dd className="text-brand-600">{attempt.time}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-brand-600">Score</dt>
+                    <dd className="font-semibold text-brand-900">
+                      {attempt.score}{" "}
+                      <span className="font-normal text-brand-600">/ {attempt.maxScore}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-brand-600">Duration</dt>
+                    <dd className="font-semibold text-brand-900">{attempt.duration}</dd>
+                  </div>
+                </dl>
+
+                <button className={`${primaryBtn} mt-4 w-full`}>
+                  View results
+                  <Eye size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto rounded-xl border border-brand-200 bg-white md:block">
+            <table className="w-full min-w-[720px]">
+              <thead className="border-b border-brand-200 bg-brand-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide">
-                    Exam Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide">
-                    Exam Completed
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide">
-                    Score
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide">
-                    Result
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide">
-                    Duration
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-xs font-semibold text-brand-600 uppercase tracking-wide"
-                    colSpan={2}
-                  >
-                    Actions
-                  </th>
+                  {["Exam date", "Exam completed", "Score", "Result", "Duration", "Actions"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-3.5 text-left text-xs font-semibold text-brand-600 lg:px-6"
+                      >
+                        {h}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black">
+              <tbody className="divide-y divide-brand-100">
                 {examAttempts.map((attempt) => (
-                  <tr key={attempt.id} className="hover:bg-brand-50 transition">
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-brand-900">
-                        {attempt.date}
-                      </div>
-                      <div className="text-xs text-brand-600">
-                        {attempt.time}
-                      </div>
+                  <tr key={attempt.id} className="transition hover:bg-brand-50">
+                    <td className="px-5 py-4 lg:px-6">
+                      <div className="text-sm font-semibold text-brand-900">{attempt.date}</div>
+                      <div className="text-xs text-brand-600">{attempt.time}</div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4 lg:px-6">
                       <div className="text-sm font-semibold text-brand-900">
                         {attempt.examName}
                       </div>
-                      <div className="text-xs text-brand-600">
-                        {attempt.examNumber}
-                      </div>
+                      <div className="text-xs text-brand-600">{attempt.examNumber}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-brand-900">
-                        {attempt.score}
-                      </div>
-                      <div className="text-xs text-brand-600">
-                        / {attempt.maxScore}
-                      </div>
+                    <td className="px-5 py-4 lg:px-6">
+                      <div className="text-sm font-bold text-brand-900">{attempt.score}</div>
+                      <div className="text-xs text-brand-600">/ {attempt.maxScore}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          attempt.status === "pass"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {attempt.result}
-                      </span>
+                    <td className="px-5 py-4 lg:px-6">
+                      <ResultBadge status={attempt.status}>{attempt.result}</ResultBadge>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-brand-900">
-                        {attempt.duration}
-                      </div>
+                    <td className="px-5 py-4 text-sm text-brand-900 lg:px-6">
+                      {attempt.duration}
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-6 py-2 font-semibold text-white transition hover:bg-brand-700">
-                        View Results
+                    <td className="px-5 py-4 lg:px-6">
+                      <button className={primaryBtn}>
+                        View results
                         <Eye size={16} />
                       </button>
                     </td>
@@ -340,7 +405,7 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

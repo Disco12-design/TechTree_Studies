@@ -428,24 +428,8 @@ function SecurityCard({
           </button>
         </div>
 
-        <div className={row}>
-          <div>
-            <p className={ui.tinyLabel}>TWO-FACTOR AUTH</p>
-            <p
-              className={`mt-0.5 flex items-center gap-1 text-xs font-semibold ${
-                twoFactor ? "text-brand-600" : "text-slate-500"
-              }`}
-            >
-              <Lock size={11} />
-              {twoFactor ? "Authenticator App (TOTP)" : "Off"}
-            </p>
-          </div>
-          <Switch
-            label="Two-factor authentication"
-            checked={twoFactor}
-            onChange={onToggleTwoFactor}
-          />
-        </div>
+      
+      
 
         <div>
           <p className={`mb-1.5 ${ui.tinyLabel}`}>ACTIVE SESSION</p>
