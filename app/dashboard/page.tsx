@@ -3,10 +3,47 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { profile, metrics, examAttempts } from "../types/assets";
-import { Calendar, Award, Plus, Eye, type LucideIcon } from "lucide-react";
+import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 
 // Same key the Profile Settings page saves to
 const PROFILE_STORAGE_KEY = "profile-settings:v1";
+const STREAK_STORAGE_KEY = "study-streak:v1";
+
+type StreakData = { lastVisit: string; count: number };
+
+/** Returns today as "YYYY-MM-DD" in the user's local timezone. */
+function todayIso(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Reads the streak from localStorage, updates it for today, and returns
+ * the current count. If the user visited yesterday the streak grows;
+ * if they already visited today it stays the same; otherwise it resets to 1.
+ */
+function loadAndUpdateStreak(): number {
+  const today = todayIso();
+  try {
+    const raw = localStorage.getItem(STREAK_STORAGE_KEY);
+    if (raw) {
+      const data: StreakData = JSON.parse(raw);
+      if (data.lastVisit === today) return data.count;           // already counted today
+
+      // Check if lastVisit was yesterday
+      const last = new Date(data.lastVisit + "T00:00:00");
+      const diff = (new Date(today + "T00:00:00").getTime() - last.getTime()) / 86_400_000;
+
+      const newCount = diff === 1 ? data.count + 1 : 1;         // consecutive → grow, else reset
+      localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ lastVisit: today, count: newCount }));
+      return newCount;
+    }
+  } catch { /* corrupted data — treat as fresh */ }
+
+  // First visit ever (or corrupted data)
+  localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ lastVisit: today, count: 1 }));
+  return 1;
+}
 
 type SavedProfile = { name: string | null; avatar: string | null };
 
@@ -42,9 +79,7 @@ function countdownLabel(days: number) {
   return "This date has passed";
 }
 
-/* ------------------------------------------------------------------ */
-/* Small building blocks                                               */
-/* ------------------------------------------------------------------ */
+
 
 const primaryBtn =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600";
@@ -120,9 +155,6 @@ function ActionCard({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
 
 export default function Dashboard() {
   const router = useRouter();
@@ -131,16 +163,16 @@ export default function Dashboard() {
   const [examIso, setExamIso] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedProfile>({ name: null, avatar: null });
   const [ready, setReady] = useState(false);
+  const [streak, setStreak] = useState(0);
 
-  // Saved name wins; fall back to the default from assets
   const displayName = saved.name ?? profile.name;
-  // Hide the name until localStorage is read so the default never flashes
   const nameVisibility = ready ? "" : "invisible";
 
   useEffect(() => {
     setSaved(loadSavedProfile());
     setReady(true);
     setExamIso(localStorage.getItem("examDate"));
+    setStreak(loadAndUpdateStreak());
   }, []);
 
   const examDateLabel = examIso
@@ -200,10 +232,17 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-brand-900 sm:text-4xl">
               Welcome back, <span className={nameVisibility}>{displayName}</span>
             </h1>
+            
             <span className="inline-flex items-center gap-1 rounded-full bg-brand-800 px-3 py-1 text-xs font-semibold text-white">
               <Award size={14} />
               PRO MEMBER
             </span>
+            <div className={`flex items-center gap-1.5 py-1 px-3 rounded-full ${streak >= 3 ? "bg-orange-500 text-white" : "bg-brand-800 text-white"}`}>
+              <Flame size={14} />
+              <p className="text-sm font-semibold">
+                Streak: {streak} {streak === 1 ? "day" : "days"}
+              </p>
+            </div>
           </div>
           <p className="mt-1 text-sm text-brand-600 sm:text-base">
             CompTIA Security+ &amp; AWS SAA-C03 Candidate
@@ -211,7 +250,7 @@ export default function Dashboard() {
         </section>
 
         {/* Target exam */}
-        <section className="mb-6 flex flex-col gap-3 rounded-xl border border-brand-200 bg-white p-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <section className="mb-6 flex flex-col gap-4 rounded-xl border border-brand-200 bg-white p-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <div className="mb-1 flex items-center gap-2 text-brand-600">
               <Calendar size={18} />
@@ -220,16 +259,35 @@ export default function Dashboard() {
             <p className="text-xl font-bold text-brand-900 sm:text-2xl">
               {examDateLabel ?? "No date set"}
             </p>
+            {days !== null && (
+              <span
+                className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                  days < 0 ? "bg-amber-100 text-amber-800" : "bg-brand-100 text-brand-700"
+                }`}
+              >
+                {countdownLabel(days)}
+              </span>
+            )}
           </div>
-          {days !== null && (
-            <span
-              className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-                days < 0 ? "bg-amber-100 text-amber-800" : "bg-brand-100 text-brand-700"
-              }`}
-            >
-              {countdownLabel(days)}
-            </span>
-          )}
+          {days !== null && days >= 0 ? (
+            <div className="flex flex-col items-center rounded-xl bg-brand-50 px-6 py-3">
+              <p className="text-4xl font-extrabold tabular-nums text-brand-900 sm:text-5xl">
+                {days}
+              </p>
+              <p className="text-xs font-semibold text-brand-600">
+                {days === 1 ? "day left" : "days left"}
+              </p>
+            </div>
+          ) : days !== null && days < 0 ? (
+            <div className="flex flex-col items-center rounded-xl bg-amber-50 px-6 py-3">
+              <p className="text-4xl font-extrabold tabular-nums text-amber-800 sm:text-5xl">
+                {Math.abs(days)}
+              </p>
+              <p className="text-xs font-semibold text-amber-700">
+                {Math.abs(days) === 1 ? "day overdue" : "days overdue"}
+              </p>
+            </div>
+          ) : null}
         </section>
 
         {/* Actions */}

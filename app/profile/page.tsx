@@ -15,6 +15,7 @@ import {
   BadgeCheck,
   Bell,
   Camera,
+  Flame,
   Info,
   Loader2,
   Lock,
@@ -70,6 +71,19 @@ const INITIAL_NOTIFS: Notifs = {
 /* ------------------------------------------------------------------ */
 
 const STORAGE_KEY = "profile-settings:v1";
+const STREAK_STORAGE_KEY = "study-streak:v1";
+
+/** Reads the current streak count from localStorage (read-only, does not update). */
+function loadStreakCount(): number {
+  try {
+    const raw = localStorage.getItem(STREAK_STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      return typeof data.count === "number" ? data.count : 0;
+    }
+  } catch { /* ignore */ }
+  return 0;
+}
 
 type Persisted = {
   form: Form;
@@ -473,6 +487,7 @@ export default function ProfileSettings() {
   const [saving, setSaving] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [twoFactor, setTwoFactor] = useState(true);
+  const [streak, setStreak] = useState(0);
 
   // Free every preview URL we created when the component unmounts
   useEffect(() => {
@@ -483,6 +498,7 @@ export default function ProfileSettings() {
   // Load saved data after mount (not in useState initial values, to avoid
   // a server/client hydration mismatch in Next.js)
   useEffect(() => {
+    setStreak(loadStreakCount());
     const saved = loadPersisted();
     if (!saved) return;
     setForm(saved.form);
@@ -708,10 +724,11 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-brand-50 px-4 py-2">
+            <div className={`rounded-xl px-4 py-2 ${streak >= 3 ? "bg-orange-50" : "bg-brand-50"}`}>
               <p className={ui.tinyLabel}>REVIEW STREAK</p>
-              <p className="flex items-center gap-1 text-lg font-bold text-brand-600">
-                14 Days <Zap size={14} className="fill-amber-400 text-amber-500" />
+              <p className={`flex items-center gap-1 text-lg font-bold ${streak >= 3 ? "text-orange-600" : "text-brand-600"}`}>
+                {streak} {streak === 1 ? "Day" : "Days"}{" "}
+                <Flame size={14} className={streak >= 3 ? "fill-orange-400 text-orange-500" : "fill-amber-400 text-amber-500"} />
               </p>
             </div>
           </div>
