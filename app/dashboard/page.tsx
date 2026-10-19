@@ -4,83 +4,11 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { profile, metrics, examAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
-
-// Same key the Profile Settings page saves to
-const PROFILE_STORAGE_KEY = "profile-settings:v1";
-const STREAK_STORAGE_KEY = "study-streak:v1";
-
-type StreakData = { lastVisit: string; count: number };
-
-/** Returns today as "YYYY-MM-DD" in the user's local timezone. */
-function todayIso(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * Reads the streak from localStorage, updates it for today, and returns
- * the current count. If the user visited yesterday the streak grows;
- * if they already visited today it stays the same; otherwise it resets to 1.
- */
-function loadAndUpdateStreak(): number {
-  const today = todayIso();
-  try {
-    const raw = localStorage.getItem(STREAK_STORAGE_KEY);
-    if (raw) {
-      const data: StreakData = JSON.parse(raw);
-      if (data.lastVisit === today) return data.count;           // already counted today
-
-      // Check if lastVisit was yesterday
-      const last = new Date(data.lastVisit + "T00:00:00");
-      const diff = (new Date(today + "T00:00:00").getTime() - last.getTime()) / 86_400_000;
-
-      const newCount = diff === 1 ? data.count + 1 : 1;         // consecutive → grow, else reset
-      localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ lastVisit: today, count: newCount }));
-      return newCount;
-    }
-  } catch { /* corrupted data — treat as fresh */ }
-
-  // First visit ever (or corrupted data)
-  localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ lastVisit: today, count: 1 }));
-  return 1;
-}
-
-type SavedProfile = { name: string | null; avatar: string | null };
-
-/** Reads the name + avatar saved by Profile Settings. */
-function loadSavedProfile(): SavedProfile {
-  try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (!raw) return { name: null, avatar: null };
-    const data = JSON.parse(raw);
-    const name = data?.form?.name;
-    return {
-      name: typeof name === "string" && name.trim() ? name.trim() : null,
-      avatar: typeof data?.avatarDataUrl === "string" ? data.avatarDataUrl : null,
-    };
-  } catch {
-    return { name: null, avatar: null };
-  }
-}
-
-/** Whole days from today until a "YYYY-MM-DD" date (negative if past). */
-function daysUntil(iso: string) {
-  const [y, m, d] = iso.split("-").map(Number);
-  const target = new Date(y, m - 1, d).getTime();
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  return Math.round((target - today) / 86_400_000);
-}
-
-function countdownLabel(days: number) {
-  if (days === 0) return "Exam day is today";
-  if (days === 1) return "1 day to go";
-  if (days > 1) return `${days} days to go`;
-  return "This date has passed";
-}
+import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
+import { loadSavedProfile, loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
 
 
-
+7
 const primaryBtn =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600";
 
@@ -175,16 +103,7 @@ export default function Dashboard() {
     setStreak(loadAndUpdateStreak());
   }, []);
 
-  const examDateLabel = examIso
-    ? (() => {
-        const [y, m, d] = examIso.split("-").map(Number);
-        return new Date(y, m - 1, d).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        });
-      })()
-    : null;
+  const examDateLabel = examIso ? formatLongDate(examIso) : null;
   const days = examIso ? daysUntil(examIso) : null;
 
   return (
@@ -414,7 +333,7 @@ export default function Dashboard() {
 
           {/* Desktop: table */}
           <div className="hidden overflow-x-auto rounded-xl border border-brand-200 bg-white md:block">
-            <table className="w-full min-w-[720px]">
+            <table className="w-full min-w-180">
               <thead className="border-b border-brand-200 bg-brand-50">
                 <tr>
                   {["Exam date", "Exam completed", "Score", "Result", "Duration", "Actions"].map(

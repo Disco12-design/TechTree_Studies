@@ -41,7 +41,7 @@ const domains = [
     name: 'Domain 4.0',
     title: 'Reporting and Communication',
     percent: '16%',
-    modules: ['4.1', '4.2', '4.3', '4.4'],
+    modules: ['4.1', '4.2',],
   },
 ];
 
@@ -201,8 +201,6 @@ function getModuleTitle(domain: string, module: string): string {
     '3.5': 'Post-Incident Activities',
     '4.1': 'Reporting Techniques',
     '4.2': 'Dashboards & Metrics',
-    '4.3': 'Stakeholder Communication',
-    '4.4': 'Documentation & Compliance',
   };
   return moduleMap[module] || '';
 }

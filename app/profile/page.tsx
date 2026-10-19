@@ -460,10 +460,6 @@ function SecurityCard({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
-
 export default function ProfileSettings() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("profile");
@@ -495,8 +491,7 @@ export default function ProfileSettings() {
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
 
-  // Load saved data after mount (not in useState initial values, to avoid
-  // a server/client hydration mismatch in Next.js)
+ 
   useEffect(() => {
     setStreak(loadStreakCount());
     const saved = loadPersisted();
@@ -586,8 +581,6 @@ export default function ProfileSettings() {
         email: form.email.trim(),
       };
 
-      // New upload → resized data URL. Otherwise keep what's there
-      // (the saved data URL, or null if the avatar was removed).
       const avatarDataUrl = avatarFile
         ? await fileToAvatarDataUrl(avatarFile)
         : avatarUrl;
