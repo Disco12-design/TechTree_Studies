@@ -134,7 +134,6 @@ export interface PracticeExam {
   maxScore: number;
   domains: string[];
   icon: LucideIcon;
-  features: string[];
 }
 
 export const practiceExams: PracticeExam[] = [
@@ -146,19 +145,28 @@ export const practiceExams: PracticeExam[] = [
     description:
       "Validate network hardening, host monitoring, zero-trust cryptographic implementations, and standard incident remediation.",
     access: "Free",
-    items: 50,
+    items: 73,
     timeCap: 90,
     targetPass: 750,
     maxScore: 900,
     domains: [
-      "Threats & Attacks",
-      "Cryptography",
-      "Identity & Access",
-      "Risk Management",
+      "1.0) Security Operations",
+      "2.0) Vulnerability Management ",
+      "3.0) Incident Response and Management ",
+      "4.0) Reporting and Communication ",
     ],
     icon: CheckCircle,
-    features: ["verified", "Simulated Pearson CBT"],
+    
+   
   },
+
+
+
+
+
+
+
+  
   {
     id: "sy0-701-threats",
     code: "SY0-701",
@@ -178,7 +186,7 @@ export const practiceExams: PracticeExam[] = [
       "Incident Response",
     ],
     icon: CheckCircle,
-    features: ["adaptive questions", "performance analytics"],
+
   },
   {
     id: "sy0-701-crypto",
@@ -194,7 +202,6 @@ export const practiceExams: PracticeExam[] = [
     maxScore: 900,
     domains: ["Cryptography", "PKI", "Certificates", "Secure Protocols"],
     icon: CheckCircle,
-    features: ["exam-ready", "detailed explanations"],
   },
   {
     id: "sy0-701-iam",
@@ -215,7 +222,6 @@ export const practiceExams: PracticeExam[] = [
       "Authentication",
     ],
     icon: CheckCircle,
-    features: ["PBQs included", "exam simulation"],
   },
 ];
 
@@ -2280,445 +2286,4 @@ export interface DetailedStudyNote {
   sections: Section[];
 }
 
-export const detailedStudyNotes: DetailedStudyNote[] = [
-  {
-    id: "network-security",
-    title: "Network Security Fundamentals",
-    category: "Network Security",
-    difficulty: "Beginner",
-    description:
-      "Core concepts of network defense, firewalls, VPNs, IDS/IPS systems, and network segmentation.",
-    estimatedTime: "4 hours",
-    icon: Network,
-    keyConceptsSummary:
-      "Network security protects data in transit across networks. Key concepts include firewalls (filtering traffic), VPNs (encrypting connections), IDS/IPS (detecting threats), and segmentation (isolating critical systems).",
-    sections: [
-      {
-        id: "firewall-basics",
-        title: "1. Firewall Fundamentals",
-        subsections: [
-          {
-            id: "firewall-def",
-            title: "What is a Firewall?",
-            content:
-              "A firewall is a network security device that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It acts as a barrier between trusted internal networks and untrusted external networks.\n\nTypes of Firewalls:\n• Stateless Firewalls: Examine packets individually without tracking connections\n• Stateful Firewalls: Track active connections and make decisions based on state\n• Next-Generation Firewalls (NGFW): Inspect application layer traffic and use threat intelligence\n• Hardware Firewalls: Protect entire networks\n• Software Firewalls: Protect individual devices",
-          },
-          {
-            id: "firewall-rules",
-            title: "Firewall Rules & Policies",
-            content:
-              "Firewall policies define how traffic is handled. Rules are processed in order (top-to-bottom) until a match is found.\n\nKey Concepts:\n• Allow Rules: Permit specific traffic\n• Deny Rules: Block specific traffic\n• Default Policy: Action taken when no rule matches (typically Deny)\n• Implicit Deny: All traffic denied unless explicitly allowed (best practice)\n• Logging: Recording matched rules for analysis and troubleshooting",
-          },
-          {
-            id: "firewall-types",
-            title: "Firewall Technologies",
-            content:
-              "Packet Filtering: Examines source/destination IP, ports, and protocols. Fast but limited.\n\nApplication Layer Gateway: Inspects application data. Slower but more effective against application-level attacks.\n\nProxy Firewall: Intercepts connections. Can mask internal IPs and provide caching.\n\nZone-Based Firewalls: Policies based on network zones (Inside, Outside, DMZ) with different trust levels.",
-          },
-        ],
-      },
-      {
-        id: "vpn-security",
-        title: "2. Virtual Private Networks (VPNs)",
-        subsections: [
-          {
-            id: "vpn-overview",
-            title: "VPN Basics",
-            content:
-              "A Virtual Private Network (VPN) creates an encrypted tunnel through a public network, allowing secure remote access and site-to-site connectivity.\n\nVPN Benefits:\n• Encryption: Protects data from eavesdropping\n• Privacy: Hides IP address and location\n• Secure Remote Access: Connect from anywhere securely\n• Site-to-Site Connectivity: Connect multiple office locations\n• Bypass Restrictions: Access resources from different regions",
-          },
-          {
-            id: "vpn-types",
-            title: "Types of VPNs",
-            content:
-              "Remote Access VPN: Users connect to corporate network from remote locations using VPN client software. Common in modern work environments for telecommuting.\n\nSite-to-Site VPN: Connects multiple office networks together. Two main types:\n• Router-to-Router VPN: Firewalls/routers encrypt tunnel\n• Host-to-Host VPN: End systems establish encrypted connections\n\nClient-to-Site VPN: Single user connects to network resources.",
-          },
-          {
-            id: "vpn-protocols",
-            title: "VPN Protocols",
-            content:
-              "IPSec: Industry standard, operates at network layer (Layer 3). Two modes:\n• Tunnel Mode: Encrypts entire packet (site-to-site)\n• Transport Mode: Encrypts only payload (end-to-end)\n\nSSL/TLS VPN: Uses HTTPS (port 443). No client software needed, access via web browser.\n\nL2TP/IPSec: Layer 2 protocol, combined with IPSec for security.\n\nWireGuard: Modern, lightweight VPN protocol with smaller attack surface.",
-          },
-        ],
-      },
-      {
-        id: "ids-ips",
-        title: "3. Intrusion Detection & Prevention",
-        subsections: [
-          {
-            id: "ids-basics",
-            title: "IDS vs IPS",
-            content:
-              "Intrusion Detection System (IDS):\n• Monitors network traffic for malicious activity\n• Alerts administrators when threats detected\n• Passive - does not stop attacks\n• Deployment: Mirror/SPAN port on switch\n\nIntrusion Prevention System (IPS):\n• Detects AND blocks malicious activity\n• Takes action automatically (drop packets, reset connections)\n• Active - prevents attacks from succeeding\n• Deployment: In-line on network path",
-          },
-          {
-            id: "ids-detection",
-            title: "IDS Detection Methods",
-            content:
-              "Signature-Based Detection:\n• Compares traffic against known attack signatures\n• Very effective against known threats\n• Cannot detect new/unknown attacks (zero-days)\n• Fast and low false positive rate\n\nAnomaly-Based Detection:\n• Learns normal baseline behavior\n• Alerts on deviations from baseline\n• Detects unknown attacks\n• High false positive rate initially\n• Requires training period",
-          },
-          {
-            id: "ids-systems",
-            title: "IDS/IPS Systems",
-            content:
-              "Network IDS/IPS (NIDS/NIPS):\n• Monitors entire network segment\n• Examples: Snort, Suricata, Cisco IPS\n• Placed at network perimeter or critical segments\n\nHost IDS/IPS (HIDS/HIPS):\n• Monitors individual host/system\n• Can see application-level attacks\n• Resource intensive\n• Examples: Wazuh, Osquery",
-          },
-        ],
-      },
-      {
-        id: "network-segmentation",
-        title: "4. Network Segmentation",
-        subsections: [
-          {
-            id: "segmentation-concept",
-            title: "Segmentation Principles",
-            content:
-              "Network segmentation divides a network into smaller subnets (segments) to improve security and performance.\n\nBenefits:\n• Containment: Limits lateral movement of attackers\n• Reduced Attack Surface: Limits access to critical systems\n• Performance: Reduces congestion and improves speed\n• Compliance: Meets regulatory requirements for data isolation\n• Access Control: Easier to enforce policies between segments",
-          },
-          {
-            id: "dmz",
-            title: "DMZ (Demilitarized Zone)",
-            content:
-              "A DMZ is a network segment with controlled access between internal network and internet.\n\nDMZ Characteristics:\n• Hosts public-facing servers (web, email, DNS)\n• Restricted access from internal network\n• No direct access to internal servers\n• Usually protected by dual firewalls\n\nTraffic Flow:\nInternet → Firewall 1 → DMZ → Firewall 2 → Internal Network\n\nIf DMZ server compromised, attacker still cannot easily access internal network.",
-          },
-          {
-            id: "vlan-segmentation",
-            title: "VLAN-Based Segmentation",
-            content:
-              "Virtual LANs (VLANs) allow logical network segmentation on physical infrastructure.\n\nVLAN Benefits:\n• Cost-effective segmentation\n• Flexible network design\n• Easy to implement access control\n• Reduces broadcast domains\n\nCommon VLAN Design:\n• VLAN 1: Management\n• VLAN 10: Servers\n• VLAN 20: Workstations\n• VLAN 30: IoT/Printers\n• VLAN 100: Guest\n\nVLAN Trunking: Allows multiple VLANs over single link using 802.1Q tagging.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "cryptography-encryption",
-    title: "Cryptography & Encryption",
-    category: "Cryptography",
-    difficulty: "Intermediate",
-    description:
-      "Encryption algorithms, PKI, digital certificates, hashing, and secure communication protocols.",
-    estimatedTime: "5 hours",
-    icon: Key,
-    keyConceptsSummary:
-      "Cryptography uses mathematical algorithms to protect data confidentiality, integrity, and authenticity. Includes symmetric encryption (same key), asymmetric encryption (public/private keys), and hashing (one-way functions).",
-    sections: [
-      {
-        id: "encryption-basics",
-        title: "1. Encryption Fundamentals",
-        subsections: [
-          {
-            id: "symmetric-encryption",
-            title: "Symmetric Encryption",
-            content:
-              "Symmetric encryption uses the SAME key for both encryption and decryption.\n\nCharacteristics:\n• Fast and efficient\n• Small key size (128, 256 bits)\n• Challenge: Key distribution and management\n• Suitable for bulk data encryption\n\nCommon Algorithms:\n• AES (Advanced Encryption Standard): 128, 192, or 256-bit keys. NIST standard. Used in SSL/TLS\n• DES (Data Encryption Standard): 56-bit key. DEPRECATED - no longer secure\n• 3DES: Triple DES, applies DES three times. Legacy system support\n• Blowfish: 64-bit block size, 32-448 bit key\n• ChaCha20: Modern stream cipher, used in TLS 1.3",
-          },
-          {
-            id: "asymmetric-encryption",
-            title: "Asymmetric Encryption",
-            content:
-              "Asymmetric encryption uses a PUBLIC key (encrypt) and PRIVATE key (decrypt).\n\nCharacteristics:\n• Slower than symmetric encryption\n• Larger key sizes (2048, 4096 bits)\n• Solves key distribution problem\n• Used for key exchange and digital signatures\n\nCommon Algorithms:\n• RSA: Most widely used, based on factorization difficulty. 2048+ bits recommended\n• ECC (Elliptic Curve Cryptography): Smaller keys with equivalent security (256-bit ECC ≈ 3072-bit RSA)\n• Diffie-Hellman: Key exchange protocol, not encryption itself",
-          },
-          {
-            id: "encryption-modes",
-            title: "Encryption Modes",
-            content:
-              "Block cipher modes determine how plaintext blocks are processed:\n\nECB (Electronic Codebook): Simple mode, same plaintext → same ciphertext. INSECURE - reveals patterns\n\nCBC (Cipher Block Chaining): Each block depends on previous. IV required. Secure but vulnerable to padding oracle attacks\n\nCTR (Counter): Converts block cipher to stream cipher. Parallelizable and secure\n\nGCM (Galois/Counter Mode): Provides encryption + authentication. Recommended for new systems\n\nCFB/OFB: Stream cipher modes, suitable for small data units",
-          },
-        ],
-      },
-      {
-        id: "hashing-integrity",
-        title: "2. Hashing & Integrity",
-        subsections: [
-          {
-            id: "hash-functions",
-            title: "Hash Functions",
-            content:
-              "Hash functions convert any input into fixed-size output (hash/digest).\n\nProperties:\n• One-way: Cannot reverse hash to get original data\n• Deterministic: Same input = same output\n• Avalanche Effect: Small input change = completely different hash\n• Collision Resistant: Two different inputs produce different hashes\n• Fast: Compute quickly\n\nApplications:\n• Data Integrity: Verify data hasn't changed\n• Password Storage: Store hashed passwords, not plaintext\n• Digital Signatures: Hash document then sign hash\n• Blockchain: Chain blocks together using hashes",
-          },
-          {
-            id: "hash-algorithms",
-            title: "Hash Algorithms",
-            content:
-              "MD5 (Message Digest 5): 128-bit output. DEPRECATED - collisions found, insecure\n\nSHA-1 (Secure Hash Algorithm 1): 160-bit output. DEPRECATED - collisions demonstrated\n\nSHA-2 Family: SHA-256, SHA-384, SHA-512. Current standard, secure\n\nSHA-3: Latest standard, based on Keccak. Greater security margin than SHA-2\n\nBcrypt: Specifically designed for passwords with salt and iterations\n\nArgon2: Modern password hashing, memory-hard to resist GPU attacks",
-          },
-          {
-            id: "hmac",
-            title: "HMAC (Hash-based Message Authentication Code)",
-            content:
-              "HMAC combines hash function with secret key to provide both authenticity and integrity.\n\nHow it works:\n• Combines message + secret key\n• Hash the combination\n• Receiver with same key can verify message wasn't tampered\n\nFormula: HMAC(K,M) = Hash((K⊕opad) || Hash((K⊕ipad) || M))\n\nCommon Use Cases:\n• API Authentication: HMAC header in API requests\n• Cookie Verification: Ensure cookies haven't been modified\n• Message Authentication in TLS: Verify message integrity\n• OAuth/JWT: Token validation",
-          },
-        ],
-      },
-      {
-        id: "pki-certificates",
-        title: "3. Public Key Infrastructure (PKI)",
-        subsections: [
-          {
-            id: "pki-overview",
-            title: "PKI Concepts",
-            content:
-              "Public Key Infrastructure manages digital certificates and public keys.\n\nPKI Components:\n• Certificate Authority (CA): Issues digital certificates\n• Registration Authority (RA): Verifies identities\n• Certificate Revocation List (CRL): List of revoked certificates\n• OCSP (Online Certificate Status Protocol): Real-time certificate status\n\nTrust Model:\n• Root CA: Self-signed, highest level of trust\n• Intermediate CA: Issued by Root CA\n• End-Entity Certificate: Issued to users/servers\n• Certificate Chain: Root → Intermediate → End-Entity",
-          },
-          {
-            id: "digital-certificates",
-            title: "Digital Certificates",
-            content:
-              "Digital certificates bind public keys to identities using digital signatures.\n\nX.509 Certificate Contents:\n• Subject: Who the certificate is for (Common Name, Org, Country)\n• Issuer: Which CA issued it\n• Public Key: The actual public key\n• Serial Number: Unique identifier\n• Valid From/To: Validity period (typically 1-3 years)\n• Signature Algorithm: Algorithm used to sign\n• Extensions: Additional info (key usage, extended validation)\n\nCertificate Types:\n• DV (Domain Validation): Verify domain ownership. Cheap, quick\n• OV (Organization Validation): Verify organization identity. More trust\n• EV (Extended Validation): Rigorous verification. Green address bar (mostly removed now)",
-          },
-          {
-            id: "certificate-management",
-            title: "Certificate Management",
-            content:
-              "Certificate Lifecycle:\n1. Generation: Create key pair\n2. Request: Submit CSR (Certificate Signing Request)\n3. Verification: CA verifies identity\n4. Issuance: CA signs and issues certificate\n5. Installation: Deploy on servers\n6. Renewal: Renew before expiry (usually 30-90 days)\n7. Revocation: If compromised or no longer needed\n\nCRL vs OCSP:\n• CRL: Large file, updated periodically, not real-time\n• OCSP: Real-time status, more current, but higher latency\n\nSelf-Signed Certificates:\n• Signed by themselves (not by CA)\n• No third-party trust\n• Useful for internal systems, testing, development\n• Browsers warn about self-signed certs",
-          },
-        ],
-      },
-      {
-        id: "secure-protocols",
-        title: "4. Secure Communication Protocols",
-        subsections: [
-          {
-            id: "ssl-tls",
-            title: "SSL/TLS",
-            content:
-              "SSL (Secure Sockets Layer) and TLS (Transport Layer Security) provide secure communication.\n\nHistory:\n• SSL 3.0: Original protocol (DEPRECATED)\n• TLS 1.0: Successor to SSL 3.0 (DEPRECATED)\n• TLS 1.1: Added protections (DEPRECATED)\n• TLS 1.2: Current standard, widely used\n• TLS 1.3: Latest, simplified handshake, faster\n\nTLS Handshake (simplified):\n1. Client Hello: Client offers cipher suites and TLS versions\n2. Server Hello: Server selects cipher suite and TLS version\n3. Certificate Exchange: Server sends certificate\n4. Key Exchange: Negotiate session key (RSA, DH, ECDH)\n5. Finished: Both sides verify handshake\n6. Data Encryption: All data encrypted with session key",
-          },
-          {
-            id: "ipsec-protocol",
-            title: "IPSec",
-            content:
-              "IPSec (Internet Protocol Security) provides network-layer encryption and authentication.\n\nComponents:\n• IKE (Internet Key Exchange): Negotiates security parameters\n• ESP (Encapsulating Security Payload): Encrypts and authenticates packets\n• AH (Authentication Header): Authenticates only (less common)\n\nModes:\n• Transport Mode: Encrypts payload only (end-to-end)\n• Tunnel Mode: Encrypts entire IP packet (site-to-site VPN)\n\nAdvantages:\n• Network-layer protection (all applications benefit)\n• VPN capable\n• Perfect Forward Secrecy possible\n\nDisadvantages:\n• Complex configuration\n• Higher overhead than TLS\n• Slower than application-layer encryption",
-          },
-          {
-            id: "other-protocols",
-            title: "Other Security Protocols",
-            content:
-              "SSH (Secure Shell): Remote login and data transfer. Uses asymmetric for auth, symmetric for data\n\nS/MIME: Email encryption using certificates\n\nPGP (Pretty Good Privacy): Email encryption, hybrid approach (asymmetric + symmetric)\n\nDTLS: DTLS is TLS for UDP (datagram)\n\nWireGuard: Modern VPN protocol, minimalist design, better performance\n\nQuic: New transport protocol with built-in encryption, 0-RTT resumption",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "threat-analysis",
-    title: "Threat Analysis & Assessment",
-    category: "Threat Intelligence",
-    difficulty: "Intermediate",
-    description:
-      "Malware types, attack vectors, threat modeling, vulnerability assessment, and risk analysis.",
-    estimatedTime: "6 hours",
-    icon: AlertTriangle,
-    keyConceptsSummary:
-      "Understanding threats involves identifying malware types, analyzing attack vectors, modeling potential threats, and assessing vulnerabilities. Critical for building effective defenses.",
-    sections: [
-      {
-        id: "malware-types",
-        title: "1. Malware Types & Characteristics",
-        subsections: [
-          {
-            id: "malware-basics",
-            title: "Malware Categories",
-            content:
-              "Malware is malicious software designed to cause harm.\n\nViruses:\n• Requires host program to execute\n• Spreads via file sharing, email, USB\n• Self-replicating\n• Payload: Steal data, corrupt files, display messages\n\nWorms:\n• Self-replicating without host\n• Exploits network vulnerabilities\n• Spreads automatically\n• Examples: Conficker, Stuxnet\n\nTrojans:\n• Appears legitimate, contains hidden malware\n• Requires user execution\n• Creates backdoor access\n• Examples: Zeus banking trojan\n\nRootkits:\n• Runs with system privileges\n• Hides from detection\n• Difficult to remove\n• Can compromise entire OS",
-          },
-          {
-            id: "advanced-malware",
-            title: "Advanced Malware",
-            content:
-              "Ransomware:\n• Encrypts files/systems\n• Demands payment for decryption key\n• Examples: WannaCry, Ryuk\n• Prevention: Backups, patching, education\n\nAdware:\n• Displays unwanted advertisements\n• Can track user behavior\n• Often bundled with free software\n\nSpyware:\n• Secretly collects user information\n• Keyloggers, screen recorders\n• Violates privacy\n\nBotnet:\n• Infected computers (zombies) controlled remotely\n• Used for DDoS, spam, mining\n• Command and Control (C&C) infrastructure",
-          },
-          {
-            id: "detection-prevention",
-            title: "Malware Detection & Prevention",
-            content:
-              "Signature-Based Detection:\n• Matches malware signatures in database\n• Effective for known malware\n• Cannot detect zero-days\n• Fast detection\n\nHeuristic Detection:\n• Analyzes behavior and code structure\n• Detects variants and unknown malware\n• More false positives\n• Slower than signature detection\n\nBehavioral Detection:\n• Monitors runtime behavior\n• Detects execution of malicious actions\n• Works on unknown malware\n• Can have false positives\n\nSandbox Analysis:\n• Execute in isolated environment\n• Observe behavior safely\n• Time-consuming but thorough",
-          },
-        ],
-      },
-      {
-        id: "attack-vectors",
-        title: "2. Attack Vectors & Techniques",
-        subsections: [
-          {
-            id: "social-engineering",
-            title: "Social Engineering Attacks",
-            content:
-              "Phishing:\n• Fraudulent emails/websites mimicking legitimate sources\n• Trick users to provide credentials\n• Largest attack vector\n• 90%+ of breaches start with phishing\n\nSpear Phishing:\n• Targeted at specific individuals\n• Personalized information used\n• Higher success rate\n• More effort but better results\n\nVishing (Voice Phishing):\n• Phishing via phone calls\n• Social engineer pretends to be authority\n• Request sensitive information\n\nPretexting:\n• Create false scenario to trick victim\n• Establish false credibility\n• Extract information or access\n\nBaiting:\n• Offer something enticing (USB, prize)\n• Contains malware\n• Exploits curiosity",
-          },
-          {
-            id: "network-attacks",
-            title: "Network-Based Attacks",
-            content:
-              "DDoS (Distributed Denial of Service):\n• Overwhelm target with traffic from multiple sources\n• Botnet used to amplify attack\n• Prevents legitimate users from accessing service\n• Mitigation: Rate limiting, CDN, ISP filtering\n\nMan-in-the-Middle (MITM):\n• Intercept communication between two parties\n• Can eavesdrop or modify messages\n• SSL/TLS prevents this\n• ARP spoofing, DNS spoofing techniques\n\nDNS Poisoning:\n• Corrupt DNS cache with false mappings\n• Redirect to malicious sites\n• Affects all users with corrupted cache\n\nPassword Attacks:\n• Brute Force: Try all combinations\n• Dictionary Attack: Try common passwords\n• Rainbow Tables: Pre-computed hash tables\n• Credential Stuffing: Use leaked credentials elsewhere",
-          },
-          {
-            id: "exploitation",
-            title: "Exploitation Techniques",
-            content:
-              "Zero-Day Exploits:\n• Attack unknown vulnerability (not patched)\n• Attacker has exclusive knowledge\n• Most dangerous\n• Usually sold on dark web\n\nSQL Injection:\n• Inject SQL code into input fields\n• Bypass authentication\n• Steal/modify database data\n• Prevention: Input validation, parameterized queries\n\nXSS (Cross-Site Scripting):\n• Inject malicious scripts into web pages\n• Stored XSS: Permanently stored\n• Reflected XSS: Reflected in URL/request\n• Prevention: Input sanitization, CSP headers\n\nBuffer Overflow:\n• Overflow buffer to overwrite memory\n• Execute arbitrary code\n• ASLR and DEP mitigations reduce risk",
-          },
-        ],
-      },
-      {
-        id: "threat-modeling",
-        title: "3. Threat Modeling",
-        subsections: [
-          {
-            id: "threat-models",
-            title: "Threat Modeling Approaches",
-            content:
-              "STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege):\n• Identify threats in each category\n• Systematic approach\n• Good for comprehensive analysis\n\nATT&CK Framework:\n• Matrix of adversary tactics and techniques\n• Based on real attack observations\n• Excellent for threat hunting\n• Used by security professionals globally\n\nKill Chain:\n• Identifies attack stages: Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command & Control, Actions\n• Helps understand attack progression\n• Identify defensive opportunities",
-          },
-          {
-            id: "threat-assessment",
-            title: "Threat Assessment Process",
-            content:
-              "Asset Identification:\n• Identify valuable assets\n• Data, systems, applications\n• Criticality rating\n\nThreat Identification:\n• What threats could affect assets?\n• Internal and external threats\n• Intentional and accidental\n\nVulnerability Analysis:\n• What weaknesses exist?\n• Could be in people, processes, or technology\n• Severity assessment\n\nRisk Calculation:\n• Risk = Threat × Vulnerability × Asset Value\n• Prioritize remediation efforts\n• Resource allocation",
-          },
-          {
-            id: "threat-intelligence",
-            title: "Threat Intelligence",
-            content:
-              "Types of Intelligence:\n• Strategic: Long-term trends, industry impacts\n• Tactical: Specific attack techniques, IOCs\n• Operational: Immediate threat information\n\nData Sources:\n• Open Source Intelligence (OSINT)\n• Dark web monitoring\n• Threat feeds (Shodan, AlienVault OTX)\n• Information sharing organizations\n\nIntelligence-Driven Defense:\n• Use threat intelligence to inform defense strategy\n• Prioritize based on likely threats\n• Continuous improvement\n• Stay ahead of attackers",
-          },
-        ],
-      },
-      {
-        id: "vulnerability-assessment",
-        title: "4. Vulnerability Assessment & Scanning",
-        subsections: [
-          {
-            id: "vulnerability-scanning",
-            title: "Vulnerability Scanning",
-            content:
-              'Automated Tools:\n• Nessus: Industry standard, comprehensive\n• OpenVAS: Open source alternative\n• Qualys: Cloud-based scanning\n• Rapid7 Nexpose/InsightVM\n\nScan Types:\n• Credentialed Scan: With system access (more thorough)\n• Non-Credentialed Scan: Without access (realistic external view)\n• Web Application Scan: Specific to web apps\n• Compliance Scan: Check against standards (PCI-DSS, HIPAA)\n\nFalse Positives:\n• Scanning reports vulnerabilities that don\'t actually exist\n• Require manual verification\n• Create "alert fatigue" if ignored\n• Prioritize critical/high severity',
-          },
-          {
-            id: "penetration-testing",
-            title: "Penetration Testing",
-            content:
-              "Process:\n1. Reconnaissance: Gather information\n2. Scanning: Identify open ports/services\n3. Enumeration: Identify usernames, shares, services\n4. Exploitation: Attempt to gain access\n5. Post-Exploitation: Maintain access, gather data\n6. Reporting: Document findings and recommendations\n\nScope Definition:\n• White Box: Attacker has full information\n• Gray Box: Limited information\n• Black Box: No information (most realistic)\n• Rules of Engagement: What is/isn't allowed\n• Legal Authorization: Written permission required!\n\nTools:\n• Metasploit: Exploitation framework\n• Burp Suite: Web application testing\n• Kali Linux: Penetration testing distribution",
-          },
-          {
-            id: "remediation",
-            title: "Vulnerability Remediation",
-            content:
-              "Prioritization:\n• Risk Rating: CVSS score × Asset criticality\n• Exploitability: How easy to exploit\n• Impact: What damage would occur\n• Compensating Controls: Existing mitigations\n\nRemediation Strategies:\n• Patching: Update software\n• Configuration: Change settings\n• Compensating: Implement controls (WAF, monitoring)\n• Decommission: Remove if not needed\n• Accept: If cost of fix > risk\n\nTracking:\n• SLA for remediation (e.g., Critical: 24 hours)\n• Verification that fix worked\n• Regression testing\n• Documentation for audit",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "identity-access-management",
-    title: "Identity & Access Management",
-    category: "IAM",
-    difficulty: "Intermediate",
-    description:
-      "Authentication methods, authorization models, MFA, SSO, LDAP, and privilege management.",
-    estimatedTime: "4 hours",
-    icon: Users,
-    keyConceptsSummary:
-      "IAM manages who can access what resources. Involves authentication (verifying identity), authorization (granting permissions), and access control (enforcing policies).",
-    sections: [
-      {
-        id: "authentication",
-        title: "1. Authentication Methods",
-        subsections: [
-          {
-            id: "password-auth",
-            title: "Password Authentication",
-            content:
-              "Something You Know: Password\n• Most common method\n• Weak: Many users choose weak passwords\n• Subject to: Brute force, dictionary attacks, credential stuffing\n• Phishing vulnerable\n\nPassword Security Best Practices:\n• Minimum length: 12+ characters\n• Complexity: Mix of cases, numbers, symbols\n• No dictionary words\n• No personal information\n• Unique per system\n• Changed regularly (controversial - NIST now recommends not forcing change)\n• Not reused\n\nPassword Storage:\n• NEVER store plaintext\n• Hash with salt: Hash(password + random salt)\n• Slow hashes: bcrypt, Argon2 (resist GPU attacks)\n• Iteration count: Higher = slower but more secure",
-          },
-          {
-            id: "mfa-biometric",
-            title: "Multi-Factor Authentication (MFA)",
-            content:
-              "Something You Know: Password\n• Knowledge-based (easiest to compromise)\n\nSomething You Have: Token/Device\n• Hardware token (RSA SecurID)\n• Mobile app (Google Authenticator, Duo)\n• SMS code (weakest form - SIM swapping)\n• Email code\n\nSomething You Are: Biometric\n• Fingerprint (FTS devices, phones)\n• Facial recognition (FaceID, FaceTime)\n• Iris scan\n• Voice recognition\n• Unique and hard to fake\n\nSomewhere You Are: Location\n• GPS location\n• IP address\n• Time zone\n\nBest Practices:\n• Combine different factors\n• Not two of same factor type (password + answer = 1 factor)\n• 2FA minimum (2 factors)\n• MFA (2+ factors) recommended",
-          },
-          {
-            id: "sso-federation",
-            title: "Single Sign-On (SSO)",
-            content:
-              'SSO Concept:\n• Authenticate once, access multiple systems\n• Improves user experience\n• Central authentication\n• Examples: Microsoft Entra ID, Okta, Google Workspace\n\nSSO Protocols:\n• SAML 2.0: XML-based, enterprise standard\n  - Assertion: Claims about user identity\n  - Service Provider (SP): Application needing auth\n  - Identity Provider (IdP): Authenticates user\n  - XML signed and encrypted\n\n• OAuth 2.0: API authorization, not authentication\n  - Delegate access without sharing password\n  - Used for "Login with Google/Facebook"\n  - Access tokens, refresh tokens\n\n• OpenID Connect: OAuth 2.0 + authentication\n  - Adds identity layer to OAuth\n  - ID tokens, UserInfo endpoint\n  - Combines benefits of both',
-          },
-        ],
-      },
-      {
-        id: "authorization",
-        title: "2. Authorization & Access Control",
-        subsections: [
-          {
-            id: "access-control-models",
-            title: "Access Control Models",
-            content:
-              "DAC (Discretionary Access Control):\n• Owner controls access to resources\n• User can grant/revoke permissions\n• Flexible but less secure\n• File systems (Windows, Linux)\n• User can share file with others\n\nMAC (Mandatory Access Control):\n• Central policy defines access\n• Users cannot change permissions\n• Very restrictive\n• Military/government systems\n• Example: SELinux\n\nRBAC (Role-Based Access Control):\n• Users assigned to roles\n• Roles have permissions\n• Easier to manage\n• Enterprise systems\n• Example: Admin role → Read/Write/Delete\n\nABAC (Attribute-Based Access Control):\n• Access based on attributes\n• More granular than RBAC\n• Attributes: User (department), Resource (classification), Environment (time, location)\n• Example: (Department=Finance AND Classification=Confidential AND Time=BusinessHours)",
-          },
-          {
-            id: "privilege-management",
-            title: "Privilege Escalation Prevention",
-            content:
-              "Vertical Escalation:\n• Non-admin gains admin rights\n• More common\n• Example: Buffer overflow to gain root\n• Prevention: Input validation, DEP/ASLR, least privilege\n\nHorizontal Escalation:\n• Access another user's data at same privilege level\n• Example: One customer views another's data\n• Prevention: Proper authorization checks\n\nLeast Privilege Principle:\n• Users get minimum permissions needed\n• Reduces damage if account compromised\n• Regular access reviews\n• Remove unnecessary permissions\n\nSeperation of Duties:\n• Different users do different steps\n• Prevents fraud\n• Example: One approves purchase, another pays\n• Prevents single person from unauthorized actions",
-          },
-          {
-            id: "access-control-lists",
-            title: "Access Control Lists (ACLs)",
-            content:
-              "ACL Components:\n• Subject: Who (user, group, process)\n• Object: What (file, printer, network resource)\n• Permissions: What can be done (Read, Write, Execute, Delete)\n• Scope: Where applies (this object only or children)\n\nNetwork ACLs:\n• Control traffic between networks\n• Source/Destination IP\n• Port/Protocol\n• Allow/Deny action\n• Usually deny by default\n• Order matters (first match wins)\n\nFile System ACLs:\n• Control file access\n• Explicit Allow/Deny entries\n• Inherited from parent folders\n• Can override inheritance\n• More powerful than permissions (R, W, X)\n\nBest Practices:\n• Review regularly\n• Remove old/unused entries\n• Group permissions when possible\n• Document reasons for access\n• Audit changes",
-          },
-        ],
-      },
-      {
-        id: "directory-services",
-        title: "3. Directory Services",
-        subsections: [
-          {
-            id: "ldap",
-            title: "LDAP (Lightweight Directory Access Protocol)",
-            content:
-              "LDAP Basics:\n• Network protocol for accessing directory services\n• Central repository of user and resource info\n• Hierarchical structure (tree)\n• Distinguished Names (DN): cn=user,ou=sales,dc=example,dc=com\n\nLDAP Operations:\n• Bind: Authenticate to directory\n• Search: Query directory\n• Add/Delete/Modify: CRUD operations\n• Unbind: Close connection\n\nLDAP Uses:\n• User authentication (many systems support LDAP)\n• Address books\n• Employee directories\n• Printer access control\n• Phone system integration\n\nLDAP Security:\n• StartTLS: Encrypt connection\n• Simple Bind: Username/password\n• SASL: More secure authentication\n• ACLs: Control who can read/modify",
-          },
-          {
-            id: "active-directory",
-            title: "Active Directory (AD)",
-            content:
-              "What is AD:\n• Microsoft's implementation of directory services\n• Central management of users, computers, resources\n• Integrated with Windows\n• Enterprise standard\n\nAD Components:\n• Domain: Group of computers sharing trust\n• Forest: Collection of domains\n• Organizational Unit (OU): Hierarchical containers\n• Group Policy: Apply settings to users/computers\n• Domain Controller: Hosts AD database\n\nAD Security Features:\n• Kerberos: Authentication protocol\n• Group Policies: Centralized config\n• Fine-grained password policies\n• Audit logging\n• Delegation: Limit admin rights\n\nAD Attacks:\n• Credential harvesting from LSASS memory\n• Golden Ticket: Forge Kerberos ticket\n• Kerberoasting: Crack service account passwords\n• Pass-the-Hash: Use NTLM hash to authenticate\n• Mitigation: MFA, privilege limiting, monitoring",
-          },
-          {
-            id: "identity-federation",
-            title: "Identity Federation",
-            content:
-              "Federation Concept:\n• Trust relationship between organizations\n• One IdP authenticates for multiple SPs\n• Enables single identity across domains\n• Cross-organization collaboration\n\nFederation Components:\n• Identity Provider (IdP): Authenticates users\n• Service Provider (SP): Offers service\n• Trust Relationship: Agreement between IdP and SP\n• Federation Metadata: Technical details\n\nUse Cases:\n• B2B collaborations\n• Cloud service SSO\n• Multi-company mergers\n• Government systems\n• Academic institutions (Shibboleth)\n\nSecurity Considerations:\n• Verify Federation Metadata\n• Certificate validation\n• Attribute encryption\n• Audit federation events\n• Principle of least trust",
-          },
-        ],
-      },
-      {
-        id: "account-management",
-        title: "4. Account Management & Lifecycle",
-        subsections: [
-          {
-            id: "account-provisioning",
-            title: "Account Provisioning & Deprovisioning",
-            content:
-              "Provisioning (Creating Accounts):\n• User needs access to systems\n• Create accounts, assign permissions\n• Usually manual or workflow-based\n• Automation: Identity governance systems\n\nDeprovisioning (Removing Access):\n• User leaves company/role\n• Remove accounts and permissions\n• Often overlooked, security risk\n• Should be immediate upon termination\n• Offboarding checklist: Email, VPN, systems, physical access\n\nAccessibility Management:\n• Periodic Access Reviews: Ensure users still need access\n• Principle of Least Privilege: Remove unnecessary access\n• Ownership: Managers verify their team's access\n• Compliance: Regulatory requirements (SOX, HIPAA)\n\nAutomation Benefits:\n• Faster provisioning\n• Consistent application\n• Audit trail\n• Reduces human error",
-          },
-          {
-            id: "password-management",
-            title: "Password Management",
-            content:
-              "Password Managers:\n• Encrypted storage of passwords\n• Generate strong random passwords\n• Auto-fill passwords\n• Reduces password reuse\n• Examples: 1Password, LastPass, Bitwarden\n\nEnterprise Solutions:\n• Privileged Access Management (PAM)\n• Rotate passwords automatically\n• Shared account credentials\n• Audit access to credentials\n• Examples: CyberArk, HashiCorp Vault\n\nPassword Synchronization:\n• Same password across systems\n• Not recommended (if one compromised, all are)\n• Better: Unique strong passwords\n• Use password manager instead\n\nPassword Reset:\n• User forgets password\n• Security questions (weak, personal info findable)\n• Email verification (better)\n• MFA confirmation (best)\n• Admin reset (verify identity first)\n• Avoid: Knowledge-based questions alone",
-          },
-          {
-            id: "privilege-elevation",
-            title: "Privileged Access Management (PAM)",
-            content:
-              "What is PAM:\n• Control and monitor privileged accounts\n• Track who used what credentials and when\n• Reduce standing privileges\n• Minimize damage if account compromised\n\nCore Functions:\n• Just-in-Time (JIT) Access: Grant temporary elevated access\n• Just-Enough-Privilege (JEP): Grant minimal permissions needed\n• Session Recording: Record admin activities\n• MFA for Privilege: Require MFA for admin access\n• Password Vault: Secure storage of service accounts\n\nImplementation:\n• Dedicated admin accounts (separate from regular accounts)\n• Separate admin workstations (clean devices)\n• Time-limited admin access\n• Frequent password rotation\n• Audit and alert on privilege use\n\nBest Practices:\n• No shared credentials\n• Service accounts for automation\n• Separate roles (change mgmt vs read-only)\n• Sunset unused accounts\n• Regular reviews of admin access",
-          },
-        ],
-      },
-    ],
-  },
-];
+export const exam: DetailedStudyNote[] = [];

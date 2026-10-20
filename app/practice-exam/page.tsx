@@ -25,7 +25,7 @@ function Segmented({ label, options, value, onChange }: SegmentedProps) {
             type="button"
             aria-pressed={value === option}
             onClick={() => onChange(option)}
-            className={`rounded px-3 py-1 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600 ${
+            className={`rounded px-3 py-1 text-sm focus-visible:outline focus-visible:outline-offset-1 focus-visible:outline-brand-600 ${
               value === option
                 ? 'bg-gray-900 text-white'
                 : 'text-gray-600 hover:text-gray-900'
@@ -163,19 +163,6 @@ export default function PracticeExam() {
                     {exam.domains.join(', ')}
                   </p>
                 )}
-
-                {exam.features.length > 0 && (
-                  <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-gray-600">
-                    {exam.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-1.5">
-                        {feature === 'verified' && (
-                          <Check className="h-4 w-4 text-green-700" aria-hidden />
-                        )}
-                        {feature === 'verified' ? 'Verified questions' : feature}
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
 
               {/* Action */}
@@ -190,7 +177,7 @@ export default function PracticeExam() {
                 </p>
                 <button
                   type="button"
-                  className="rounded-md bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                  className="rounded-md bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                 >
                   Start exam
                 </button>
