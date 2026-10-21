@@ -121,6 +121,14 @@ export const examAttempts = [
   },
 ];
 
+export interface PracticeQuestion {
+  id: number;
+  question: string;
+  options: Record<string, string>;
+  answer: string[];
+  type: "single_choice" | "multiple_choice";
+}
+
 export interface PracticeExam {
   id: string;
   code: string;
@@ -133,38 +141,1061 @@ export interface PracticeExam {
   targetPass: number;
   maxScore: number;
   domains: string[];
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  questions?: PracticeQuestion[];
 }
 
 export const practiceExams: PracticeExam[] = [
-  {
-    id: "sy0-701-core",
-    code: "SY0-701",
-    level: "Associate",
-    title: "CompTIA Security+ SY0-701 Practice Exam",
-    description:
-      "Validate network hardening, host monitoring, zero-trust cryptographic implementations, and standard incident remediation.",
-    access: "Free",
-    items: 73,
-    timeCap: 90,
-    targetPass: 750,
-    maxScore: 900,
-    domains: [
-      "1.0) Security Operations",
-      "2.0) Vulnerability Management ",
-      "3.0) Incident Response and Management ",
-      "4.0) Reporting and Communication ",
-    ],
-    icon: CheckCircle,
-    
-   
-  },
-
-
-
-
-
-
+ {
+  "id": "CompTIA Cybersecurity Analyst ",
+  "code": "CS0-004",
+  "level": "Associate",
+  "title": "CompTIA Cybersecurity Analyst CS0-004 Practice Exam",
+  "description": "Validate network hardening, host monitoring, zero-trust cryptographic implementations, and standard incident remediation.",
+  "access": "Free",
+  "items": 73,
+  "timeCap": 165,
+  "targetPass": 750,
+  "maxScore": 900,
+  "domains": [
+    "1.0) Security Operations",
+    "2.0) Vulnerability Management",
+    "3.0) Incident Response and Management",
+    "4.0) Reporting and Communication"
+  ],
+ 
+  "questions": [
+    {
+      "id": 1,
+      "question": "Which of the following is the most important reason why tactics, techniques, and procedures (TTP) are beneficial to a defensive strategy?",
+      "options": {
+        "A": "TTP provides useful insights on the hash values and internet protocol addresses attributed to an attacker.",
+        "B": "TTP provides useful insights on an attacker's indicators of compromise.",
+        "C": "TTP provides useful insights on the tools used by an attacker.",
+        "D": "TTP provides useful insights on the strategy and behavior of an attacker."
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 2,
+      "question": "Which of the following is the best reason to heavily segment business-critical assets from within the network?",
+      "options": {
+        "A": "Legacy systems",
+        "B": "Degraded functionality",
+        "C": "Asset obfuscation",
+        "D": "Proprietary server"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 3,
+      "question": "A cybersecurity analyst receives an unstructured text document that contains advanced persistent threat (APT)-related indicators of compromise (IoCs). The analyst needs to extract the IPv4 addresses.\nWhich of the following is the best tool to accomplish this task?",
+      "options": {
+        "A": "CyberChef",
+        "B": "Wireshark",
+        "C": "Zeek",
+        "D": "Open Cyber Threat Intelligence (OpenCTI)"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 4,
+      "question": "Which of the following best describes why operational technology (OT) devices use compensating controls?",
+      "options": {
+        "A": "Industrial control systems use significant network bandwidth.",
+        "B": "Outage windows are usually scheduled.",
+        "C": "Traditional IT security solutions may not be compatible.",
+        "D": "OT devices are typically not encrypted."
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 5,
+      "question": "A public threat intelligence report includes indicators of compromise (IoCs) for threat actors. The threat actors are exploiting a zero-day vulnerability that the vendor has not fixed.\nWhich of the following techniques should be used until a patch is available?",
+      "options": {
+        "A": "Sinkholing",
+        "B": "Eradication techniques",
+        "C": "Continuous monitoring",
+        "D": "Evidence acquisition"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 6,
+      "question": "The Chief Information Security Officer wants to improve internal security measures by continuously validating and verifying access to the production environment.\nWhich of the following concepts best describes this practice?",
+      "options": {
+        "A": "Secure access service edge",
+        "B": "Next-generation firewall",
+        "C": "Zero Trust",
+        "D": "Privileged access management"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 7,
+      "question": "Which of the following allows an organization to leverage AI in various forms while protecting business objectives and data?",
+      "options": {
+        "A": "Usage policies",
+        "B": "Prompt engineering",
+        "C": "Non-disclosure agreement",
+        "D": "Incident response policy"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 8,
+      "question": "A security operations center analyst is using the command line to display specific traffic. The analyst uses the following command:\n$tshark -r file.pcap -Y \"http or udp\"\nWhich of the following will the command line display?",
+      "options": {
+        "A": "Encrypted web requests and Domain Name System (DNS) traffic",
+        "B": "Unencrypted web requests and DNS traffic",
+        "C": "Neither encrypted nor unencrypted web and DNS traffic",
+        "D": "Both encrypted and unencrypted web and DNS traffic"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 9,
+      "question": "Which of the following network architectures would best implement a perimeter-less network topology?",
+      "options": {
+        "A": "Hybrid cloud networks",
+        "B": "Secure access service edge",
+        "C": "Cloud-native computing",
+        "D": "Content delivery networks"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 10,
+      "question": "A new security operations center (SOC) manager joins a team that struggles to meet service-level agreements (SLAs). The alert backlog continues to increase daily.\nWhich of the following will the manager most likely need to do?",
+      "options": {
+        "A": "Automate escalation.",
+        "B": "Improve the triage processes.",
+        "C": "Upgrade threat intelligence.",
+        "D": "Enhance the customer service response."
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 11,
+      "question": "Which of the following should a cybersecurity analyst utilize when a notification is inaccurate?",
+      "options": {
+        "A": "Data enrichment",
+        "B": "Dashboard creation",
+        "C": "Threat hunting",
+        "D": "Alert tuning"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 12,
+      "question": "A Chief Information Security Officer (CISO) evaluates a threat heat map and notices a substantial increase in custom scanning and enumeration activities. The CISO wants to gather as much information as possible about the activities targeting the company to help prioritize mitigations.\nWhich of the following solutions is the best way to accomplish this goal?",
+      "options": {
+        "A": "Configuring a honeypot in a separate environment to gather attacker techniques",
+        "B": "Leveraging canary tokens on all production systems to detect valid intrusion attempts",
+        "C": "Subscribing to information-sharing and threat intelligence reports for the industry",
+        "D": "Implementing a web application firewall in front of all applications and having it log attacks"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 13,
+      "question": "An analyst uses an AI platform to help correlate events. The AI output contains events that did not happen. This results in inaccurate correlations.\nWhich of the following best describes what has occurred?",
+      "options": {
+        "A": "Hallucinations",
+        "B": "Data exposure",
+        "C": "Malicious prompts",
+        "D": "Model poisoning"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 14,
+      "question": "Which of the following is the most difficult for threat actors to change according to the Pyramid of Pain model?",
+      "options": {
+        "A": "Tactics, techniques, and procedures",
+        "B": "Tools",
+        "C": "Domain names",
+        "D": "Internet Protocol addresses"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 15,
+      "question": "An analyst is assigned to a new cybersecurity improvement project. The analyst wants to better understand the workflow processes and the skill set of the cybersecurity engineers on this task force. The analyst sets up a recurring, weekly conference call.\nWhich of the following best describes the purpose for the conference call?",
+      "options": {
+        "A": "To conduct incident response training",
+        "B": "To create vendor information sessions",
+        "C": "To manage and facilitate team coordination",
+        "D": "To respond to customer requirements"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 16,
+      "question": "A security analyst uses a full pcap solution to extract all traffic from the last two days associated with the 10.213.4.27 file server. This file server is under investigation due to concerns about potential data exfiltration using Domain Name System (DNS) traffic.\nWhich of the following commands should the analyst use to extract any potentially leaked data from the suspicious.pcap file?",
+      "options": {
+        "A": "strings suspicious.pcap | grep 10.213.4.27",
+        "B": "zeek -r suspicious.pcap ; grep 10.213.4.27 file.log",
+        "C": "snort -r suspicious.pcap ; grep eve.log 10.213.4.27",
+        "D": "tcpdump -r suspicious.pcap port 53 and host 10.213.4.27"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 17,
+      "question": "An analyst is configuring a security information and event management system to capture fileless malware execution events.\nWhich of the following log files requires additional configuration to accomplish this task?",
+      "options": {
+        "A": "Microsoft-Windows-Crypto-DPAPI/Operational",
+        "B": "Microsoft-Windows-PowerShell/Operational",
+        "C": "Microsoft-Windows-UserPnp/DeviceInstall",
+        "D": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 18,
+      "question": "A binary file that might contain malicious code is hosted on an isolated machine. An analyst wants to quickly detect the malicious code.\nWhich of the following should the analyst use?",
+      "options": {
+        "A": "strings",
+        "B": "VirusTotal",
+        "C": "WHOIS",
+        "D": "Yet Another Recursive Acronym (YARA)"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 19,
+      "question": "Which of the following best explains the purpose of the Pyramid of Pain in threat intelligence?",
+      "options": {
+        "A": "To show that changing to different types of indicators and behaviors is difficult for an adversary",
+        "B": "To measure how much operational damage a threat actor can cause before detection occurs",
+        "C": "To compare open-source intelligence (OSINT) with closed-source intelligence based on collection cost",
+        "D": "To organize attack activity into categories such as spoofing, tampering, and repudiation"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 20,
+      "question": "Which of the following best explains why sensitive data should be encrypted at rest on laptops?",
+      "options": {
+        "A": "To prevent end users from copying data to other systems",
+        "B": "To protect disclosure of information if physical devices are stolen",
+        "C": "To comply with regulatory and legal requirements",
+        "D": "To ensure the integrity of the data on the company network"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 21,
+      "question": "A security architect works with a client on security operations center (SOC) capabilities. The security architect wants to ensure the log correlation and investigation activities are accurate across the infrastructure.\nWhich of the following is the best for the client to implement?",
+      "options": {
+        "A": "Network Time Protocol (NTP)",
+        "B": "Zero Trust Network Access (ZTNA)",
+        "C": "Account federation",
+        "D": "Secure access service edge (SASE)",
+        "E": "Application programming interfaces (APIs)"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 22,
+      "question": "A cybersecurity analyst requests a paid subscription to a threat intelligence feed relevant to a company's industry.\nWhich of the following best describes this type of feed?",
+      "options": {
+        "A": "Open-source intelligence",
+        "B": "Threat mapping",
+        "C": "Threat modeling",
+        "D": "Closed-source intelligence"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 23,
+      "question": "A security team deploys a new scanning solution that requires root, domain administrator, and local server administrator permissions on all systems.\nWhich of the following is the best way to help mitigate the risk for this level of access?",
+      "options": {
+        "A": "Integrating token-based authentication using a privileged access management (PAM) solution",
+        "B": "Enabling single sign-on for all administrators",
+        "C": "Using temporary, one-time passwords as part of the login process",
+        "D": "Configuring agentless scanning for critical targets"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 24,
+      "question": "A security director at a remote company is concerned about recent threat intelligence reports regarding threat actors who are hired by the company and steal intellectual property.\nWhich of the following solutions are the best ways to identify the tactics, techniques, and procedures (TTPs) used by these threat actors? (Choose two.)",
+      "options": {
+        "A": "Deploying a fully featured endpoint detection and response (EDR)",
+        "B": "Subscribing to an identity proofing service for all employees",
+        "C": "Utilizing user behavioral analytics-based detections implemented in the security information and event management (SIEM)",
+        "D": "Installing and configuring a data loss prevention tool",
+        "E": "Validating identification information manually",
+        "F": "Conducting thorough background checks on all incoming employees"
+      },
+      "answer": [
+        "A",
+        "C"
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "id": 25,
+      "question": "A cybersecurity analyst is reviewing static application security testing scan results and notices a finding for hard-coded credentials.\nWhich of the following should the analyst recommend to the application team to resolve this concern?",
+      "options": {
+        "A": "Integrate secrets management.",
+        "B": "Obfuscate application programming interface keys.",
+        "C": "Enable single sign-on.",
+        "D": "Implement a privileged access management solution."
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 26,
+      "question": "Two organizations are assessing a partnership to exchange security information and share resources in case an incident occurs. The assessment is in the pre-contract stage, and no detailed definitions have been made by management.\nWhich of the following is the best artifact to formalize the agreement at the current stage?",
+      "options": {
+        "A": "SLA",
+        "B": "NDA",
+        "C": "SLO",
+        "D": "MOU"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 27,
+      "question": "A company's Zero Trust network requires reauthentication with MFA every two hours.\nWhich of the following is an advantage of this architecture?",
+      "options": {
+        "A": "Increases the accuracy of user and device asset inventories",
+        "B": "Rotates the encryption key to prevent brute forcing",
+        "C": "Reduces the time an attacker can use compromised credentials",
+        "D": "Prevents the recurring use of rainbow tables"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 28,
+      "question": "A security analyst needs to identify the devices in a critical infrastructure network that handles an oil and gas pipeline. The network has devices connected over IPv4 using either HTTP or Modbus protocols running on the standard ports.\nWhich of the following approaches should the analyst use to achieve the objective?",
+      "options": {
+        "A": "Perform an nmap -T2 -A -p 80,502",
+        "B": "Employ the IT vulnerability scanner to target ports 80 and 502",
+        "C": "Use banner grabbing with netcat on TCP ports 80 and 502",
+        "D": "Scan the ICS network using masscan --open-only -p80,502"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 29,
+      "question": "Law enforcement subpoenas a company in order to obtain all records related to the activities a threat actor performed using the IP address 154.21.154.21.\nWhich of the following should an analyst perform first?",
+      "options": {
+        "A": "Data acquisition",
+        "B": "Legal hold",
+        "C": "Hash verification",
+        "D": "Chain of custody"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 30,
+      "question": "Which of the following describes the importance of an organization understanding SLOs when outsourcing IR to a third party?",
+      "options": {
+        "A": "To understand the hidden costs of an SLA",
+        "B": "To quantify the risk appetite in an MOU",
+        "C": "To ensure that an objective risk score can be calculated",
+        "D": "To track the performance of specific KPIs"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 31,
+      "question": "Users frequently get disconnected from the company's internal wireless network. The wireless system and clients are healthy. Once disconnected, the wireless clients reconnect automatically.\nWhich of the following is the best way for a security analyst to determine the source of the wireless disconnection?",
+      "options": {
+        "A": "Looking at authentication logs for impossible travel",
+        "B": "Using a client with kismet to analyze the airspace for potential deauthentication attacks",
+        "C": "Collecting the RADIUS logs and investigating the IP addresses of failed user authentications",
+        "D": "Utilizing aireplay-ng to disconnect the malicious wireless station and capture its handshake"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 32,
+      "question": "A company migrated its email solution from hybrid to on premises only. The administrator made the following changes:\nHybrid, before the migration:\nv=spf1 include:cloud.mailprovider.com ip4:200.100.50.25/32 -all\nOn premises, after the migration:\nv=spf1 ip4:200.100.50.25/32 -all\nA few weeks after the migration, multiple clients report that the company's emails are being marked as spam. The systems administrator notices that the SPF record has been manipulated by a threat actor who is spoofing the company's domain. The unauthorized change:\nv=spf1 include:cloud.mailprovider.com ip4:100.50.25.10 -all\nWhich of the following explains the reason legitimate emails are being marked as spam?",
+      "options": {
+        "A": "The SoftFail parameter is causing the issue.",
+        "B": "The cloud provider was added back.",
+        "C": "The company's IP was removed from the record.",
+        "D": "The subnet is no longer present with the IP"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 33,
+      "question": "The Chief Information Officer (CIO) is requiring users to phase out a legacy system that no longer receives security updates because the system will be decommissioned soon.\nWhich of the following risk management strategies is the CIO using?",
+      "options": {
+        "A": "Avoidance",
+        "B": "Acceptance",
+        "C": "Mitigation",
+        "D": "Transference"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 34,
+      "question": "During a recent security event, log files were being sent to a stand-alone console that was not being checked on a daily basis. As a result, the stated SLA for detection was exceeded.\nWhich of the following is a way to prevent this delay in the future?",
+      "options": {
+        "A": "Reevaluating the SLA for detection to reflect current operations",
+        "B": "Decreasing the interval for sending logs from endpoints",
+        "C": "Using a centralized dashboard for monitoring",
+        "D": "Automating the process for ingesting logs into the stand-alone console"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 35,
+      "question": "Cybersecurity analysts determine that SIEM alerts are true positives and an internal application is being attacked.\nWhich of the following is a critical step to understanding the impact on the business at this stage?",
+      "options": {
+        "A": "Knowledge of any regulatory requirements",
+        "B": "Notification of the legal team",
+        "C": "Identification of stakeholders",
+        "D": "Root cause analysis"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 36,
+      "question": "Which of the following actions should an incident response analyst take during the recovery phase of the incident response process?",
+      "options": {
+        "A": "Take the system offline.",
+        "B": "Verify that malicious activity has occurred.",
+        "C": "Reimage the disk.",
+        "D": "Write the final report."
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 37,
+      "question": "An analyst receives an alert that a user clicked on a malicious link. The analyst verifies that the link is malicious and was intended to capture credentials. The analyst verifies that the user visited the website, but no evidence indicates that the credentials were used. The analyst recommends that the user take remedial training and closes the case.\nWhich of the following steps in the incident response process did the analyst neglect?",
+      "options": {
+        "A": "Recovery",
+        "B": "Containment",
+        "C": "Post-incident",
+        "D": "Analysis"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 38,
+      "question": "A security team reviews a penetration testing report of a web application that contains multiple cross-site scripting (XSS) and Structured Query Language injection (SQLi) vulnerabilities.\nWhich of the following is most likely causing these to occur?",
+      "options": {
+        "A": "Misconfigured web application firewall (WAF)",
+        "B": "Lack of secure input validation",
+        "C": "Lack of a Hypertext Transfer Protocol (HTTP) Strict Transport Security (HSTS) header",
+        "D": "Lack of endpoint protection in the environment"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 39,
+      "question": "Which of the following best explains compensating controls?",
+      "options": {
+        "A": "A compensating control is implemented when a vulnerability cannot be remediated.",
+        "B": "A compensating control is deployed after systems have been brought into compliance.",
+        "C": "A compensating control addresses the threat side of the risk equation rather than the vulnerability side.",
+        "D": "A compensating control completely remediates vulnerabilities that are too costly to fix."
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 40,
+      "question": "Which of the following is the most likely reason an organization might implement compensating controls?",
+      "options": {
+        "A": "A vulnerability does not have a patch, and the system is mission critical.",
+        "B": "A vulnerability has been fixed, tested, and deployed to production.",
+        "C": "A vulnerability is being actively exploited in the wild, but the organization does not use the affected system.",
+        "D": "A vulnerability was detected, but the organization has determined the result is a false positive."
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 41,
+      "question": "A company needs to design controls to address the following vulnerabilities:\nBroken access control\nRXSS\nCSRF\nInjection flaws\nDirectory traversal\nWhich of the following resources provides the most comprehensive recommendations?",
+      "options": {
+        "A": "Diamond Model of Intrusion Analysis",
+        "B": "MITRE ATT&CK framework",
+        "C": "Cyber Kill Chain",
+        "D": "OWASP Web Security Testing Guide"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 42,
+      "question": "A vendor releases details of a new vulnerability. When an analyst reviews the scheduled scans, no vulnerabilities are identified. The vulnerability is only discovered after a configuration change.\nWhich of the following scan types did the analyst configure?",
+      "options": {
+        "A": "External",
+        "B": "Credentialed",
+        "C": "Agent-based",
+        "D": "Network"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 43,
+      "question": "A security operations center manager is concerned that after action reporting is not being completed in a timely manner.\nWhich of the following will allow the manager to quantify this concern?",
+      "options": {
+        "A": "Mean time to remediate",
+        "B": "Mean time to close",
+        "C": "Mean time between failures",
+        "D": "Mean time to respond"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 44,
+      "question": "Which of the following does a phishing campaign click rate measure?",
+      "options": {
+        "A": "The effectiveness of an organization's email filters",
+        "B": "The false-positive rate of data leakage prevention behavior",
+        "C": "The employees' security awareness",
+        "D": "The speed of responding to a social engineering attack"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 45,
+      "question": "An administrator at a partner organization does not know if an assigned task is authorized.\nTo find the answer, which of the following is the best document to refer to?",
+      "options": {
+        "A": "Service-level agreement",
+        "B": "Executive summary",
+        "C": "Memorandum of understanding",
+        "D": "Compliance report"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 46,
+      "question": "A security operations center (SOC) manager makes significant updates to the incident response plan and wants to test these updates with all stakeholders collaboratively.\nWhich of the following is the best way to accomplish this task?",
+      "options": {
+        "A": "Red-teaming event",
+        "B": "Tabletop exercise",
+        "C": "Security awareness training",
+        "D": "Penetration test"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 47,
+      "question": "A security analyst is scanning an ICS host (192.168.1.5) in an industrial plant for insecure ports while minimizing the impact to uptime or performance. Which of following commands should the analyst use to perform the task?",
+      "options": {
+        "A": "nmap 192.168.1.5 -? -P 21",
+        "B": "nmap 192.168.1.5 -T2 -P 3389",
+        "C": "nmap 192.168.1.5 -T3 -P 22",
+        "D": "nmap 192.168.1.5 -T5 -P 80"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 48,
+      "question": "As part of a quality assurance test, a developer wants to examine how the code behaves after an application has been fully compiled and is running.\nWhich of the following best describes the type of testing that the developer should perform?",
+      "options": {
+        "A": "Black box",
+        "B": "Static",
+        "C": "Dynamic",
+        "D": "Diagnostic"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 49,
+      "question": "Which of the following is the main concept behind the use of an attack methodology framework?",
+      "options": {
+        "A": "Implementing continuous monitoring and rapid deployment of system fixes over the traditional patch, test, and deploy approach",
+        "B": "Prioritizing vulnerabilities that can be exploited based on risk calculations and using the consequences and likelihood of the exploits to determine where resources should be allocated",
+        "C": "Approaching cybersecurity from the perspective of a threat actor and using their common behaviors and motivations to identify secure solutions",
+        "D": "Applying a Zero Trust environment by assuming networks and systems are vulnerable to malicious actions by both external, hostile adversaries and insider threats"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 50,
+      "question": "A security analyst reviews the public-facing attack surface of a network that contains both Windows and Linux servers.\nWhich of the following commands is the best way to identify the services running?",
+      "options": {
+        "A": "nmap -O -p- -iL hosts.txt",
+        "B": "nmap -sV -pl-1024 -iL hosts.txt",
+        "C": "nmap -sP -A -iL hosts.txt",
+        "D": "nmap -sn -vvvv -iL hosts.txt"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 51,
+      "question": "An analyst must provide a visualization of data received from threat intelligence sources. The data includes the Internet Protocols, services, and tools used by threat actors.\nWhich of the following is the best framework for the analyst to follow to display this data?",
+      "options": {
+        "A": "Diamond Model of Intrusion Analysis",
+        "B": "Exploit Prediction Scoring System",
+        "C": "Cyber Kill Chain",
+        "D": "MITRE Adversarial Tactics, Techniques, and Common Knowledge and Detection, Denial, and Disruption Framework Empowering Network Defense"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 52,
+      "question": "A security operations center (SOC) manager reviews a document signed by the Chief Financial Officer (CFO), the sales director, and a customer to decide whether a contract breach occurred.\nWhich of the following best describes the document that includes key performance indicators (KPIs)?",
+      "options": {
+        "A": "Tactics, techniques, and procedures (TTPs)",
+        "B": "Return on investment report",
+        "C": "Service-level agreement (SLA)",
+        "D": "Risk management plan",
+        "E": "Memorandum of understanding"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 53,
+      "question": "Which of the following is the best strategy for prioritizing vulnerabilities for remediation?",
+      "options": {
+        "A": "Remediate from the beginning to the end of the report.",
+        "B": "Remediate the findings based on the description of the vulnerabilities.",
+        "C": "Remediate the vulnerabilities based on the CVE score only.",
+        "D": "Remediate based on the organization's timeframe in the procedures."
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 54,
+      "question": "A vulnerability analyst runs a credentialed vulnerability scan covering all addressable enterprise assets. After running the scan, the analyst discovers a large number of critical vulnerabilities that cannot be immediately remediated.\nWhich of the following are the most likely reasons why the vulnerabilities cannot be immediately addressed?",
+      "options": {
+        "A": "Lack of technical skills, the absence of a test environment, and the absence of an asset inventory",
+        "B": "Physical access challenges, the absence of vendor support, and a lack of system documentation",
+        "C": "Inaccurate asset inventory, a lack of system documentation, and an absence of authorization",
+        "D": "Legacy and proprietary systems, a lack of patch availability, and vendor dependencies"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 55,
+      "question": "Which of the following describes the main benefits of MITRE ATT&CK Navigator?",
+      "options": {
+        "A": "Replicating adversary behavior and blocking gaps in defenses",
+        "B": "Monitoring adversary behavior and performing malware reverse engineering",
+        "C": "Responding to adversary behavior and building security defense tools",
+        "D": "Understanding adversary behavior and identifying gaps in defenses"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 56,
+      "question": "Which of the following best describes a type of risk that exists after mitigations or controls are enacted and implemented?",
+      "options": {
+        "A": "Residual",
+        "B": "Acceptable",
+        "C": "Inherent",
+        "D": "Appropriate"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 57,
+      "question": "Which of the following best describes the reason a root cause analysis is an important part of the incident response process?",
+      "options": {
+        "A": "Compliance teams can be legally required to conduct a post-incident root cause analysis to satisfy regulatory requirements.",
+        "B": "Response teams can use the analysis to isolate a system while the incident is ongoing to prevent further contamination.",
+        "C": "The organization can use the results of the analysis to provide stakeholders with assurances that customer data was not disclosed.",
+        "D": "The leadership team can better allocate resources to address systemic issues that span multiple groups in an organization."
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 58,
+      "question": "Which of the following would an analyst use to assess a server for vulnerabilities using the OWASP framework?",
+      "options": {
+        "A": "Honeypot",
+        "B": "Watering hole",
+        "C": "Directory traversal",
+        "D": "Evil twin"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 59,
+      "question": "While reviewing logs, a SOC analyst notices traffic that is attempting connections to all hosts on ports 1-65535.\nWhich of the following steps of the Cyber Kill Chain is most likely occurring?",
+      "options": {
+        "A": "Delivery",
+        "B": "Installation",
+        "C": "Reconnaissance",
+        "D": "Weaponization"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 60,
+      "question": "A SOC analyst scans a group of servers to search for vulnerabilities. After analyzing the output, the analyst realizes that some OS versions were not detected properly.\nWhich of the following is the best option to increase the accuracy of the scan?",
+      "options": {
+        "A": "Update the scan plug-ins.",
+        "B": "Upgrade the server OS.",
+        "C": "Use passive fingerprinting.",
+        "D": "Perform credentialed scans."
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 61,
+      "question": "A security analyst reruns infrastructure as code (IaC) to tear down and rebuild a new environment after a ransomware attack.\nWhich of the following describes this phase?",
+      "options": {
+        "A": "Analysis",
+        "B": "Post-incident",
+        "C": "Detection",
+        "D": "Containment",
+        "E": "Recovery"
+      },
+      "answer": [
+        "E"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 62,
+      "question": "Which of the following describes the reason Zero Trust should be followed on cloud-based architecture designs?",
+      "options": {
+        "A": "It results in higher encryption entropy",
+        "B": "It provides active monitoring for threat detection",
+        "C": "It reduces the attack surface",
+        "D": "It enforces separation of duties"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 63,
+      "question": "A security analyst is investigating a group of SIEM alerts about the installation of a potentially unwanted program on multiple devices. Due to the number of alerts, the analyst is concerned that the program may not be safe.\nWhich of the following actions should the analyst take to determine whether an incident is occurring?",
+      "options": {
+        "A": "Place the devices on an isolated VLAN with no external access.",
+        "B": "Use packet captures to analyze traffic for communications to command-and-control destinations.",
+        "C": "Run manual virus scans on all devices and quarantine any findings.",
+        "D": "Reimage the devices immediately and instruct the users to avoid installing the program in the future."
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 64,
+      "question": "Which of the following tools provides logs that show user access to prohibited cloud storage, identifying whether a file was downloaded to a personal device?",
+      "options": {
+        "A": "SASE",
+        "B": "CASB",
+        "C": "EDR",
+        "D": "SDN"
+      },
+      "answer": [
+        "B"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 65,
+      "question": "Which of the following is the most comprehensive type of report associated with a closed incident?",
+      "options": {
+        "A": "Lessons-learned",
+        "B": "Situation",
+        "C": "Root cause analysis",
+        "D": "After action"
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 66,
+      "question": "When vulnerabilities are identified weeks after the disclosure, which of the following KPIs most likely needs to be adjusted?",
+      "options": {
+        "A": "Mean time to acknowledge",
+        "B": "Mean time to respond",
+        "C": "Mean time to detect",
+        "D": "Mean time to resolve"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 67,
+      "question": "Which of the following can a software provider use to implement secure authentication and authorization mechanisms that leverage existing controls in-place on their customers' environments?",
+      "options": {
+        "A": "SSO",
+        "B": "SASE",
+        "C": "PAM",
+        "D": "CASB"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 68,
+      "question": "An incident response team identifies a malicious -uniform resource locator (URL) associated with a required business process and performs the following activities:\nAccess to the URL has been restricted only to the necessary users through firewall rules and Cloud Security Group rules.\nAdditional monitoring has been enabled for traffic related to that site and the allowed users.\nAll application servers that need to access that site have been patched with the latest security and software updates.\nApplication owners have been notified of the severity and need to remediate this reported issue.\nWhich of the following best describes the overall mitigation the security team is performing?",
+      "options": {
+        "A": "Patching solutions",
+        "B": "Configuration management",
+        "C": "Compensating controls",
+        "D": "Attack surface management"
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 69,
+      "question": "There is an alert coming from the security information and event management system.\nWhich of the following is the first task an analyst should complete?",
+      "options": {
+        "A": "Contact the incident coordinator to communicate the vulnerability.",
+        "B": "Conduct remediation activities within the recovery phase.",
+        "C": "Escalate the issue to the help desk team.",
+        "D": "Perform triage activities that will identify the risk."
+      },
+      "answer": [
+        "D"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 70,
+      "question": "Which of the following occurs during the analysis phase of the incident response process?",
+      "options": {
+        "A": "Triage",
+        "B": "Alert writing",
+        "C": "Reimaging",
+        "D": "Isolation"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 71,
+      "question": "Which of the following phases of the incident response process will permanently remove an attacker's access to corporate resources?",
+      "options": {
+        "A": "Eradication",
+        "B": "Containment",
+        "C": "Denial of service",
+        "D": "Detection"
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 72,
+      "question": "An analyst prepares an after action report following an incident in which multiple systems were compromised over several days. The analyst provides raw event logs from each compromised system in the report and determines that a patient-zero system cannot be found.\nWhich of the following should the analyst do to determine the patient-zero system?",
+      "options": {
+        "A": "Establish an accurate timeline of events.",
+        "B": "Enable monitoring on the compromised systems.",
+        "C": "Isolate the compromised systems before remediation.",
+        "D": "Improve the content for incident updates during shift handoff.",
+        "E": "Perform a reverse composition analysis on malware packages."
+      },
+      "answer": [
+        "A"
+      ],
+      "type": "single_choice"
+    },
+    {
+      "id": 73,
+      "question": "An application server was recently upgraded to prefer TLS 1.3, and now users are unable to connect their clients to the server. Attempts to reproduce the error are confirmed, and clients are reporting the following: ERR_SSL_VERSION_OR_CIPHER_MISMATCH\nWhich of the following is MOST likely the root cause?",
+      "options": {
+        "A": "The client application is testing PFS.",
+        "B": "The client application is configured to use ECDHE.",
+        "C": "The client application is configured to use RC4.",
+        "D": "The client application is configured to use AES-256 in GCM."
+      },
+      "answer": [
+        "C"
+      ],
+      "type": "single_choice"
+    }
+  ]
+},
 
   
   {
