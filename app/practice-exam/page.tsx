@@ -31,6 +31,9 @@ const LEVELS = ["All", "Foundational", "Associate", "Professional"] as const;
 const ACCESS = ["All", "Free", "Pro"] as const;
 const LOW_TIME_SECONDS = 300;
 
+// Fired after an attempt is saved so a mounted Attempts view can refresh.
+const ATTEMPTS_UPDATED_EVENT = "exam-attempts-updated";
+
 const cn = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
 const toOptions = <T extends string>(values: readonly T[]) =>
@@ -62,7 +65,7 @@ type ButtonVariant = "primary" | "secondary" | "link";
 const BUTTON_BASE =
   "inline-flex items-center justify-center gap-2 rounded-md text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-50";
 
-  // Button variant styles
+// Button variant styles
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-brand-600 px-5 py-2 font-semibold text-white hover:bg-brand-700",
   secondary:
@@ -251,6 +254,7 @@ function ConfirmDialog({
     </Dialog>
   );
 }
+
 // Mode dialog component for selecting the exam mode (practice or real)
 function ModeDialog({
   exam,
@@ -861,6 +865,7 @@ function ResultsView({
 }) {
   const [filter, setFilter] = useState<ReviewFilter>("all");
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -886,6 +891,44 @@ function ResultsView({
   const incorrectCount = rows.length - correctCount - unansweredCount;
   const flaggedCount = rows.filter((r) => r.isFlagged).length;
   const percent = Math.round((correctCount / rows.length) * 100);
+
+  // Save the attempt exactly once as soon as results are shown, so it is
+  // recorded even if the user retakes, closes the tab, or navigates away.
+  useEffect(() => {
+    if (savedRef.current) return;
+    savedRef.current = true;
+
+    const incorrectQuestions: IncorrectQuestion[] = rows
+      .filter((r) => !r.correct)
+      .map((r) => ({
+        id: r.question.id,
+        question: r.question.question,
+        userAnswer: r.selected,
+        correctAnswer: r.question.answer,
+        explanation: getExplanation(r.question),
+      }));
+
+    try {
+      saveExamAttempt({
+        id: `${exam.id}-${Date.now()}`,
+        code: exam.code,
+        title: exam.title,
+        mode,
+        score: percent,
+        total: 100,
+        date: todayIso(),
+        correct: correctCount,
+        incorrect: incorrectCount,
+        unanswered: unansweredCount,
+        incorrectQuestions,
+      });
+      // Tell any mounted Attempts view to refresh.
+      window.dispatchEvent(new Event(ATTEMPTS_UPDATED_EVENT));
+    } catch (e) {
+      console.error("Failed to save attempt:", e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const visible = rows.filter((r) =>
     filter === "incorrect"
@@ -959,35 +1002,7 @@ function ResultsView({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Button onClick={onRetake}>Retake exam</Button>
-          <Button 
-            variant="secondary" 
-            onClick={() => {
-              const incorrectQuestions: IncorrectQuestion[] = rows
-                .filter((r) => !r.correct)
-                .map((r) => ({
-                  id: r.question.id,
-                  question: r.question.question,
-                  userAnswer: r.selected,
-                  correctAnswer: r.question.answer,
-                  explanation: getExplanation(r.question),
-                }));
-
-              saveExamAttempt({
-                id: `${exam.id}-${Date.now()}`,
-                code: exam.code,
-                title: exam.title,
-                mode,
-                score: percent,
-                total: 100,
-                date: todayIso(),
-                correct: correctCount,
-                incorrect: incorrectCount,
-                unanswered: unansweredCount,
-                incorrectQuestions,
-              });
-              onExit();
-            }}
-          >
+          <Button variant="secondary" onClick={onExit}>
             Back to exams
           </Button>
         </div>
@@ -1327,6 +1342,10 @@ function ExamCard({
     </li>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Page                                                                      */
+/* -------------------------------------------------------------------------- */
 
 type ActiveSession = { exam: PracticeExam; mode: Mode; attempt: number };
 

@@ -20,6 +20,9 @@ import {
   Loader2,
 } from "lucide-react";
 
+// Must match the event name dispatched by the exam page after saving.
+const ATTEMPTS_UPDATED_EVENT = "exam-attempts-updated";
+
 type Tone = { bar: string; badge: string; ring: string };
 
 const getTone = (score: number): Tone => {
@@ -40,6 +43,13 @@ const getTone = (score: number): Tone => {
     badge: "bg-rose-50 text-rose-700 ring-rose-600/20",
     ring: "text-rose-600",
   };
+};
+
+// Used to sort newest first. Attempt ids end in a Date.now() timestamp;
+// falls back to the date string if the id has no numeric suffix.
+const stamp = (a: ExamAttempt) => {
+  const n = Number(a.id.split("-").pop());
+  return Number.isFinite(n) ? n : Date.parse(a.date) || 0;
 };
 
 function StatCard({
@@ -72,7 +82,7 @@ export default function Attempts() {
   const loadAttempts = () => {
     setIsLoading(true);
     try {
-      setAttempts(loadExamAttempts());
+      setAttempts([...loadExamAttempts()].sort((a, b) => stamp(b) - stamp(a)));
     } catch (e) {
       console.error("Failed to load attempts:", e);
       setAttempts([]);
@@ -82,6 +92,21 @@ export default function Attempts() {
 
   useEffect(() => {
     loadAttempts();
+
+    const reload = () => loadAttempts();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadAttempts();
+    };
+
+    window.addEventListener(ATTEMPTS_UPDATED_EVENT, reload); // same tab
+    window.addEventListener("storage", reload); // other tabs
+    document.addEventListener("visibilitychange", onVisible); // tab refocus
+
+    return () => {
+      window.removeEventListener(ATTEMPTS_UPDATED_EVENT, reload);
+      window.removeEventListener("storage", reload);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   const total = attempts.length;
@@ -123,7 +148,7 @@ export default function Attempts() {
       )}
 
       {/* Content */}
-      {isLoading ? (
+      {isLoading && total === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-500">
           <Loader2 className="h-6 w-6 animate-spin" />
           <p className="text-sm">Loading attempts…</p>
