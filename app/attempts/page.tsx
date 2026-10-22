@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { loadExamAttempts, type ExamAttempt } from "@/lib/storage";
+import {
+  ATTEMPTS_UPDATED_EVENT,
+  loadExamAttempts,
+  type ExamAttempt,
+  type ReviewQuestion,
+} from "@/lib/storage";
+import { formatLongDate } from "@/lib/dates";
 import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  RotateCw,
   ChevronDown,
   ClipboardList,
   Target,
@@ -19,9 +24,6 @@ import {
   PartyPopper,
   Loader2,
 } from "lucide-react";
-
-// Must match the event name dispatched by the exam page after saving.
-const ATTEMPTS_UPDATED_EVENT = "exam-attempts-updated";
 
 type Tone = { bar: string; badge: string; ring: string };
 
@@ -74,37 +76,51 @@ function StatCard({
   );
 }
 
+type ReviewFilter = "all" | "correct" | "wrong";
+
+const FILTERS: { value: ReviewFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "correct", label: "Correct" },
+  { value: "wrong", label: "Wrong" },
+];
+
+// Older attempts only saved wrong questions, so fall back to those.
+const getReviewItems = (attempt: ExamAttempt): ReviewQuestion[] =>
+  attempt.reviewQuestions ??
+  (attempt.incorrectQuestions ?? []).map((q) => ({ ...q, isCorrect: false }));
+
 export default function Attempts() {
   const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const loadAttempts = () => {
-    setIsLoading(true);
-    try {
-      setAttempts([...loadExamAttempts()].sort((a, b) => stamp(b) - stamp(a)));
-    } catch (e) {
-      console.error("Failed to load attempts:", e);
-      setAttempts([]);
-    }
-    setIsLoading(false);
-  };
+  const [filter, setFilter] = useState<ReviewFilter>("all");
 
   useEffect(() => {
-    loadAttempts();
+    const loadAttempts = () => {
+      try {
+        setAttempts(
+          [...loadExamAttempts()].sort((a, b) => stamp(b) - stamp(a)),
+        );
+      } catch (e) {
+        console.error("Failed to load attempts:", e);
+        setAttempts([]);
+      }
+      setIsLoading(false);
+    };
 
-    const reload = () => loadAttempts();
     const onVisible = () => {
       if (document.visibilityState === "visible") loadAttempts();
     };
 
-    window.addEventListener(ATTEMPTS_UPDATED_EVENT, reload); // same tab
-    window.addEventListener("storage", reload); // other tabs
+    loadAttempts();
+
+    window.addEventListener(ATTEMPTS_UPDATED_EVENT, loadAttempts); // same tab
+    window.addEventListener("storage", loadAttempts); // other tabs
     document.addEventListener("visibilitychange", onVisible); // tab refocus
 
     return () => {
-      window.removeEventListener(ATTEMPTS_UPDATED_EVENT, reload);
-      window.removeEventListener("storage", reload);
+      window.removeEventListener(ATTEMPTS_UPDATED_EVENT, loadAttempts);
+      window.removeEventListener("storage", loadAttempts);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
@@ -127,22 +143,17 @@ export default function Attempts() {
             Review your exam and practice results
           </p>
         </div>
-        <button
-          onClick={loadAttempts}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 disabled:opacity-60"
-          title="Refresh attempts"
-        >
-          <RotateCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
       </div>
 
       {/* Summary stats */}
       {total > 0 && (
         <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard icon={ClipboardList} label="Total attempts" value={total} />
-          <StatCard icon={TrendingUp} label="Average score" value={`${average}%`} />
+          <StatCard
+            icon={TrendingUp}
+            label="Average score"
+            value={`${average}%`}
+          />
           <StatCard icon={Trophy} label="Best score" value={`${best}%`} />
         </div>
       )}
@@ -168,13 +179,23 @@ export default function Attempts() {
         <div className="space-y-4">
           <p className="flex items-center gap-2 text-sm text-gray-500">
             <Lightbulb className="h-4 w-4" />
-            Select an attempt to see the questions you got wrong.
+            Select an attempt to review its questions, then filter by all, correct or wrong.
           </p>
 
           {attempts.map((attempt) => {
             const tone = getTone(attempt.score);
-            const hasIncorrect =
-              attempt.incorrectQuestions && attempt.incorrectQuestions.length > 0;
+            const reviewItems = getReviewItems(attempt);
+            const hasIncorrect = reviewItems.length > 0;
+            const hasFullReview = attempt.reviewQuestions !== undefined;
+            const visibleItems = reviewItems.filter((q) =>
+              filter === "correct"
+                ? q.isCorrect
+                : filter === "wrong"
+                  ? !q.isCorrect
+                  : true,
+            );
+            const hasMissedQuestions =
+              attempt.incorrect + attempt.unanswered > 0;
             const isOpen = expandedId === attempt.id;
             const isPractice = attempt.mode === "practice";
 
@@ -223,7 +244,7 @@ export default function Attempts() {
 
                     <p className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
                       <Calendar className="h-3.5 w-3.5" />
-                      {attempt.date}
+                      {formatLongDate(attempt.date)}
                     </p>
 
                     <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-gray-700">
@@ -256,51 +277,110 @@ export default function Attempts() {
                   </div>
                 </button>
 
-                {/* Expanded: incorrect questions */}
+                {/* Expanded: missed questions */}
                 {isOpen && hasIncorrect && (
                   <div className="border-t border-gray-200 bg-gray-50 p-5">
-                    <h4 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
-                      <Target className="h-4 w-4 text-rose-600" />
-                      Questions you got wrong
-                    </h4>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                      <h4 className="flex items-center gap-2 font-semibold text-gray-900">
+                        <Target className="h-4 w-4 text-rose-600" />
+                        Review
+                      </h4>
+                      <div
+                        role="group"
+                        aria-label="Filter questions"
+                        className="flex rounded-md border border-gray-300 bg-white p-0.5"
+                      >
+                        {FILTERS.map((f) => (
+                          <button
+                            key={f.value}
+                            type="button"
+                            aria-pressed={filter === f.value}
+                            onClick={() => setFilter(f.value)}
+                            className={`rounded px-3 py-1 text-sm ${
+                              filter === f.value
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-600 hover:text-gray-900"
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {!hasFullReview && filter !== "wrong" && (
+                      <p className="mb-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                        This older attempt only saved the questions you got
+                        wrong.
+                      </p>
+                    )}
+                    {visibleItems.length === 0 && (
+                      <p className="rounded-lg border border-dashed border-gray-300 p-4 text-center text-sm text-gray-600">
+                        No questions to show for this filter.
+                      </p>
+                    )}
                     <div className="space-y-3">
-                      {attempt.incorrectQuestions!.map((q, idx) => (
+                      {visibleItems.map((q, idx) => (
                         <div
                           key={q.id}
-                          className="rounded-lg border border-gray-200 border-l-4 border-l-rose-500 bg-white p-4"
+                          className={`rounded-lg border border-gray-200 border-l-4 bg-white p-4 ${
+                            q.isCorrect
+                              ? "border-l-emerald-500"
+                              : "border-l-rose-500"
+                          }`}
                         >
                           <p className="mb-3 text-sm font-medium text-gray-900">
-                            <span className="mr-1 text-rose-600">
-                              Q{idx + 1}.
+                            <span
+                              className={`mr-1 ${q.isCorrect ? "text-emerald-600" : "text-rose-600"}`}
+                            >
+                              Q{q.number ?? idx + 1}.
                             </span>
                             {q.question}
                           </p>
 
                           <div className="space-y-2 text-sm">
                             <p className="flex items-start gap-2 text-gray-700">
-                              <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
-                              <span>
-                                <span className="font-medium text-rose-700">
-                                  Your answer:
-                                </span>{" "}
-                                {q.userAnswer.length === 0 ? (
-                                  <span className="italic text-gray-500">
-                                    Unanswered
+                              {q.isCorrect ? (
+                                <>
+                                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                                  <span>
+                                    <span className="font-medium text-emerald-700">
+                                      Correct answer:
+                                    </span>{" "}
+                                    {q.correctAnswer.join(", ")}
                                   </span>
-                                ) : (
-                                  q.userAnswer.join(", ")
-                                )}
-                              </span>
+                                </>
+                              ) : q.userAnswer.length === 0 ? (
+                                <>
+                                  <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+                                  <span>
+                                    <span className="font-medium text-gray-700">
+                                      Unanswered
+                                    </span>
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+                                  <span>
+                                    <span className="font-medium text-rose-700">
+                                      Your answer:
+                                    </span>{" "}
+                                    {q.userAnswer.join(", ")}
+                                  </span>
+                                </>
+                              )}
                             </p>
-                            <p className="flex items-start gap-2 text-gray-700">
-                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                              <span>
-                                <span className="font-medium text-emerald-700">
-                                  Correct answer:
-                                </span>{" "}
-                                {q.correctAnswer.join(", ")}
-                              </span>
-                            </p>
+                            {!q.isCorrect && (
+                              <p className="flex items-start gap-2 text-gray-700">
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                                <span>
+                                  <span className="font-medium text-emerald-700">
+                                    Correct answer:
+                                  </span>{" "}
+                                  {q.correctAnswer.join(", ")}
+                                </span>
+                              </p>
+                            )}
                             {q.explanation && (
                               <div className="mt-2 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3">
                                 <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
@@ -319,8 +399,15 @@ export default function Attempts() {
                   </div>
                 )}
 
+                {/* Older attempts may not have saved question details. */}
+                {isOpen && !hasIncorrect && hasMissedQuestions && (
+                  <div className="border-t border-gray-200 bg-amber-50 p-5 text-sm text-amber-900">
+                    Question details are unavailable for this attempt.
+                  </div>
+                )}
+
                 {/* Expanded: perfect score */}
-                {isOpen && !hasIncorrect && (
+                {isOpen && !hasIncorrect && !hasMissedQuestions && (
                   <div className="flex items-center gap-2 border-t border-gray-200 bg-emerald-50 p-5 text-sm text-emerald-800">
                     <PartyPopper className="h-5 w-5" />
                     Perfect score. You got every question correct.

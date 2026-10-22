@@ -21,7 +21,11 @@ import {
   X,
 } from "lucide-react";
 import { practiceExams, type PracticeExam } from "../types/assets";
-import { saveExamAttempt, type IncorrectQuestion } from "@/lib/storage";
+import {
+  saveExamAttempt,
+  type IncorrectQuestion,
+  type ReviewQuestion,
+} from "@/lib/storage";
 import { todayIso } from "@/lib/dates";
 
 type Mode = "practice" | "real";
@@ -30,9 +34,6 @@ type Question = NonNullable<PracticeExam["questions"]>[number];
 const LEVELS = ["All", "Foundational", "Associate", "Professional"] as const;
 const ACCESS = ["All", "Free", "Pro"] as const;
 const LOW_TIME_SECONDS = 300;
-
-// Fired after an attempt is saved so a mounted Attempts view can refresh.
-const ATTEMPTS_UPDATED_EVENT = "exam-attempts-updated";
 
 const cn = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
@@ -890,10 +891,14 @@ function ResultsView({
   const unansweredCount = rows.filter((r) => r.selected.length === 0).length;
   const incorrectCount = rows.length - correctCount - unansweredCount;
   const flaggedCount = rows.filter((r) => r.isFlagged).length;
-  const percent = Math.round((correctCount / rows.length) * 100);
+  // Guard against NaN% if an exam has zero questions.
+  const percent = rows.length
+    ? Math.round((correctCount / rows.length) * 100)
+    : 0;
 
   // Save the attempt exactly once as soon as results are shown, so it is
   // recorded even if the user retakes, closes the tab, or navigates away.
+  // saveExamAttempt also notifies any mounted Attempts view to refresh.
   useEffect(() => {
     if (savedRef.current) return;
     savedRef.current = true;
@@ -902,14 +907,25 @@ function ResultsView({
       .filter((r) => !r.correct)
       .map((r) => ({
         id: r.question.id,
+        number: r.number,
         question: r.question.question,
         userAnswer: r.selected,
         correctAnswer: r.question.answer,
         explanation: getExplanation(r.question),
       }));
 
+    const reviewQuestions: ReviewQuestion[] = rows.map((r) => ({
+      id: r.question.id,
+      number: r.number,
+      question: r.question.question,
+      userAnswer: r.selected,
+      correctAnswer: r.question.answer,
+      explanation: getExplanation(r.question),
+      isCorrect: r.correct,
+    }));
+
     try {
-      saveExamAttempt({
+      const saved = saveExamAttempt({
         id: `${exam.id}-${Date.now()}`,
         code: exam.code,
         title: exam.title,
@@ -921,11 +937,12 @@ function ResultsView({
         incorrect: incorrectCount,
         unanswered: unansweredCount,
         incorrectQuestions,
+        reviewQuestions,
       });
-      // Tell any mounted Attempts view to refresh.
-      window.dispatchEvent(new Event(ATTEMPTS_UPDATED_EVENT));
+      if (!saved) console.error("Attempt was not saved (see error above).");
     } catch (e) {
-      console.error("Failed to save attempt:", e);
+      // Anything thrown before the save, e.g. from todayIso().
+      console.error("Failed to prepare attempt:", e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
