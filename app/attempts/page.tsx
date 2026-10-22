@@ -179,7 +179,7 @@ export default function Attempts() {
         <div className="space-y-4">
           <p className="flex items-center gap-2 text-sm text-gray-500">
             <Lightbulb className="h-4 w-4" />
-            Select an attempt to review its questions, then filter by all, correct or wrong.
+            Select an attempt to see the questions you got wrong.
           </p>
 
           {attempts.map((attempt) => {
@@ -370,17 +370,15 @@ export default function Attempts() {
                                 </>
                               )}
                             </p>
-                            {!q.isCorrect && (
-                              <p className="flex items-start gap-2 text-gray-700">
-                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                                <span>
-                                  <span className="font-medium text-emerald-700">
-                                    Correct answer:
-                                  </span>{" "}
-                                  {q.correctAnswer.join(", ")}
-                                </span>
-                              </p>
-                            )}
+                            <p className="flex items-start gap-2 text-gray-700">
+                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                              <span>
+                                <span className="font-medium text-emerald-700">
+                                  Correct answer:
+                                </span>{" "}
+                                {q.correctAnswer.join(", ")}
+                              </span>
+                            </p>
                             {q.explanation && (
                               <div className="mt-2 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3">
                                 <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />

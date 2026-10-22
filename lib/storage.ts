@@ -3,9 +3,6 @@ import { todayIso, parseIso, daysBetween, isIsoDate } from "./dates";
 export const PROFILE_STORAGE_KEY = "profile-settings:v1";
 export const STREAK_STORAGE_KEY = "study-streak:v1";
 export const EXAM_ATTEMPTS_STORAGE_KEY = "exam-attempts:v1";
-
-// Fired after an attempt is saved so a mounted Attempts view can refresh.
-// Defined here once so the exam page and Attempts page can't drift apart.
 export const ATTEMPTS_UPDATED_EVENT = "exam-attempts-updated";
 
 export type StreakData = { lastVisit: string; count: number };

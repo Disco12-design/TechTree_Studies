@@ -61,7 +61,7 @@ export default function StudyNotesFilter({
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="font-bold text-lg text-brand-900">Study Notes</h3>
+          <h3 className="font-bold text-lg text-brand-900">Revision Notes</h3>
           <p className="text-sm text-brand-600 mt-0.5">
             Choose a domain, then select a module to open it.
           </p>
