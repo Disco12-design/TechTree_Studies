@@ -896,9 +896,7 @@ function ResultsView({
     ? Math.round((correctCount / rows.length) * 100)
     : 0;
 
-  // Save the attempt exactly once as soon as results are shown, so it is
-  // recorded even if the user retakes, closes the tab, or navigates away.
-  // saveExamAttempt also notifies any mounted Attempts view to refresh.
+
   useEffect(() => {
     if (savedRef.current) return;
     savedRef.current = true;
@@ -1398,7 +1396,7 @@ export default function PracticeExamsPage() {
 
   const stats = [
     { label: "exams available", value: practiceExams.length },
-    { label: "average pass rate", value: "84%" },
+    
   ];
 
   return (
