@@ -26,6 +26,7 @@ import {
   Workflow,
   Bot,
   ListOrdered,
+  Cpu,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -39,6 +40,7 @@ export const navLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/practice-exam", label: "Practice Exam", icon: BookOpen },
   { href: "/study-notes", label: "Study Notes", icon: BarChart3 },
+  { href: "/pbq", label: "PBQ Simulations", icon: Cpu },
   { href: "/attempts", label: "Attempts", icon: FileText },
   { href: "/pricing-billing", label: "Pricing & Billing", icon: CreditCard },
 ];

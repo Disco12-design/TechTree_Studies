@@ -93,7 +93,7 @@ export default function Sidebar() {
           aria-label="Open menu"
           aria-expanded={open}
           aria-controls="app-sidebar"
-          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-lg p-2 text-brand-600 transition hover:bg-brand-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500"
+          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-lg p-2 text-brand-600 transition hover:bg-brand-300 focus-visible:outline focus-visible:outline-brand-500"
         >
           <Menu size={28} />
         </button>
@@ -133,7 +133,7 @@ export default function Sidebar() {
           ref={closeButtonRef}
           onClick={() => setOpen(false)}
           aria-label="Close menu"
-          className="absolute right-3 top-3 rounded p-2 hover:bg-brand-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500 md:hidden"
+          className="absolute right-3 top-3 rounded p-2 hover:bg-brand-300 focus-visible:outline focus-visible:outline-brand-500 md:hidden"
         >
           <X size={24} />
         </button>
@@ -163,7 +163,7 @@ export default function Sidebar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded px-4 py-2 text-xl font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700 ${
+                className={`flex items-center gap-3 rounded px-4 py-2 text-xl font-semibold transition focus-visible:outline focus-visible:outline-brand-700 ${
                   active
                     ? 'bg-brand-500 text-white'
                     : 'text-brand-950 hover:bg-brand-300 hover:text-brand-800'
@@ -179,7 +179,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={handleSignOut}
-          className="mt-auto flex items-center gap-3 rounded px-4 py-2 text-left text-lg font-semibold text-brand-950 transition hover:bg-brand-300 hover:text-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700"
+          className="mt-auto flex items-center gap-3 rounded px-4 py-2 text-left text-lg font-semibold text-brand-950 transition hover:bg-brand-300 hover:text-brand-800 focus-visible:outline focus-visible:outline-brand-700"
         >
           <LogOut size={22} aria-hidden="true" />
           <span>Sign out</span>
