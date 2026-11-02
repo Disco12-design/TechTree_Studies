@@ -286,6 +286,38 @@ A few things to keep in mind:
 Avoid storing passwords, access tokens, or other sensitive information
 in `localStorage`.
 
+### Sign-in demo and social providers
+
+The sign-in and sign-up page is a browser-only demo. Demo accounts and
+sessions are stored in this browser; password hashes are salted, but
+client-side storage is not a secure authentication system. Do not use a
+real or reused password. Social sign-in buttons for Google, Facebook,
+and Instagram currently show a setup message and do not authenticate.
+
+To enable real social authentication:
+
+1. Choose and configure a server-side authentication service.
+2. Create OAuth apps for Google and Facebook, and configure Instagram
+   Login through a Meta developer app.
+3. Add each provider's client ID and secret to server-side environment
+   variables and configure the callback URLs required by the chosen
+   authentication service. Never expose client secrets using
+   `NEXT_PUBLIC_*` variables.
+4. Connect the provider callbacks to server-managed sessions, then
+   replace the demo sign-in handlers with that service.
+
+Example variable names for a future server-side integration (not read by
+this demo):
+
+```text
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=
+INSTAGRAM_CLIENT_ID=
+INSTAGRAM_CLIENT_SECRET=
+```
+
 ------------------------------------------------------------------------
 
 ## Current scope

@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LogOut, Menu, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { signOutDemoAccount } from '../../lib/auth';
 import { navLinks, images } from '../types/assets';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -67,6 +70,17 @@ export default function Sidebar() {
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
+
+  const handleSignOut = () => {
+    try {
+      signOutDemoAccount();
+      toast.success('You have signed out.');
+      router.replace('/');
+    } catch (error) {
+      console.error('Could not sign out of the demo account:', error);
+      toast.error('Could not sign out. Please try again.');
+    }
+  };
 
   return (
     <>
@@ -161,6 +175,15 @@ export default function Sidebar() {
             );
           })}
         </nav>
+
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="mt-auto flex items-center gap-3 rounded px-4 py-2 text-left text-lg font-semibold text-brand-950 transition hover:bg-brand-300 hover:text-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700"
+        >
+          <LogOut size={22} aria-hidden="true" />
+          <span>Sign out</span>
+        </button>
       </aside>
     </>
   );
