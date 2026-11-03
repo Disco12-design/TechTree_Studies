@@ -16,8 +16,8 @@ export default function PBQPage() {
 
   if (currentPBQ) {
     return (
-      <div className="min-h-dvh bg-gray-50 p-4 md:p-8">
-        <div className="mx-auto max-w-7xl">
+      <div className="flex flex-col bg-gray-50 p-4 md:p-8">
+        <div className="mx-auto w-full max-w-7xl">
           <button
             onClick={() => setSelectedPBQ(null)}
             className="mb-6 rounded-lg bg-brand-600 px-4 py-2 text-white transition hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500"
@@ -39,8 +39,8 @@ export default function PBQPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="flex flex-col bg-gray-50 p-4 md:p-8">
+      <div className="mx-auto w-full max-w-7xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Performance-Based Questions</h1>
           <p className="mt-2 text-lg text-gray-600">
