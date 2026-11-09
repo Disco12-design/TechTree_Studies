@@ -280,7 +280,7 @@ export default function PBQPage() {
               >
                 <div className="flex items-start gap-3">
                   <NumberBadge n={index + 1} />
-                  <h3 className="line-clamp-2 min-h-[3.25rem] text-lg font-semibold leading-snug text-gray-900">
+                  <h3 className="line-clamp-2 min-h-13 text-lg font-semibold leading-snug text-gray-900">
                     {cleanTitle(pbq.title)}
                   </h3>
                 </div>
@@ -310,7 +310,7 @@ export default function PBQPage() {
 
                 <button
                   onClick={() => openPbq(pbq.id)}
-                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500 ${
+                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition focus-visible:outline focus-visible:outline-brand-500 ${
                     s
                       ? 'border border-brand-600 bg-white text-brand-700 hover:bg-brand-200'
                       : 'bg-brand-600 text-white hover:bg-brand-700'

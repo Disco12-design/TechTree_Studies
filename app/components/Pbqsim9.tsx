@@ -12,13 +12,13 @@ import type { Environment, PbqRemediation, ScanFinding, SimProps, Sla } from '..
  */
 
 const C = {
-  tableHead: "#6f8fd6",
-  rowAlt: "#cfdcf5",
-  panelBg: "#e8e8e8",
-  tabIdle: "#c9c9c9",
-  tabIdleText: "#f4f4f4",
-  tabActiveText: "#2f5fb3",
-  btn: "#4a4a4a",
+  tableHead: "#1e3a8a",
+  rowAlt: "#eaf0fb",
+  panelBg: "#e2e8f0",
+  tabIdle: "#cbd5e1",
+  tabIdleText: "#1e293b",
+  tabActiveText: "#1e3a8a",
+  btn: "#334155",
 };
 
 const toList = (v?: string | string[] | null): string[] => (Array.isArray(v) ? v : v ? [v] : []);
@@ -70,7 +70,7 @@ function SlaTab({ sla }: { sla: Sla }) {
           </thead>
           <tbody>
             {sla.rows.map((row) => (
-              <tr className="odd:bg-white even:bg-[#cfdcf5]" key={row.level}>
+              <tr className="odd:bg-white even:bg-[#eaf0fb]" key={row.level}>
                 <td className={td}>{row.level}</td>
                 <td className={td}>
                   {sla.standard(row.days).replace(`${row.days} calendar days`, "")}
@@ -114,7 +114,7 @@ function EnvironmentTab({ environment }: { environment: Environment }) {
         </thead>
         <tbody>
           {environment.rows.map((row) => (
-            <tr className="odd:bg-white even:bg-[#cfdcf5]" key={String(row[0])}>
+            <tr className="odd:bg-white even:bg-[#eaf0fb]" key={String(row[0])}>
               {row.map((cell, i) => (
                 <td className={td} key={i}>
                   {Array.isArray(cell)
@@ -138,15 +138,15 @@ function FindingsTab({ findings }: { findings: ScanFinding[] }) {
           className="grid grid-cols-1 gap-x-3 gap-y-0.5 border-gray-200 py-3 not-first:border-t sm:grid-cols-[130px_1fr]"
           key={i}
         >
-          <dt className="mt-1 font-bold text-[#2f5fb3] sm:mt-0">Title:</dt>
+          <dt className="mt-1 font-bold text-[#1e3a8a] sm:mt-0">Title:</dt>
           <dd className="leading-6">{f.title}</dd>
-          <dt className="mt-1 font-bold text-[#2f5fb3] sm:mt-0">Description:</dt>
+          <dt className="mt-1 font-bold text-[#1e3a8a] sm:mt-0">Description:</dt>
           <dd className="leading-6">{f.description}</dd>
-          <dt className="mt-1 font-bold text-[#2f5fb3] sm:mt-0">Affected asset:</dt>
+          <dt className="mt-1 font-bold text-[#1e3a8a] sm:mt-0">Affected asset:</dt>
           <dd className="leading-6">{f.asset}</dd>
-          <dt className="mt-1 font-bold text-[#2f5fb3] sm:mt-0">Risk:</dt>
+          <dt className="mt-1 font-bold text-[#1e3a8a] sm:mt-0">Risk:</dt>
           <dd className="leading-6">{f.risk}</dd>
-          <dt className="mt-1 font-bold text-[#2f5fb3] sm:mt-0">Reference:</dt>
+          <dt className="mt-1 font-bold text-[#1e3a8a] sm:mt-0">Reference:</dt>
           <dd className="leading-6">{f.reference}</dd>
         </dl>
       ))}

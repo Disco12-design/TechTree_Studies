@@ -10,13 +10,13 @@ import type { PbqLogAnalysis, SimProps } from '../data/pbqTypes';
  */
 
 const C = {
-  tableHead: '#6f8fd6',
-  rowAlt: '#cfdcf5',
-  panelBg: '#e8e8e8',
-  tabIdle: '#c9c9c9',
-  tabIdleText: '#f4f4f4',
-  tabActiveText: '#2f5fb3',
-  btn: '#4a4a4a',
+  tableHead: '#1e3a8a',
+  rowAlt: '#eaf0fb',
+  panelBg: '#e2e8f0',
+  tabIdle: '#cbd5e1',
+  tabIdleText: '#1e293b',
+  tabActiveText: '#1e3a8a',
+  btn: '#334155',
 };
 
 const toList = (v?: string | string[] | null): string[] => (Array.isArray(v) ? v : v ? [v] : []);
@@ -143,7 +143,7 @@ export default function PbqLogSim({ pbq, onScore }: SimProps<PbqLogAnalysis>) {
                   activeTab.lines.map((line) => (
                     <div
                       key={line}
-                      className={`whitespace-pre px-1 ${isHit(line) ? 'bg-yellow-900 text-yellow-100' : ''}`}
+                      className={`whitespace-pre px-1 ${isHit(line) ? 'bg-blue-900 text-blue-100' : ''}`}
                     >
                       {line}
                     </div>
@@ -162,7 +162,7 @@ export default function PbqLogSim({ pbq, onScore }: SimProps<PbqLogAnalysis>) {
                       </thead>
                       <tbody>
                         {activeTab.netstat.rows.map((row, i) => (
-                          <tr key={i} className={isHit(row.join(' ')) ? 'bg-yellow-900 text-yellow-100' : ''}>
+                          <tr key={i} className={isHit(row.join(' ')) ? 'bg-blue-900 text-blue-100' : ''}>
                             {row.map((cell, j) => (
                               <td key={j} className="whitespace-nowrap py-0.5 pl-1 pr-4">{cell}</td>
                             ))}

@@ -20,13 +20,13 @@ interface SummaryRow {
 
 // Same palette as PbqSim / PbqStepSim
 const C = {
-  tableHead: '#6f8fd6',
-  panelBg: '#e8e8e8',
-  tabIdle: '#c9c9c9',
-  tabIdleText: '#f4f4f4',
-  tabActiveText: '#2f5fb3',
-  btn: '#4a4a4a',
-  yellow: '#e3c43a',
+  tableHead: '#1e3a8a',
+  panelBg: '#e2e8f0',
+  tabIdle: '#cbd5e1',
+  tabIdleText: '#1e293b',
+  tabActiveText: '#1e3a8a',
+  btn: '#334155',
+  select: '#2563eb',
 };
 const GREEN = '#22a24b';
 const RED = '#d33';
@@ -294,7 +294,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
       }}
       className={`flex items-center gap-1.5 rounded border px-2 py-1.5 text-sm font-medium select-none ${
         submitted ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
-      } ${picked === server.id ? 'ring-2 ring-amber-500' : ''}`}
+      } ${picked === server.id ? 'ring-2 ring-blue-600' : ''}`}
       style={{ background: '#2d4f6e', color: '#fff', borderColor: '#1c364d' }}
     >
       <GripVertical size={14} className="opacity-70" />
@@ -329,8 +329,8 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
 
     const zoneStyle = submitted
       ? resultStyle(r.serverOk)
-      : { borderColor: C.yellow, background: dragOver === l.id ? '#fff8d6' : '#fff' };
-    const selectStyle = submitted ? resultStyle(r.scanOk) : { borderColor: C.yellow, background: '#fff' };
+      : { borderColor: C.select, background: dragOver === l.id ? '#dbeafe' : '#fff' };
+    const selectStyle = submitted ? resultStyle(r.scanOk) : { borderColor: C.select, background: '#fff' };
 
     return (
       <div key={l.id} className="grid gap-3 border-b border-gray-300 py-3 last:border-b-0 md:grid-cols-[120px_1fr_190px]">
@@ -355,7 +355,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
           >
             {server
               ? renderServerChip(server, () => patch(l.id, { server: null }))
-              : <HelpCircle size={30} style={{ color: C.yellow }} />}
+              : <HelpCircle size={30} style={{ color: C.select }} />}
           </div>
           {submitted && !r.serverOk && (
             <p className="mt-1 text-xs text-red-700">Correct: {serverById(l.correct.server).label}</p>

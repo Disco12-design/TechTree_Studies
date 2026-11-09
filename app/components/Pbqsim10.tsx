@@ -18,19 +18,19 @@ import type { Host, HostOutput, PbqInvestigation, SimProps } from '../data/pbqTy
 
 
 const C = {
-  tableHead: "#6f8fd6",
-  rowAlt: "#cfdcf5",
-  panelBg: "#e8e8e8",
-  tabIdle: "#c9c9c9",
-  tabIdleText: "#f4f4f4",
-  tabActiveText: "#2f5fb3",
-  btn: "#4a4a4a",
+  tableHead: "#1e3a8a",
+  rowAlt: "#eaf0fb",
+  panelBg: "#e2e8f0",
+  tabIdle: "#cbd5e1",
+  tabIdleText: "#1e293b",
+  tabActiveText: "#1e3a8a",
+  btn: "#334155",
 };
 
 const toList = (v?: string | string[] | null): string[] => (Array.isArray(v) ? v : v ? [v] : []);
 
 const focus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f5fb3] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a8a] focus-visible:ring-offset-2";
 
 const ICONS: Record<string, LucideIcon> = {
   laptop: Laptop,
@@ -57,14 +57,14 @@ function HostButton({
       aria-pressed={selected}
       className={`flex w-full items-center gap-3 rounded border px-3 py-2.5 text-left transition ${focus} ${
         selected
-          ? "border-[#2f5fb3] bg-[#2f5fb3] text-white"
-          : "border-gray-300 bg-white text-gray-900 hover:bg-[#cfdcf5]"
+          ? "border-[#1e3a8a] bg-[#1e3a8a] text-white"
+          : "border-gray-300 bg-white text-gray-900 hover:bg-[#eaf0fb]"
       }`}
     >
       <Icon
         size={22}
         strokeWidth={1.8}
-        className={selected ? "text-white" : "text-[#2f5fb3]"}
+        className={selected ? "text-white" : "text-[#1e3a8a]"}
         aria-hidden="true"
       />
       <span className="min-w-0">
@@ -94,7 +94,7 @@ function Node({
     <div className="flex flex-col items-center gap-1.5 text-center text-gray-900">
       <span
         className={`flex h-16 w-16 items-center justify-center rounded-full border-4 bg-white ${
-          accent ? "border-red-500 text-red-600" : "border-[#6f8fd6] text-[#2f5fb3]"
+          accent ? "border-red-500 text-red-600" : "border-[#1e3a8a] text-[#1e3a8a]"
         }`}
       >
         <Icon size={28} strokeWidth={1.6} aria-hidden="true" />
@@ -298,11 +298,11 @@ export default function PbqInvestigationSim({ pbq, onScore, onSubmit }: SimProps
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row lg:flex-col xl:flex-row">
               <Node icon={ShieldCheck} label={gateway.label} sub={gateway.ip} />
-              <ArrowRight className="hidden text-[#2f5fb3] sm:block lg:hidden xl:block" aria-hidden="true" />
-              <ArrowDown className="text-[#2f5fb3] sm:hidden lg:block xl:hidden" aria-hidden="true" />
+              <ArrowRight className="hidden text-[#1e3a8a] sm:block lg:hidden xl:block" aria-hidden="true" />
+              <ArrowDown className="text-[#1e3a8a] sm:hidden lg:block xl:hidden" aria-hidden="true" />
               <Node icon={Cloud} label={pbq.diagram.internet.label} />
-              <ArrowRight className="hidden text-[#2f5fb3] sm:block lg:hidden xl:block" aria-hidden="true" />
-              <ArrowDown className="text-[#2f5fb3] sm:hidden lg:block xl:hidden" aria-hidden="true" />
+              <ArrowRight className="hidden text-[#1e3a8a] sm:block lg:hidden xl:block" aria-hidden="true" />
+              <ArrowDown className="text-[#1e3a8a] sm:hidden lg:block xl:hidden" aria-hidden="true" />
               <Node
                 icon={Target}
                 label={pbq.diagram.target.label}

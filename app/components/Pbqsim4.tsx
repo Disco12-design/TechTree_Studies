@@ -10,14 +10,14 @@ interface DeviceAnswer {
 
 // Same palette as PbqDragSim / PbqSim / PbqStepSim
 const C = {
-  tableHead: '#6f8fd6',
-  rowAlt: '#cfdcf5',
-  panelBg: '#e8e8e8',
-  tabIdle: '#c9c9c9',
-  tabIdleText: '#f4f4f4',
-  tabActiveText: '#2f5fb3',
-  btn: '#4a4a4a',
-  yellow: '#e3c43a',
+  tableHead: '#1e3a8a',
+  rowAlt: '#eaf0fb',
+  panelBg: '#e2e8f0',
+  tabIdle: '#cbd5e1',
+  tabIdleText: '#1e293b',
+  tabActiveText: '#1e3a8a',
+  btn: '#334155',
+  select: '#2563eb',
 };
 const GREEN = '#22a24b';
 const RED = '#d33';
@@ -147,7 +147,7 @@ export default function PbqHardenSim({ pbq, onScore }: SimProps<PbqHardening>) {
   /* ---------- Device card ---------- */
 
   const selectStyle = (ok?: boolean) => ({
-    borderColor: submitted ? (ok ? GREEN : RED) : C.yellow,
+    borderColor: submitted ? (ok ? GREEN : RED) : C.select,
     background: submitted ? (ok ? GREEN_BG : RED_BG) : '#fff',
   });
 

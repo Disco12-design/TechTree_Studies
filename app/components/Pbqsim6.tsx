@@ -6,11 +6,11 @@ type ActionRow = PbqActionPlan['actionPlan']['rows'][number];
 
 // Same palette as the other simulations
 const C = {
-  tableHead: '#6f8fd6',
-  rowAlt: '#cfdcf5',
-  panelBg: '#e8e8e8',
-  tabActiveText: '#2f5fb3',
-  btn: '#4a4a4a',
+  tableHead: '#1e3a8a',
+  rowAlt: '#eaf0fb',
+  panelBg: '#e2e8f0',
+  tabActiveText: '#1e3a8a',
+  btn: '#334155',
 };
 
 const toList = (v?: string | string[] | null): string[] => (Array.isArray(v) ? v : v ? [v] : []);
@@ -58,7 +58,7 @@ export default function PbqActionPlanSim({ pbq, onScore }: SimProps<PbqActionPla
 
   const selectStyle = (row: ActionRow) => {
     if (submitted) return isCorrect(row) ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50';
-    return answers[row.id] ? 'border-amber-600 bg-amber-300' : 'border-gray-300 bg-white';
+    return answers[row.id] ? 'border-blue-600 bg-blue-100' : 'border-gray-300 bg-white';
   };
 
   /* ---------- Layout ---------- */

@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { ChevronRight, RotateCcw } from 'lucide-react';
 import type { MatrixRow, MatrixTab, Pbq02Steps, ScanReportTab, SimProps } from '../data/pbqTypes';
 
-// Same palette as PbqSim so both simulations look alike
+// Same palette as PbqSim so all simulations look alike
 const C = {
-  tableHead: '#6f8fd6',
-  rowAlt: '#cfdcf5',
-  panelBg: '#e8e8e8',
-  tabIdle: '#c9c9c9',
-  tabIdleText: '#f4f4f4',
-  tabActiveText: '#2f5fb3',
-  link: '#2f5fb3',
-  gridHead: '#bcdcf2',
-  btn: '#4a4a4a',
+  tableHead: '#1e3a8a',
+  rowAlt: '#eaf0fb',
+  panelBg: '#e2e8f0',
+  tabIdle: '#cbd5e1',
+  tabIdleText: '#1e293b',
+  tabActiveText: '#1e3a8a',
+  link: '#1d4ed8',
+  gridHead: '#dbe4f5',
+  btn: '#334155',
 };
 
 type Field = 'validate' | 'remediation';
@@ -56,7 +56,7 @@ export default function PbqStepSim({ pbq, onScore }: SimProps<Pbq02Steps>) {
 
   const renderScanReport = (tab: ScanReportTab) => (
     <div className="bg-white border" style={{ borderColor: C.tableHead }}>
-      <div className="px-4 py-2 text-white font-medium" style={{ background: '#2f6fe0' }}>
+      <div className="px-4 py-2 text-white font-medium" style={{ background: C.tableHead }}>
         {tab.heading}
       </div>
       <div className="p-4 max-h-96 overflow-y-auto space-y-4 text-sm">
@@ -92,7 +92,7 @@ export default function PbqStepSim({ pbq, onScore }: SimProps<Pbq02Steps>) {
 
   const selectClass = (ok: boolean | null, value?: string) => {
     if (submitted) return ok ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50';
-    return value ? 'border-amber-600 bg-amber-300' : 'border-gray-300 bg-white';
+    return value ? 'border-blue-600 bg-blue-100' : 'border-gray-300 bg-white';
   };
 
   const columns: [Field, string[], string][] = [

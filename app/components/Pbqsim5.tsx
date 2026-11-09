@@ -22,13 +22,13 @@ interface AnswerRow {
 
 // Larger-text version: all small text sizes raised for readability.
 const C = {
-  tableHead: "#6f8fd6",
-  rowAlt: "#cfdcf5",
-  panelBg: "#e8e8e8",
-  btn: "#4a4a4a",
-  blue: "#1a7cf5",
+  tableHead: "#1e3a8a",
+  rowAlt: "#eaf0fb",
+  panelBg: "#e2e8f0",
+  btn: "#334155",
+  blue: "#1e3a8a",
   orange: "#f0a428",
-  tabActiveText: "#2f5fb3",
+  tabActiveText: "#1e3a8a",
 };
 
 const ICONS: Record<string, LucideIcon> = {
@@ -75,7 +75,7 @@ function ArtifactBody({ a }: { a: Artifact }) {
                   <th
                     key={c}
                     className="px-3 py-2 text-left text-base font-bold text-white"
-                    style={{ background: "#7b95d0" }}
+                    style={{ background: "#1e3a8a" }}
                   >
                     {c}
                   </th>
@@ -86,7 +86,7 @@ function ArtifactBody({ a }: { a: Artifact }) {
               {a.rows.map((r, i) => (
                 <tr
                   key={i}
-                  style={{ background: i % 2 === 0 ? "#eef2fb" : "#cdd8f3" }}
+                  style={{ background: i % 2 === 0 ? "#ffffff" : "#eaf0fb" }}
                 >
                   {r.map((cell, j) => (
                     <td
@@ -249,7 +249,7 @@ export default function PbqKillChainSim({ pbq, onScore }: SimProps<PbqArtifacts>
         ? "border-green-500 bg-green-50"
         : "border-red-500 bg-red-50";
     return answers[row.id]
-      ? "border-amber-600 bg-amber-300"
+      ? "border-blue-600 bg-blue-100"
       : "border-gray-300 bg-white";
   };
 

@@ -5,15 +5,15 @@ import type { PbqRiskPlan, RiskCategory, RiskFinding, SimProps } from '../data/p
 
 // Same palette as the other simulations
 const C = {
-  tableHead: '#6f8fd6',
-  rowAlt: '#cfdcf5',
-  panelBg: '#e8e8e8',
-  tabIdle: '#c9c9c9',
-  tabIdleText: '#f4f4f4',
-  tabActiveText: '#2f5fb3',
-  btn: '#4a4a4a',
-  blue: '#1a7cf5',
-  head2: '#5b93d3',
+  tableHead: '#1e3a8a',
+  rowAlt: '#eaf0fb',
+  panelBg: '#e2e8f0',
+  tabIdle: '#cbd5e1',
+  tabIdleText: '#1e293b',
+  tabActiveText: '#1e3a8a',
+  btn: '#334155',
+  blue: '#1e3a8a',
+  head2: '#1e40af',
 };
 
 // Row colors for the chosen category (matches the exam-style screen)
@@ -49,7 +49,7 @@ function DocumentBody({
           </thead>
           <tbody>
             {pbq.findings.map((f, i) => (
-              <tr key={f.id} style={{ background: i % 2 === 0 ? '#d8e2f5' : '#edf1fa' }}>
+              <tr key={f.id} style={{ background: i % 2 === 0 ? '#eaf0fb' : '#ffffff' }}>
                 <td className="border-b border-white px-3 py-2 align-top text-gray-800">{f.finding}</td>
                 <td className="border-b border-white px-3 py-2 align-top text-gray-700">{f.description}</td>
                 <td className="whitespace-nowrap border-b border-white px-3 py-2 align-top text-xs text-gray-700">
@@ -112,7 +112,7 @@ function DocumentBody({
           </thead>
           <tbody>
             {pbq.sla.map((r, i) => (
-              <tr key={r.category} style={{ background: i % 2 === 0 ? '#d8e2f5' : '#edf1fa' }}>
+              <tr key={r.category} style={{ background: i % 2 === 0 ? '#eaf0fb' : '#ffffff' }}>
                 <td className="border-b border-white px-3 py-2 align-top">
                   <span className="rounded px-2 py-0.5 text-xs font-semibold" style={CAT_STYLE[r.category]}>{r.category}</span>
                 </td>
@@ -188,7 +188,7 @@ export default function PbqRiskSim({ pbq, onScore }: SimProps<PbqRiskPlan>) {
 
   const fieldStyle = (ok: boolean, value?: string) => {
     if (submitted) return ok ? 'border-green-600 bg-green-50 text-gray-900' : 'border-red-600 bg-red-50 text-gray-900';
-    return value ? 'border-amber-600 bg-amber-200 text-gray-900' : 'border-gray-300 bg-white text-gray-900';
+    return value ? 'border-blue-600 bg-blue-100 text-gray-900' : 'border-gray-300 bg-white text-gray-900';
   };
 
   /* ---------- Tabs ---------- */
@@ -205,7 +205,7 @@ export default function PbqRiskSim({ pbq, onScore }: SimProps<PbqRiskPlan>) {
         </thead>
         <tbody>
           {findings.map(f => {
-            const rowStyle = CAT_STYLE[category[f.id]] || { background: '#dde6f6', color: '#1f2937' };
+            const rowStyle = CAT_STYLE[category[f.id]] || { background: '#eaf0fb', color: '#1f2937' };
             return (
               <tr key={f.id} style={rowStyle}>
                 <td className="px-2 py-2 align-top">
@@ -268,7 +268,7 @@ export default function PbqRiskSim({ pbq, onScore }: SimProps<PbqRiskPlan>) {
             const ok = controlsOk(f);
             const optional = f.optional || [];
             return (
-              <tr key={f.id} style={{ background: i % 2 === 0 ? '#dde6f6' : '#edf1fa' }}>
+              <tr key={f.id} style={{ background: i % 2 === 0 ? '#eaf0fb' : '#ffffff' }}>
                 <td className="w-2/5 px-3 py-2 align-top text-gray-800">
                   {f.finding}
                   {submitted && (
