@@ -1,4 +1,4 @@
-import type { PbqStep } from '../components/PbqSim2';
+import type { Pbq02Steps } from '../data/pbqTypes';
 
 // PBQ 02: Validate and remediate vulnerability scan findings (two-step simulation).
 // `kind: 'steps'` tells the parent to render this with <PbqStepSim /> instead of <PbqSim />.
@@ -17,7 +17,7 @@ const REMEDIATION_OPTIONS = [
   'Renew the Current Certificate',
 ];
 
-export const pbq04: PbqStep = {
+export const pbq04: Pbq02Steps = {
   id: 'pbq-02',
   kind: 'steps',
   title: '2.) Validate and Remediate Scan Findings',

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronRight, RotateCcw } from 'lucide-react';
+import type { MatrixRow, MatrixTab, Pbq02Steps, ScanReportTab, SimProps } from '../data/pbqTypes';
 
 // Same palette as PbqSim so both simulations look alike
 const C = {
@@ -18,101 +19,9 @@ const C = {
 
 type Field = 'validate' | 'remediation';
 
-interface ScanItem {
-  title: string;
-  description: string;
-  asset: string;
-  risk: string;
-  reference: string;
-}
-
-interface ScanSection {
-  severity: string;
-  color: string;
-  items: ScanItem[];
-}
-
-interface ScanReportTab {
-  id: string;
-  title: string;
-  type: 'scanReport';
-  heading: string;
-  sections: ScanSection[];
-  scenario?: string | string[];
-  instructions?: string | string[];
-}
-
-interface MatrixTab {
-  id: string;
-  title: string;
-  type: 'matrix';
-  heading: string;
-  text: string;
-  scenario?: string | string[];
-  instructions?: string | string[];
-}
-
-interface UnknownTab {
-  id: string;
-  title: string;
-  type: string;
-  scenario?: string | string[];
-  instructions?: string | string[];
-}
-
-type Tab = ScanReportTab | MatrixTab | UnknownTab;
-
-interface MatrixRow {
-  id: string;
-  system: string;
-  correct: Record<Field, string>;
-}
-
-interface Matrix {
-  points: Record<Field, number>;
-  validateOptions: string[];
-  remediationOptions: string[];
-  rows: MatrixRow[];
-}
-
-interface ReviewServer {
-  system: string;
-  finding: string;
-  meaning: string;
-  answer: string;
-  why: string;
-}
-
-interface Review {
-  intro?: string;
-  servers?: ReviewServer[];
-  tips?: string[];
-}
-
-export interface PbqStep {
-  id: string;
-  kind?: string;
-  title?: string;
-  estimatedMinutes?: number;
-  modules?: string[];
-  tabs: Tab[];
-  matrix: Matrix;
-  scenario?: string | string[];
-  instructions?: string | string[];
-  review?: Review;
-}
-
 type Answers = Record<string, Partial<Record<Field, string>>>;
 
-interface PbqStepSimProps {
-  pbq: PbqStep;
-  onScore?: (id: string, score: number, maxPoints: number) => void;
-}
-
-const toList = (v?: string | string[]): string[] =>
-  Array.isArray(v) ? v : v ? [v] : [];
-
-export default function PbqStepSim({ pbq, onScore }: PbqStepSimProps) {
+export default function PbqStepSim({ pbq, onScore }: SimProps<Pbq02Steps>) {
   const [activeTab, setActiveTab] = useState(pbq.tabs[0].id);
   const [answers, setAnswers] = useState<Answers>({}); // { [rowId]: { validate, remediation } }
   const [submitted, setSubmitted] = useState(false);
@@ -241,18 +150,15 @@ export default function PbqStepSim({ pbq, onScore }: PbqStepSimProps) {
     </div>
   );
 
-  const renderTab = (tab: Tab) => {
-    if (tab.type === 'scanReport') return renderScanReport(tab as ScanReportTab);
-    if (tab.type === 'matrix') return renderMatrix(tab as MatrixTab);
-    return <div className="text-red-600">Unknown tab type: {tab.type}</div>;
-  };
+  const renderTab = (tab: Pbq02Steps['tabs'][number]) =>
+    tab.type === 'scanReport' ? renderScanReport(tab) : renderMatrix(tab);
 
   const currentTab = pbq.tabs.find(t => t.id === activeTab);
 
   /* ---------- Layout ---------- */
 
-  const sideScenario = toList(currentTab?.scenario ?? pbq.scenario);
-  const sideInstructions = toList(currentTab?.instructions ?? pbq.instructions);
+  const sideScenario = pbq.scenario;
+  const sideInstructions = pbq.instructions;
 
   return (
     <div className="space-y-6 w-full">
