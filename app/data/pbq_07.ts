@@ -116,18 +116,18 @@ const RAW: RawRiskFinding[] = [
     description:
       "A list containing the PHI of 15 patient, including prescription information, was emailed to the incorrect recipient outside of the organizations. There was a BPA with the recipient and notification to the patients was deemed unnecessary",
     likelihood: 3,
-    severity: 1, // 3 -> Low
+    severity: 5, // 3 -> Low
     required: ["Implement PIN to print"],
     optional: ["Relocate devices to secured locations"],
     why: "A PIN or badge requirement releases documents only when the owner is at the device. Moving the device to a secured location also helps.",
   },
   {
     id: "f8",
-    finding: "",
+    finding: "A large volume of ICMP traffic is deleted from an external source to server2.",
     description:
-      "",
-    likelihood: 2,
-    severity: 1, // 2 -> Low
+      "Review of logs show that a large volume of ICMP traffic has been consistently directed at server2 for an extended period of time.",
+    likelihood: 5,
+    severity: 4, // 2 -> Low
     required: ["Implement approved software listing"],
     optional: ["Implement file integrity monitoring"],
     why: "An approved software list prevents unapproved programs from being installed or run. File integrity monitoring can also flag unexpected installs.",

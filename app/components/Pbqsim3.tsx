@@ -278,7 +278,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
   /* ---------- Server chip (a function, not a component, so dragging
      isn't cancelled by re-renders) ---------- */
 
-  const renderServerChip = (server: Server, onRemove?: () => void) => (
+  const renderServerChip = (server: Server, onRemove?: () => void, fill = false) => (
     <div
       key={server.id}
       draggable={!submitted}
@@ -293,16 +293,18 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
         if (!submitted) setPicked(picked === server.id ? null : server.id);
       }}
       className={`flex items-center gap-1.5 rounded border px-2 py-1.5 text-sm font-medium select-none ${
+        fill ? 'h-full w-full min-w-0 justify-center text-center' : ''
+      } ${
         submitted ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
       } ${picked === server.id ? 'ring-2 ring-blue-600' : ''}`}
       style={{ background: '#2d4f6e', color: '#fff', borderColor: '#1c364d' }}
     >
-      <GripVertical size={14} className="opacity-70" />
-      <span>{server.label}</span>
+      <GripVertical size={14} className="shrink-0 opacity-70" />
+      <span className="min-w-0 break-words">{server.label}</span>
       {onRemove && !submitted && (
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="ml-1 opacity-80 hover:opacity-100"
+          className="ml-1 shrink-0 opacity-80 hover:opacity-100"
           aria-label={`Remove ${server.label}`}
         >
           <X size={14} />
@@ -343,18 +345,23 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
               e.dataTransfer.dropEffect = 'move';
               if (dragOver !== l.id) setDragOver(l.id);
             }}
-            onDragLeave={() => setDragOver(null)}
+            onDragLeave={(e) => {
+              // Ignore leave events fired when the pointer moves onto a child (the placed chip)
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragOver(null);
+            }}
             onDrop={(e) => {
               e.preventDefault();
               setDragOver(null);
               placeServer(l.id, e.dataTransfer.getData('text/plain'));
             }}
             onClick={() => picked && placeServer(l.id, picked)}
-            className="flex h-28 items-center justify-center rounded-sm border-2 bg-white p-1.5 transition"
+            className={`flex h-28 items-center justify-center overflow-hidden rounded-sm border-2 bg-white transition ${
+              server ? 'p-0' : 'p-1.5'
+            } ${dragOver === l.id ? 'ring-4 ring-blue-300' : ''}`}
             style={{ ...zoneStyle, cursor: picked ? 'copy' : 'default' }}
           >
             {server
-              ? renderServerChip(server, () => patch(l.id, { server: null }))
+              ? renderServerChip(server, () => patch(l.id, { server: null }), true)
               : <HelpCircle size={30} style={{ color: C.select }} />}
           </div>
           {submitted && !r.serverOk && (

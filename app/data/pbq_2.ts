@@ -51,9 +51,9 @@ export const pbq04: Pbq02Steps = {
             {
               title: 'Cleartext Transmission of Sensitive Information',
               description:
-                'The software transmits sensitive or security-critical data in cleartext over a communication channel that can be sniffed.',
+                'The software transmits sensitive or securely critical data in cleartext in a communication channel that can sniffed by authorized users',
               asset: '172.30.0.15',
-              risk: 'Anyone with access to the channel can read the information being communicated.',
+              risk: 'Anyone can read the information by gaining access to the channel being used for communication.',
               reference: 'CVE-2002-1949',
             },
           ],
@@ -65,7 +65,7 @@ export const pbq04: Pbq02Steps = {
             {
               title: "Sensitive Cookie in HTTPS Session without 'Secure' Attribute",
               description:
-                'The Secure attribute is not set on sensitive cookies in HTTPS sessions, so the user agent may send them in plaintext over an HTTP session.',
+                'The secure attributes for sensitive cookies in HTTPS sessions is not set, which could cause the use agent to send those cookies in plaintext over HTTP session. ',
               asset: '172.30.0.152',
               risk: 'Session sidejacking',
               reference: 'CVE-2004-0462',

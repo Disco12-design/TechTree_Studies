@@ -1,10 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useSidebar } from '../providers/SidebarProvider';
-import { ArrowLeft, CheckCircle2, Clock, Gauge, ListChecks, Play, RotateCcw, Trophy } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Gauge,
+  ListChecks,
+  Play,
+  RotateCcw,
+  Trophy,
+} from 'lucide-react';
 import { pbqs } from '../data/pbq';
 import { pbq04 } from '../data/pbq_2';
 import { pbq03 } from '../data/pbq_03';
@@ -144,16 +155,58 @@ function StatCard({
   );
 }
 
+// Previous / Next button used in the detail heading
+function NavButton({
+  direction,
+  target,
+  onClick,
+}: {
+  direction: 'prev' | 'next';
+  target?: AnyPbq;
+  onClick: () => void;
+}) {
+  const isPrev = direction === 'prev';
+  const Icon = isPrev ? ChevronLeft : ChevronRight;
+  const label = isPrev ? 'Previous' : 'Next';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!target}
+      aria-label={target ? `${label} PBQ: ${cleanTitle(target.title)}` : `${label} PBQ (none)`}
+      title={target ? cleanTitle(target.title) : undefined}
+      className="inline-flex items-center gap-1.5 rounded-xl border border-brand-600 bg-white px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-200 focus-visible:outline focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white"
+    >
+      {isPrev && <Icon size={18} aria-hidden="true" />}
+      <span className="hidden sm:inline">{label}</span>
+      {!isPrev && <Icon size={18} aria-hidden="true" />}
+    </button>
+  );
+}
+
 export default function PBQPage() {
   const { collapsed } = useSidebar();
   const [selectedPBQ, setSelectedPBQ] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, { score: number; maxPoints: number }>>({});
+  const topRef = useRef<HTMLDivElement>(null);
 
   const currentPBQ = selectedPBQ ? allPbqs.find((p) => p.id === selectedPBQ) : null;
   const currentIndex = currentPBQ ? allPbqs.findIndex((p) => p.id === currentPBQ.id) : -1;
+  const prevPBQ = currentIndex > 0 ? allPbqs[currentIndex - 1] : undefined;
+  const nextPBQ =
+    currentIndex >= 0 && currentIndex < allPbqs.length - 1 ? allPbqs[currentIndex + 1] : undefined;
 
   const handleScore = (id: string, score: number, maxPoints: number) => {
     setScores((prev) => ({ ...prev, [id]: { score, maxPoints } }));
+  };
+
+  // Jump to another PBQ and bring the heading back into view
+  const goTo = (target?: AnyPbq) => {
+    if (!target) return;
+    setSelectedPBQ(target.id);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    topRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   };
 
   const openPbq = (id: string) => {
@@ -175,7 +228,7 @@ export default function PBQPage() {
     const tone = scoreTone(p);
 
     return (
-      <div className="flex flex-col bg-gray-50 p-4 md:p-8">
+      <div ref={topRef} className="flex scroll-mt-4 flex-col bg-gray-50 p-4 md:p-8">
         <div className="mx-auto w-full max-w-7xl">
           <button
             onClick={() => setSelectedPBQ(null)}
@@ -187,7 +240,7 @@ export default function PBQPage() {
 
           <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <NumberBadge n={currentIndex + 1} large />
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-60">
               <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
                 {cleanTitle(currentPBQ.title)}
               </h1>
@@ -201,9 +254,22 @@ export default function PBQPage() {
                 Last score: {s.score} / {s.maxPoints} ({p}%)
               </div>
             )}
+
+            {/* Previous / Next */}
+            <nav
+              aria-label="PBQ navigation"
+              className="flex w-full items-center justify-between gap-2 border-t border-gray-200 pt-4 sm:ml-auto sm:w-auto sm:justify-end sm:border-t-0 sm:pt-0"
+            >
+              <NavButton direction="prev" target={prevPBQ} onClick={() => goTo(prevPBQ)} />
+              <span className="min-w-14 text-center text-sm font-medium text-gray-600" aria-live="polite">
+                {currentIndex + 1} / {allPbqs.length}
+              </span>
+              <NavButton direction="next" target={nextPBQ} onClick={() => goTo(nextPBQ)} />
+            </nav>
           </div>
 
-          {renderSim(currentPBQ, handleScore)}
+          {/* key forces a fresh simulation (and fresh answers) when switching PBQs */}
+          <div key={currentPBQ.id}>{renderSim(currentPBQ, handleScore)}</div>
         </div>
       </div>
     );
