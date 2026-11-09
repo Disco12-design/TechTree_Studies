@@ -200,9 +200,6 @@ function StatusBadge({ ok }: { ok: boolean }) {
   );
 }
 
-/* ---------------------------------------------------------------------------
-   Main component
---------------------------------------------------------------------------- */
 
 export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
   const [activeTab, setActiveTab] = useState(pbq.tabs[0].id);
@@ -300,7 +297,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
       style={{ background: '#2d4f6e', color: '#fff', borderColor: '#1c364d' }}
     >
       <GripVertical size={14} className="shrink-0 opacity-70" />
-      <span className="min-w-0 break-words">{server.label}</span>
+      <span className="min-w-0 break-word">{server.label}</span>
       {onRemove && !submitted && (
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -324,7 +321,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
 
   const renderListing = (l: Listing) => {
     const a = get(l.id);
-    const r = evaluate(l); // only read when `submitted` is true
+    const r = evaluate(l); 
     const complianceSelected = a.scan === 'Compliance';
     const server = a.server ? serverById(a.server) : null;
     const correctFpTexts = l.findings.filter((f) => l.correct.falsePositives.includes(f.id)).map((f) => f.text);
