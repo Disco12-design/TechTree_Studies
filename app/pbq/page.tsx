@@ -2,13 +2,19 @@
 
 import { useState } from 'react';
 import { pbqs } from '../data/pbq';
+import { pbq04 } from '../data/pbq_2';
 import PbqSim from '../components/PbqSim';
+import PbqStepSim from '../components/PbqSim2';
+
+type AnyPbq = (typeof pbqs)[number] | typeof pbq04;
+
+const allPbqs: AnyPbq[] = [...pbqs, pbq04];
 
 export default function PBQPage() {
   const [selectedPBQ, setSelectedPBQ] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, { score: number; maxPoints: number }>>({});
 
-  const currentPBQ = selectedPBQ ? pbqs.find((p) => p.id === selectedPBQ) : null;
+  const currentPBQ = selectedPBQ ? allPbqs.find((p) => p.id === selectedPBQ) : null;
 
   const handleScore = (id: string, score: number, maxPoints: number) => {
     setScores((prev) => ({ ...prev, [id]: { score, maxPoints } }));
@@ -32,7 +38,11 @@ export default function PBQPage() {
             </p>
           </div>
 
-          <PbqSim pbq={currentPBQ} onScore={handleScore} />
+          {'kind' in currentPBQ && currentPBQ.kind === 'steps' ? (
+            <PbqStepSim pbq={pbq04} onScore={handleScore} />
+          ) : (
+            <PbqSim pbq={currentPBQ} onScore={handleScore} />
+          )}
         </div>
       </div>
     );
@@ -49,7 +59,7 @@ export default function PBQPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pbqs.map((pbq) => {
+          {allPbqs.map((pbq) => {
             const pbqScore = scores[pbq.id];
             const percentage = pbqScore
               ? Math.round((pbqScore.score / pbqScore.maxPoints) * 100)
