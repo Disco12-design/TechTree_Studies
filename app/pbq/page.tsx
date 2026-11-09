@@ -70,10 +70,9 @@ function renderSim(pbq: AnyPbq, onScore: ScoreHandler) {
 
 
 const cleanTitle = (title: string) => title.replace(/^\d+\.\)\s*/, '');
-
 const pct = (score: number, max: number) => (max > 0 ? Math.round((score / max) * 100) : 0);
 
-// Semantic score colours (kept separate from the brand palette on purpose)
+
 const scoreTone = (p: number) =>
   p >= 80
     ? { bar: 'bg-green-500', text: 'text-green-800', soft: 'bg-green-50 ring-green-200' }
@@ -145,10 +144,6 @@ function StatCard({
   );
 }
 
-/* ---------------------------------------------------------------------------
-   Page
---------------------------------------------------------------------------- */
-
 export default function PBQPage() {
   const { collapsed } = useSidebar();
   const [selectedPBQ, setSelectedPBQ] = useState<string | null>(null);
@@ -163,7 +158,7 @@ export default function PBQPage() {
 
   const openPbq = (id: string) => {
     setSelectedPBQ(id);
-    // The collapse toggle only exists on desktop, so skip the tip on mobile or when already collapsed
+   
     const isDesktop = window.matchMedia('(min-width: 768px)').matches;
     if (collapsed || !isDesktop) return;
     toast.info('Close the sidebar for the full experience', {
@@ -173,8 +168,7 @@ export default function PBQPage() {
     });
   };
 
-  /* ---------- Detail view ---------- */
-
+ 
   if (currentPBQ) {
     const s = scores[currentPBQ.id];
     const p = s ? pct(s.score, s.maxPoints) : 0;
@@ -215,7 +209,6 @@ export default function PBQPage() {
     );
   }
 
-  /* ---------- List view ---------- */
 
   const attempted = Object.values(scores);
   const completed = attempted.length;

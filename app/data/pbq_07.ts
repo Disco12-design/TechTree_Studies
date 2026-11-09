@@ -1,12 +1,5 @@
 import type { PbqRiskPlan, RiskCategory, RawRiskFinding, RiskFinding } from './pbqTypes';
 
-// PBQ 11: Healthcare risk categorization, prioritization and controls.
-// `kind: 'riskPlan'` tells your parent to render this with <PbqRiskSim />.
-//
-// The answer key (priority + category) comes from the reference screenshot (EXPECTED below).
-// Likelihood and severity are set so that likelihood x severity reproduces that answer key:
-//   Low (0-4), Medium (5-9), High (10-25)
-//   Priority 1 = lowest rating score ... 8 = highest rating score.
 
 const CATEGORIES: RiskCategory[] = ["Low (0-4)", "Medium (5-9)", "High (10-25)"];
 const categoryFor = (score: number): RiskCategory =>
@@ -52,7 +45,7 @@ const RAW: RawRiskFinding[] = [
     description:
       "During sampling, ten successful connections to websites with expired or invalid security certificates were found. Sites found during the assessment include www.cnn.com, www.localbank.com and www.shopping.com.",
     likelihood: 2,
-    severity: 4,
+    severity: 1,
     required: ["Implement web content filter"],
     optional: [],
     why: "Internal users are reaching external sites with bad certificates. A web content filter can block or warn on those connections.",
@@ -60,11 +53,11 @@ const RAW: RawRiskFinding[] = [
   {
     id: "f2",
     finding:
-      "A large volume of ICMP traffic is detected from an external source to Server2.",
+      "A large number of potentially malicious email is reaching end-user shared mailboxes",
     description:
-      "Review of logs shows a large volume of ICMP traffic has been consistently directed at Server2 for an extended period.",
-    likelihood: 2,
-    severity: 3, // 6 -> Medium
+      "A heavy volume phishing and/or spam messages are reaching end user and shared mailboxes increasing the risj of malicious attachments being opened or links being clicked",
+    likelihood: 5,
+    severity: 5, // 6 -> Medium
     required: ["Filter echo request replies"],
     optional: ["Implement IDS/IPS"],
     why: "Filtering or rate-limiting echo requests and replies stops ping floods and outside mapping of the server. IDS/IPS can also help detect it.",
@@ -72,11 +65,11 @@ const RAW: RawRiskFinding[] = [
   {
     id: "f3",
     finding:
-      "A large number of potentially malicious emails is reaching end-user and shared mailboxes.",
+      "Unauthorized software was discovered on technician workstation",
     description:
-      "A heavy volume of phishing and spam messages is reaching end-user and shared mailboxes, increasing the risk of malicious attachments being opened or links being clicked.",
-    likelihood: 5,
-    severity: 1, // 5 -> Medium
+      "Unauthorized software was goind on station used by technicians in potient-facing roles. Software found: Weather Toolbar, Shopping Helper, Newsfeed Live",
+    likelihood: 2,
+    severity: 2, // 5 -> Medium
     required: ["Implement mail filters"],
     optional: ["Implement SPF"],
     why: "Mail filters screen out phishing and spam before delivery. SPF lets receivers reject spoofed senders, which reduces the same flood.",
@@ -84,11 +77,11 @@ const RAW: RawRiskFinding[] = [
   {
     id: "f4",
     finding:
-      "A list of patient prescription information was emailed to the incorrect recipient.",
+      "PHI data was found within the development and test environment ",
     description:
-      "A list containing the PHI of 15 patients, including prescription information, was emailed to the incorrect recipient outside the organization. A BPA was in place, and notification to the patients was deemed unnecessary.",
-    likelihood: 4,
-    severity: 5, // 20 -> High
+      "Controls are not in place to prevent sensitive production data from being used in the test/dev environment, leading to the potential of unauthorized to and exfoliation of sensitive data",
+    likelihood: 3,
+    severity: 3, // 20 -> High
     required: ["Implement DLP"],
     optional: ["Implement email encryption"],
     why: "DLP detects and blocks PHI leaving in outbound mail. Email encryption would also keep a wrong recipient from reading the content.",
@@ -98,20 +91,20 @@ const RAW: RawRiskFinding[] = [
     finding:
       "The internet-facing web server allows access to data without requiring credentials.",
     description:
-      "Data on the server was found to be accessible from the internet without requiring login credentials. The marketing material stored on this server is required to be publicly available.",
-    likelihood: 5,
-    severity: 3, // 15 -> High
+      "Data on the server was found to be accessible via the internet without requiring login credentials. The marketing stored on this server is required to be publicly available",
+    likelihood: 3,
+    severity: 1, // 15 -> High
     required: ["Acceptance"],
     optional: [],
     why: "The content is meant to be public, so the impact is minimal. Accepting the risk is appropriate, and adding authentication would defeat the purpose.",
   },
   {
     id: "f6",
-    finding: "PHI data was found within the development and test environments.",
+    finding: "Sensitive materials were found on tax on a fax machine in a common area",
     description:
-      "Controls are not in place to prevent sensitive production data from being used in the test/dev environment, leading to the potential for unauthorized access to and exfiltration of sensitive data.",
-    likelihood: 4,
-    severity: 3, // 12 -> High
+      "Documents containing patient information were unattended on a printer/fax machine located in a common area and was potentially accessible by patients and other non-staff",
+    likelihood: 3,
+    severity: 2, // 12 -> High
     required: ["Require data deidentification"],
     optional: [],
     why: "PHI should be masked, tokenized or anonymized before it is copied into non-production environments.",
@@ -119,9 +112,9 @@ const RAW: RawRiskFinding[] = [
   {
     id: "f7",
     finding:
-      "Sensitive materials were found on a fax machine in a common area.",
+      "A list of patient prescription information was emailed to the incorrect recipient",
     description:
-      "Documents containing patient information were found unattended on a printer/fax machine in a common area and were potentially accessible to patients and other non-staff.",
+      "A list containing the PHI of 15 patient, including prescription information, was emailed to the incorrect recipient outside of the organizations. There was a BPA with the recipient and notification to the patients was deemed unnecessary",
     likelihood: 3,
     severity: 1, // 3 -> Low
     required: ["Implement PIN to print"],
@@ -130,9 +123,9 @@ const RAW: RawRiskFinding[] = [
   },
   {
     id: "f8",
-    finding: "Unauthorized software was discovered on technician workstations.",
+    finding: "",
     description:
-      "Unauthorized software was found on a station used by technicians in patient-facing roles. Software found: Weather Toolbar, Shopping Helper and Newsfeed Live.",
+      "",
     likelihood: 2,
     severity: 1, // 2 -> Low
     required: ["Implement approved software listing"],
