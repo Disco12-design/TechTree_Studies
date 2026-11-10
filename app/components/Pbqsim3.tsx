@@ -237,6 +237,7 @@ export default function PbqDragSim({ pbq, onScore }: SimProps<PbqListings>) {
 
   const toggleFp = (lid: string, fid: string) => {
     const cur = get(lid).fp;
+    
     patch(lid, { fp: cur.includes(fid) ? cur.filter((x) => x !== fid) : [...cur, fid] });
   };
 

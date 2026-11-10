@@ -24,7 +24,8 @@ export const pbq06: PbqHardening = {
       type: 'diagram',
       instructions: [
         'The simulation includes 2 steps.',
-        'STEP 1: Review the information provided in the network diagram, then move to the STEP 2 tab.',
+        'STEP 1: Review the information provided in the network diagram',
+        'STEP 2: Given the scenario, determine which remediation action is required to address the vulnerability.',
       ],
     },
     {
