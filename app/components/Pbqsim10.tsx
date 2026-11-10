@@ -108,17 +108,22 @@ function Node({
 function Terminal({ output }: { output: HostOutput }) {
   const isLog = output.type === "proxyLog";
   return (
-    <div className="overflow-hidden bg-gray-800 text-gray-200">
-      <div className="border-b border-gray-600 px-4 py-2 text-center text-xs text-gray-300">
-        {output.title}
+    <div className="overflow-hidden rounded-lg border-2 border-red-600 bg-[#2b2f3a] text-gray-200">
+      <div className="relative flex items-center px-4 py-3">
+        <div className="flex gap-2" aria-hidden="true">
+          <span className="h-3.5 w-3.5 rounded-full bg-[#ff5f57]" />
+          <span className="h-3.5 w-3.5 rounded-full bg-[#febc2e]" />
+          <span className="h-3.5 w-3.5 rounded-full bg-[#28c840]" />
+        </div>
+        <span className="absolute inset-x-0 text-center text-sm text-gray-400">{output.title}</span>
       </div>
-      <div className="max-h-96 overflow-auto p-4 font-mono text-xs leading-relaxed">
-        {!isLog && <p className="mb-1 text-gray-400">Active Connections</p>}
+      <div className="max-h-96 overflow-auto px-5 pb-5 pt-2 font-mono text-sm leading-relaxed">
+        {!isLog && <p className="mb-2 font-bold text-gray-300">Active Connections</p>}
         <table className="w-full min-w-[560px] border-collapse">
           <thead>
-            <tr className="text-left text-gray-400">
+            <tr className="text-left text-gray-300">
               {output.columns.map((c) => (
-                <th className="whitespace-nowrap border-b border-gray-600 py-1 pr-6 font-normal" key={c}>
+                <th className="whitespace-nowrap pb-2 pr-8 font-bold" key={c}>
                   {c}
                 </th>
               ))}
@@ -128,7 +133,7 @@ function Terminal({ output }: { output: HostOutput }) {
             {output.rows.map((row, i) => (
               <tr key={i}>
                 {row.map((cell, j) => (
-                  <td className="whitespace-nowrap py-0.5 pr-6" key={j}>
+                  <td className="whitespace-nowrap py-1 pr-8 text-gray-200" key={j}>
                     {cell}
                   </td>
                 ))}

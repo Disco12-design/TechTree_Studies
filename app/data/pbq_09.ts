@@ -34,7 +34,14 @@ const environment = {
     ['ops.comptia.org', 'External', ['203.17.18.20', '203.17.18.30', '192.168.60.0/24', '192.168.61.0/24'], 'comptia.org', 'Yes', 'Yes', 'Yes', 'No'],
     ['stage.comptia.org', 'Internal', ['192.168.76.0/24', '192.168.75.0/24'], 'comptia.org', 'No', 'No', 'Yes', 'Yes'],
     ['test.comptia.org', 'External', ['192.168.50.0/24', '192.168.51.0/24'], 'comptia.org', 'No', 'Yes', 'Yes', 'Yes'],
+    // the second part
+    ['pod.comptia.org', 'External', ['104.17.18.29', '104.17.18.30', '192.168.60.0/24', '192.168.61.0/24'], 'comptia.org', 'Yes', 'Yes', 'Yes', 'Yes'],
+    ['dev.comptia.org', 'Internal', ['192.168.76.0/24', '192.168.75.0/24'], 'comptia.org', 'No', 'No', 'Yes', 'Yes'],
+    ['uat.comptia.org', 'External', ['192.168.50.0/24', '192.168.51.0/24'], 'comptia.org', 'No', 'Yes', 'Yes', 'Yes'],
+
+
   ],
+  
 };
 
 // ---- Tab 3: Output (scan results) -----------------------------------------------------------
