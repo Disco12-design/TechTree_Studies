@@ -2,10 +2,12 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { profile, metrics, examAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
 import { loadSavedProfile, loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
+import { getUser, isFreshLogin, clearFreshLoginFlag } from "@/lib/authStorage";
 
 
 7
@@ -101,6 +103,17 @@ export default function Dashboard() {
     setReady(true);
     setExamIso(localStorage.getItem("examDate"));
     setStreak(loadAndUpdateStreak());
+
+    // Show welcome toast if this is a fresh login
+    if (isFreshLogin()) {
+      const user = getUser();
+      if (user) {
+        toast.success(`Welcome back, ${user.name}! 👋`, {
+          description: "You're logged in successfully.",
+        });
+        clearFreshLoginFlag();
+      }
+    }
   }, []);
 
   const examDateLabel = examIso ? formatLongDate(examIso) : null;

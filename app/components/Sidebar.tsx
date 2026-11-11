@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChevronRight, LogOut, Menu, Moon, Search, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { logout } from '@/lib/authStorage';
 import { useSidebar } from '../providers/SidebarProvider';
 import { navLinks, images } from '../types/assets';
@@ -76,6 +77,9 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     logout();
+    toast.success("Logged out successfully 👋", {
+      description: "See you next time!",
+    });
     router.push('/auth/signin');
   };
 

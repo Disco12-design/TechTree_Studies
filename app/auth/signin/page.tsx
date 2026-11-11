@@ -1,30 +1,31 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Check } from 'lucide-react';
-import { saveUser, validateEmail } from '@/lib/authStorage';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
+import { saveUser, validateEmail } from "@/lib/authStorage";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email');
+      setError("Please enter a valid email");
       return;
     }
 
     if (!password) {
-      setError('Password is required');
+      setError("Password is required");
       return;
     }
 
@@ -34,13 +35,13 @@ export default function SignInPage() {
       const user = {
         id: Date.now().toString(),
         email,
-        name: email.split('@')[0],
+        name: email.split("@")[0],
       };
 
       saveUser(user);
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
-      setError('Failed to sign in. Please try again.');
+      setError("Failed to sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -50,25 +51,12 @@ export default function SignInPage() {
     <div className="flex min-h-screen bg-white">
       {/* Left Column - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 py-12">
-     
-
         {/* Form Section */}
         <div>
-          <h1 className="text-4xl font-bold text-brand-950 mb-2">Welcome Back!</h1>
+          <h1 className="text-4xl font-bold text-brand-950 mb-2">
+            Welcome Back!
+          </h1>
           <p className="text-brand-700 mb-8">Please choose your information</p>
-
-          {/* Email Display Box */}
-          {email && (
-            <div className="mb-6 p-4 border border-brand-200 rounded-lg flex items-center justify-between bg-white hover:bg-brand-50 transition cursor-pointer">
-              <div>
-                <p className="text-xs text-brand-600 mb-1">Email Address</p>
-                <p className="font-medium text-brand-950">{email}</p>
-              </div>
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                <Check className="w-4 h-4 text-green-600" />
-              </div>
-            </div>
-          )}
 
           <form onSubmit={handleSignIn} className="space-y-4">
             {/* Email Field */}
@@ -91,14 +79,29 @@ export default function SignInPage() {
               <label className="block text-sm font-medium text-brand-900 mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-lg border border-brand-200 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:outline-none transition"
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 pr-12 rounded-lg border border-brand-200 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:outline-none transition"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-brand-500 hover:text-brand-700 transition"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -114,7 +117,7 @@ export default function SignInPage() {
               disabled={isLoading}
               className="w-full bg-brand-950 text-white py-3 rounded-lg font-semibold transition hover:bg-brand-900 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
-              {isLoading ? 'Signing in...' : 'Continue with email'}
+              {isLoading ? "Signing in..." : "Continue with email"}
             </button>
           </form>
 
@@ -145,8 +148,11 @@ export default function SignInPage() {
 
           {/* Link to Sign Up */}
           <p className="text-center text-sm text-brand-700 mt-6">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="font-semibold text-brand-600 hover:text-brand-700">
+            Don't have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="font-semibold text-brand-600 hover:text-brand-700"
+            >
               Sign Up
             </Link>
           </p>
@@ -154,40 +160,20 @@ export default function SignInPage() {
       </div>
 
       {/* Right Column - Promotional */}
-      <div className="hidden lg:flex w-1/2 bg-linear-to-br from-brand-900 via-brand-800 to-brand-900 relative overflow-hidden flex-col justify-center items-center p-12">
-        {/* Background Pattern */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-700 rounded-full blur-3xl opacity-20" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-600 rounded-full blur-3xl opacity-20" />
+      <div
+        className="hidden lg:flex w-1/2 relative overflow-hidden flex-col justify-center items-center p-12"
+        style={{
+          backgroundImage: "url('/TechTree%20Studies%20Network%20Logo.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-linear-to-br from-brand-900/95 via-brand-800/90 to-brand-950/95" />
 
-        {/* Content */}
-        <div className="relative z-10 text-center text-white max-w-md">
-          <h2 className="text-5xl font-bold mb-4">Ace Your Exam</h2>
-          <p className="text-xl text-brand-100 mb-8">
-            Join thousands of students who have successfully passed their CompTIA Security+ certification.
-          </p>
-
-          {/* Features */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                <Check className="w-6 h-6 text-brand-300" />
-              </div>
-              <span className="text-brand-100">100% Pass Guarantee</span>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                <Check className="w-6 h-6 text-brand-300" />
-              </div>
-              <span className="text-brand-100">Expert Study Materials</span>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                <Check className="w-6 h-6 text-brand-300" />
-              </div>
-              <span className="text-brand-100">Lifetime Access</span>
-            </div>
-          </div>
-        </div>
+        {/* Animated Background Elements */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand-600 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-700 rounded-full blur-3xl opacity-20" />
       </div>
     </div>
   );
