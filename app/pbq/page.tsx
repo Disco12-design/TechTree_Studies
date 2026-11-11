@@ -246,7 +246,6 @@ export default function PBQPage() {
               </h1>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Chip icon={Clock}>{currentPBQ.estimatedMinutes} min</Chip>
-                {/* {currentPBQ.difficulty && <Chip icon={Gauge}>{currentPBQ.difficulty}</Chip>} */}
               </div>
             </div>
             {s && (
