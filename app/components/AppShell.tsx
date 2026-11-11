@@ -6,7 +6,7 @@ import { SidebarProvider } from "../providers/SidebarProvider";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/";
+  const isAuthPage = pathname === "/" || pathname.startsWith("/auth/");
 
   return (
     <SidebarProvider>

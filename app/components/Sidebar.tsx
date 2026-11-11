@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { ChevronRight, Menu, Moon, Search, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ChevronRight, LogOut, Menu, Moon, Search, X } from 'lucide-react';
+import { logout } from '@/lib/authStorage';
 import { useSidebar } from '../providers/SidebarProvider';
 import { navLinks, images } from '../types/assets';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false); // mobile drawer
   const { collapsed, setCollapsed } = useSidebar(); // desktop icon-only mode
   const [lightMode, setLightMode] = useState(false); // switch state (not wired to a theme yet)
@@ -71,6 +73,11 @@ export default function Sidebar() {
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/auth/signin');
+  };
 
   // Expand the sidebar, then focus the search box once it has rendered
   const expandAndSearch = () => {
@@ -195,7 +202,16 @@ export default function Sidebar() {
 
           {/* Divider + footer actions */}
           <div className="mt-auto space-y-2 border-t border-brand-300 pt-4">
-            {/* Light mode switch (visual only: hook up to your theme logic) */}
+            {/* Logout Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={collapsed ? 'Logout' : undefined}
+              className={`flex w-full items-center gap-3 rounded px-4 py-2 text-left text-lg font-semibold text-brand-950 transition hover:bg-brand-300 hover:text-brand-800 focus-visible:outline focus-visible:outline-brand-700 ${centerCls}`}
+            >
+              <LogOut size={22} aria-hidden="true" className="shrink-0" />
+              <span className={labelCls}>Logout</span>
+            </button>
           </div>
         </aside>
 
