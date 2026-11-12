@@ -7,7 +7,7 @@ import { profile, metrics, examAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
 import { loadSavedProfile, loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
-import { getUser, isFreshLogin, clearFreshLoginFlag } from "@/lib/authStorage";
+import { useUser } from "@clerk/nextjs";
 
 
 7
@@ -94,7 +94,7 @@ export default function Dashboard() {
   const [saved, setSaved] = useState<SavedProfile>({ name: null, avatar: null });
   const [ready, setReady] = useState(false);
   const [streak, setStreak] = useState(0);
-
+  const { isLoaded, user } = useUser();
   const displayName = saved.name ?? profile.name;
   const nameVisibility = ready ? "" : "invisible";
 
@@ -103,18 +103,17 @@ export default function Dashboard() {
     setReady(true);
     setExamIso(localStorage.getItem("examDate"));
     setStreak(loadAndUpdateStreak());
-
-    // Show welcome toast if this is a fresh login
-    if (isFreshLogin()) {
-      const user = getUser();
-      if (user) {
-        toast.success(`Welcome back, ${user.name}! `, {
-          description: "You're logged in successfully.",
-        });
-        clearFreshLoginFlag();
-      }
-    }
   }, []);
+
+  // Welcome toast once per browser session after Clerk loads the user
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    if (sessionStorage.getItem("welcomed")) return;
+    sessionStorage.setItem("welcomed", "true");
+    toast.success(`Welcome back, ${user.firstName ?? user.primaryEmailAddress?.emailAddress.split("@")[0]}! `, {
+      description: "You're logged in successfully.",
+    });
+  }, [isLoaded, user]);
 
   const examDateLabel = examIso ? formatLongDate(examIso) : null;
   const days = examIso ? daysUntil(examIso) : null;

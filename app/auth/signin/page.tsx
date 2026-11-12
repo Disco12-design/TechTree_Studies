@@ -5,40 +5,71 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
-import { saveUser, validateEmail } from "@/lib/authStorage";
+import { useSignIn } from "@clerk/nextjs";
+import { validateEmail } from "@/lib/authStorage";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { signIn } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const validate = (): string | null => {
+    if (!validateEmail(email)) return "Please enter a valid email";
+    if (!password) return "Password is required";
+    return null;
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
-    const validate = (): string | null => {
-  if (!validateEmail(email)) return "Please enter a valid email";
-  if (!password) return "Password is required";
-  return null;
-};
+    e.preventDefault();
 
-const handleSignIn = async (e: React.FormEvent) => {
-  e.preventDefault();
+    const validationError = validate();
+    setError(validationError ?? "");
+    if (validationError) return;
 
-  const validationError = validate();
-  setError(validationError ?? "");
-  if (validationError) return;
+    try {
+      setIsLoading(true);
+      const { error: clerkError } = await signIn.password({
+        emailAddress: email,
+        password,
+      });
+      if (clerkError) {
+        setError(clerkError.longMessage ?? clerkError.message);
+        return;
+      }
 
-  try {
-    setIsLoading(true);
-    saveUser({ id: Date.now().toString(), email, name: email.split("@")[0] });
-    router.push("/dashboard");
-  } catch {
-    setError("Failed to sign in. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      if (signIn.status === "complete") {
+        await signIn.finalize({
+          navigate: ({ decorateUrl }) => {
+            const url = decorateUrl("/dashboard");
+            if (url.startsWith("http")) {
+              window.location.href = url;
+            } else {
+              router.push(url);
+            }
+          },
+        });
+      } else {
+        setError("Additional verification is required. Please contact support.");
+      }
+    } catch {
+      setError("Failed to sign in. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    const { error: clerkError } = await signIn.sso({
+      strategy: "oauth_google",
+      redirectCallbackUrl: "/auth/sso-callback",
+      redirectUrl: "/dashboard",
+    });
+    if (clerkError) setError(clerkError.longMessage ?? clerkError.message);
   };
 
   return (
@@ -126,6 +157,7 @@ const handleSignIn = async (e: React.FormEvent) => {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
+              onClick={handleGoogle}
               className="flex items-center justify-center gap-2 py-3 px-4 border border-brand-200 rounded-lg hover:bg-brand-50 transition font-medium text-brand-900"
             >
               <Image src="/google.png" alt="Google" width={20} height={20} />

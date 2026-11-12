@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
-import { saveUser, validateEmail, validatePassword } from '@/lib/authStorage';
+import { useSignUp } from '@clerk/nextjs';
+import { validateEmail, validatePassword } from '@/lib/authStorage';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { signUp } = useSignUp();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +19,8 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [code, setCode] = useState('');
 
   
   // Validate form fields before submission
@@ -26,6 +30,19 @@ export default function SignUpPage() {
   if (!validatePassword(password)) return 'Password must be at least 6 characters';
   if (password !== confirmPassword) return 'Passwords do not match';
   return null;
+};
+
+const goToDashboard = async () => {
+  await signUp.finalize({
+    navigate: ({ decorateUrl }) => {
+      const url = decorateUrl('/dashboard');
+      if (url.startsWith('http')) {
+        window.location.href = url;
+      } else {
+        router.push(url);
+      }
+    },
+  });
 };
 
 // Handle form submission for sign up
@@ -38,14 +55,58 @@ const handleSignUp = async (e: React.FormEvent) => {
 
   try {
     setIsLoading(true);
-    saveUser({ id: Date.now().toString(), email, name: name.trim() });
-    router.push('/dashboard');
+    const { error: clerkError } = await signUp.password({ emailAddress: email, password });
+    if (clerkError) {
+      setError(clerkError.longMessage ?? clerkError.message);
+      return;
+    }
+    const { error: sendError } = await signUp.verifications.sendEmailCode();
+    if (sendError) {
+      setError(sendError.longMessage ?? sendError.message);
+      return;
+    }
+    setVerifying(true);
   } catch {
     setError('Failed to create account. Please try again.');
   } finally {
     setIsLoading(false);
   }
-}; 
+};
+
+// Verify the email code Clerk sent, then finish sign up
+const handleVerify = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+
+  try {
+    setIsLoading(true);
+    const { error: clerkError } = await signUp.verifications.verifyEmailCode({ code });
+    if (clerkError) {
+      setError(clerkError.longMessage ?? clerkError.message);
+      return;
+    }
+    if (signUp.status === 'complete') {
+      await goToDashboard();
+    } else {
+      setError('Sign up is not complete. Please try again.');
+    }
+  } catch {
+    setError('Failed to verify the code. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const handleGoogle = async () => {
+  setError('');
+  const { error: clerkError } = await signUp.sso({
+    strategy: 'oauth_google',
+    redirectCallbackUrl: '/auth/sso-callback',
+    redirectUrl: '/dashboard',
+  });
+  if (clerkError) setError(clerkError.longMessage ?? clerkError.message);
+};
+
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -56,6 +117,33 @@ const handleSignUp = async (e: React.FormEvent) => {
           <h1 className="text-4xl font-bold text-brand-950 mb-2">Create Account</h1>
           <p className="text-brand-700 mb-8">Start your learning journey today</p>
 
+          {verifying ? (
+            <form onSubmit={handleVerify} className="space-y-4">
+              <p className="text-sm text-brand-700">
+                We sent a verification code to {email}. Enter it below.
+              </p>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Verification code"
+                className="w-full px-4 py-3 rounded-lg border border-brand-200 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:outline-none transition"
+                disabled={isLoading}
+              />
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-brand-950 text-white py-3 rounded-lg font-semibold transition hover:bg-brand-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Verifying...' : 'Verify email'}
+              </button>
+            </form>
+          ) : (
           <form onSubmit={handleSignUp} className="space-y-4">
             {/* Name Field */}
             <div>
@@ -164,7 +252,9 @@ const handleSignUp = async (e: React.FormEvent) => {
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
+            <div id="clerk-captcha" />
           </form>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
@@ -177,6 +267,7 @@ const handleSignUp = async (e: React.FormEvent) => {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
+              onClick={handleGoogle}
               className="flex items-center justify-center gap-2 py-3 px-4 border border-brand-200 rounded-lg hover:bg-brand-50 transition font-medium text-brand-900"
             >
               <Image src="/google.png" alt="Google" width={20} height={20} />

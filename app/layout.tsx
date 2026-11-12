@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import { Suspense } from "react";
 import AppShell from "./components/AppShell";
 import { ToasterProvider } from "./providers/ToasterProvider";
@@ -11,11 +12,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-dvh">
-        <ToasterProvider />
+        <ClerkProvider signInUrl="/auth/signin" signUpUrl="/auth/signup">
+          <ToasterProvider />
 
-        <Suspense fallback={null}>
+          <Suspense fallback={null}>
           <AppShell>{children}</AppShell>
-        </Suspense>
+          </Suspense>
+        </ClerkProvider>
       </body>
     </html>
   );

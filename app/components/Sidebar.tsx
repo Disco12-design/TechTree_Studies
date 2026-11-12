@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChevronRight, LogOut, Menu, X, type LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { logout } from '@/lib/authStorage';
+import { useClerk } from '@clerk/nextjs';
 import { useSidebar } from '../providers/SidebarProvider';
 import { navLinks, images } from '../types/assets';
 
@@ -131,8 +131,10 @@ export default function Sidebar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const centered = collapsed ? 'md:justify-center md:px-0' : '';
 
-  const handleLogout = () => {
-    logout();
+  const { signOut } = useClerk();
+
+  const handleLogout = async () => {
+    await signOut();
     toast.success('Logged out successfully', { description: 'See you next time!' });
     router.push('/auth/signin');
   };
