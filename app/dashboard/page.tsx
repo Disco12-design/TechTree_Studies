@@ -108,7 +108,7 @@ export default function Dashboard() {
     if (isFreshLogin()) {
       const user = getUser();
       if (user) {
-        toast.success(`Welcome back, ${user.name}! 👋`, {
+        toast.success(`Welcome back, ${user.name}! `, {
           description: "You're logged in successfully.",
         });
         clearFreshLoginFlag();

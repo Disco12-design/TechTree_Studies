@@ -16,35 +16,29 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+    const validate = (): string | null => {
+  if (!validateEmail(email)) return "Please enter a valid email";
+  if (!password) return "Password is required";
+  return null;
+};
 
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email");
-      return;
-    }
+const handleSignIn = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
+  const validationError = validate();
+  setError(validationError ?? "");
+  if (validationError) return;
 
-    try {
-      setIsLoading(true);
-
-      const user = {
-        id: Date.now().toString(),
-        email,
-        name: email.split("@")[0],
-      };
-
-      saveUser(user);
-      router.push("/dashboard");
-    } catch (err) {
-      setError("Failed to sign in. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+  try {
+    setIsLoading(true);
+    saveUser({ id: Date.now().toString(), email, name: email.split("@")[0] });
+    router.push("/dashboard");
+  } catch {
+    setError("Failed to sign in. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   };
 
   return (

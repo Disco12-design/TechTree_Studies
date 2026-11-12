@@ -18,47 +18,34 @@ export default function SignUpPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  
+  // Validate form fields before submission
+  const validate = (): string | null => {
+  if (!name.trim()) return 'Name is required';
+  if (!validateEmail(email)) return 'Please enter a valid email';
+  if (!validatePassword(password)) return 'Password must be at least 6 characters';
+  if (password !== confirmPassword) return 'Passwords do not match';
+  return null;
+};
 
-    if (!name.trim()) {
-      setError('Name is required');
-      return;
-    }
+// Handle form submission for sign up
+const handleSignUp = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email');
-      return;
-    }
+  const validationError = validate();
+  setError(validationError ?? '');
+  if (validationError) return;
 
-    if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const newUser = {
-        id: Date.now().toString(),
-        email,
-        name: name.trim(),
-      };
-
-      saveUser(newUser);
-      router.push('/dashboard');
-    } catch (err) {
-      setError('Failed to create account. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    setIsLoading(true);
+    saveUser({ id: Date.now().toString(), email, name: name.trim() });
+    router.push('/dashboard');
+  } catch {
+    setError('Failed to create account. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+}; 
 
   return (
     <div className="flex min-h-screen bg-white">
