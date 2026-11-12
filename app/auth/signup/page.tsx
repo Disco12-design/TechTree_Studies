@@ -97,10 +97,10 @@ const handleVerify = async (e: React.FormEvent) => {
   }
 };
 
-const handleGoogle = async () => {
+const handleSocial = async (strategy: 'oauth_google' | 'oauth_apple') => {
   setError('');
   const { error: clerkError } = await signUp.sso({
-    strategy: 'oauth_google',
+    strategy,
     redirectCallbackUrl: '/auth/sso-callback',
     redirectUrl: '/dashboard',
   });
@@ -267,7 +267,7 @@ const handleGoogle = async () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={handleGoogle}
+              onClick={() => handleSocial('oauth_google')}
               className="flex items-center justify-center gap-2 py-3 px-4 border border-brand-200 rounded-lg hover:bg-brand-50 transition font-medium text-brand-900"
             >
               <Image src="/google.png" alt="Google" width={20} height={20} />
@@ -275,6 +275,7 @@ const handleGoogle = async () => {
             </button>
             <button
               type="button"
+              onClick={() => handleSocial('oauth_apple')}
               className="flex items-center justify-center gap-2 py-3 px-4 border border-brand-200 rounded-lg hover:bg-brand-50 transition font-medium text-brand-900"
             >
               <Image src="/apple.png" alt="Apple" width={20} height={20} />
