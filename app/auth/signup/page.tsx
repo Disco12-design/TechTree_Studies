@@ -138,6 +138,15 @@ export default function SignUpPage() {
       const result = await signUp.verifications.verifyEmailCode({ code });
       if (result.error) return setError(errorMessage(result.error));
 
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      await signUp.update({
+        firstName,
+        lastName,
+      });
+
       if (signUp.status === 'complete') await goToDashboard();
       else setError('Sign up is not complete. Please try again.');
     } catch {
@@ -251,7 +260,7 @@ export default function SignUpPage() {
         <p className="text-center text-sm text-brand-700 mt-6">
           Already have an account?{' '}
           <Link href="/auth/signin" className="font-semibold text-brand-600 hover:text-brand-700">
-            Sign In
+            Sign Inv
           </Link>
         </p>
       </div>

@@ -1,12 +1,48 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher(["/", "/auth(.*)", "/.well-known(.*)"]);
+// Public routes accessible without authentication
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/auth/signin",
+  "/auth/signup",
+  "/auth/sso-callback",
+  "/pricing-billing",
+  "/.well-known(.*)",
+]);
+
+// Protected routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/profile(.*)",
+  "/study-notes(.*)",
+  "/practice-exam(.*)",
+  "/attempts(.*)",
+  "/pbq(.*)",
+]);
 
 export default clerkMiddleware(
   async (auth, req) => {
-    if (!isPublicRoute(req)) await auth.protect();
+    const { userId } = await auth();
+    const { pathname } = req.nextUrl;
+
+    // If trying to access protected route without being signed in
+    if (isProtectedRoute(req) && !userId) {
+      return auth.redirectToSignIn();
+    }
+
+    // If signed in and trying to access sign-in/sign-up pages
+    if (userId && (pathname === "/auth/signin" || pathname === "/auth/signup")) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    // For all other requests, proceed normally
+    return NextResponse.next();
   },
-  { signInUrl: "/auth/signin", signUpUrl: "/auth/signup" },
+  { 
+    signInUrl: "/auth/signin", 
+    signUpUrl: "/auth/signup",
+  },
 );
 
 export const config = {
