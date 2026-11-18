@@ -23,12 +23,13 @@ const isProtectedRoute = createRouteMatcher([
 
 export default clerkMiddleware(
   async (auth, req) => {
-    const { userId } = await auth();
+    const authState = await auth();
+    const { userId } = authState;
     const { pathname } = req.nextUrl;
 
     // If trying to access protected route without being signed in
     if (isProtectedRoute(req) && !userId) {
-      return auth.redirectToSignIn();
+      return authState.redirectToSignIn();
     }
 
     // If signed in and trying to access sign-in/sign-up pages
