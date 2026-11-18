@@ -1,0 +1,86 @@
+ .gitignore                                         |   56 [32m+[m[31m-[m
+ README.md                                          |  341 [32m++[m
+ backend/.env.example                               |   15 [32m+[m
+ backend/.gitignore                                 |   33 [32m+[m
+ backend/Controllers/AttemptsController.js          |    0
+ backend/Controllers/AuthController.js              |   32 [32m+[m
+ backend/Controllers/PriceBilling.js                |    0
+ backend/Controllers/ProfileController.js           |  139 [32m+[m
+ backend/Controllers/Ratelimitting.js               |    0
+ backend/Routes/AttemptsRoute.js                    |    0
+ backend/Routes/AuthRoute.js                        |    9 [32m+[m
+ backend/Routes/PriceBillingRoute.js                |    0
+ backend/Routes/ProfilePageRoute.js                 |   11 [32m+[m
+ backend/Routes/RatelimittingRoute.js               |    0
+ backend/config/firebase.js                         |   12 [32m+[m
+ backend/middleware/requireAuthentication.js        |   15 [32m+[m
+ backend/package-lock.json                          | 3242 [32m++++++++++++++++++++[m
+ backend/package.json                               |   30 [32m+[m
+ backend/server.js                                  |   76 [32m+[m
+ frontend/.gitignore                                |   41 [32m+[m
+ TESTING_GUIDE.md => frontend/TESTING_GUIDE.md      |    0
+ .../TEST_INSTRUCTIONS.md                           |    0
+ .../app}/api/study-notes/[id]/route.ts             |    0
+ {app => frontend/app}/attempts/page.tsx            |    0
+ {app => frontend/app}/auth/signin/page.tsx         |    0
+ {app => frontend/app}/auth/signup/page.tsx         |    0
+ {app => frontend/app}/auth/sso-callback/page.tsx   |    0
+ {app => frontend/app}/components/AppShell.tsx      |    0
+ {app => frontend/app}/components/Calendar.tsx      |    0
+ {app => frontend/app}/components/PbqSim.tsx        |    0
+ {app => frontend/app}/components/PbqSim2.tsx       |    0
+ {app => frontend/app}/components/Pbqsim10.tsx      |    0
+ {app => frontend/app}/components/Pbqsim3.tsx       |    0
+ {app => frontend/app}/components/Pbqsim4.tsx       |    0
+ {app => frontend/app}/components/Pbqsim5.tsx       |    0
+ {app => frontend/app}/components/Pbqsim6.tsx       |    0
+ {app => frontend/app}/components/Pbqsim7.tsx       |    0
+ {app => frontend/app}/components/Pbqsim8.tsx       |    0
+ {app => frontend/app}/components/Pbqsim9.tsx       |    0
+ .../app}/components/ProtectedRoute.tsx             |    0
+ {app => frontend/app}/components/Sidebar.tsx       |    0
+ {app => frontend/app}/components/StudyNoteCard.tsx |    0
+ .../app}/components/StudyNotesFilter.tsx           |    0
+ {app => frontend/app}/dashboard/calendar/page.tsx  |    0
+ {app => frontend/app}/dashboard/page.tsx           |    0
+ {app => frontend/app}/data/pbq.ts                  |    0
+ {app => frontend/app}/data/pbqTypes.ts             |    0
+ {app => frontend/app}/data/pbq_03.ts               |    0
+ {app => frontend/app}/data/pbq_04.ts               |    0
+ {app => frontend/app}/data/pbq_05.ts               |    0
+ {app => frontend/app}/data/pbq_06.ts               |    0
+ {app => frontend/app}/data/pbq_07.ts               |    0
+ {app => frontend/app}/data/pbq_08.ts               |    0
+ {app => frontend/app}/data/pbq_09.ts               |    0
+ {app => frontend/app}/data/pbq_10.ts               |    0
+ {app => frontend/app}/data/pbq_2.ts                |    0
+ {app => frontend/app}/favicon.ico                  |  Bin
+ {app => frontend/app}/globals.css                  |    0
+ {app => frontend/app}/layout.tsx                   |    0
+ {app => frontend/app}/page.tsx                     |    0
+ {app => frontend/app}/pbq/page.tsx                 |    0
+ {app => frontend/app}/practice-exam/page.tsx       |    0
+ {app => frontend/app}/pricing-billing/page.tsx     |    0
+ {app => frontend/app}/profile/page.tsx             |    0
+ .../app}/providers/SidebarProvider.tsx             |    0
+ .../app}/providers/ToasterProvider.tsx             |    0
+ {app => frontend/app}/study-notes/[id]/page.tsx    |    0
+ {app => frontend/app}/study-notes/notes/page.tsx   |    0
+ {app => frontend/app}/study-notes/page.tsx         |    0
+ {app => frontend/app}/types/assets.ts              |    0
+ {lib => frontend/lib}/authStorage.ts               |    0
+ {lib => frontend/lib}/dates.ts                     |    0
+ {lib => frontend/lib}/storage.ts                   |    0
+ next.config.ts => frontend/next.config.ts          |    0
+ package-lock.json => frontend/package-lock.json    |    0
+ package.json => frontend/package.json              |    0
+ proxy.ts => frontend/proxy.ts                      |    0
+ .../public}/Magenta Purple Circuit Tree.png        |  Bin
+ .../public}/TechTree Studies Network Logo.png      |  Bin
+ {public => frontend/public}/apple.png              |  Bin
+ {public => frontend/public}/google.png             |  Bin
+ {public => frontend/public}/logo.png               |  Bin
+ {public => frontend/public}/technology.png         |  Bin
+ {public => frontend/public}/user.png               |  Bin
+ tsconfig.json => frontend/tsconfig.json            |    0
+ 85 files changed, 4011 insertions(+), 41 deletions(-)
