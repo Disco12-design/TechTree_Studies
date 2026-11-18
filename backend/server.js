@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 
 import profileRoutes from "./Routes/ProfilePageRoute.js";
 import authRoutes from "./Routes/AuthRoute.js";
+import attemptsRoutes from "./Routes/AttemptsRoute.js";
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.get("/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/attempts", attemptsRoutes);
 
 // 404 handler for undefined routes (must come after all routes)
 app.use((req, res) => {
