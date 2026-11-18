@@ -15,10 +15,6 @@ export async function getCurrentUser(req, res) {
         sessionId,
         firstName: user.firstName,
         lastName: user.lastName,
-        fullName:
-          user.fullName ||
-          [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-          null,
         email: primaryEmail?.emailAddress ?? null,
         imageUrl: user.imageUrl,
       },
