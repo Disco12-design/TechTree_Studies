@@ -1,164 +1,191 @@
 import { db } from "../config/firebase.js";
+import { FieldValue } from "firebase-admin/firestore";
 
-// Get the attempts collection for a specific user
-function getUserAttempts(userId) {
-  return db.collection("users").doc(userId).collection("attempts");
+function getProfileRef(userId) {
+  return db.collection("users").doc(userId);
 }
 
+function serializeProfile(profile) {
+  const serialized = { ...profile };
 
-// CREATE ATTEMPT
-const createAttempt = async (req, res, next) => {
-  try {
-    const { id,code,title,mode,score,total,date,correct,incorrect,unanswered,reviewQuestions,average,} = req.body;
+  for (const field of ["createdAt", "updatedAt", "lastActivityDate"]) {
+    if (serialized[field]?.toDate) {
+      serialized[field] = serialized[field].toDate();
+    }
+  }
 
-    // Check required fields
-    if (!id || !code || !title || !mode || !date) {
-      return res.status(400).json({
-        error: "Please provide all required fields",
-      });
+  return serialized;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function getValidProfileFields(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { error: "Request body must be an object" };
+  }
+
+  const fields = {};
+
+  for (const field of ["firstName", "lastName", "email", "profilePicture"]) {
+    const value = body[field];
+
+    if (value === undefined) {
+      continue;
     }
 
-    // Check the attempt mode
-    if (mode !== "practice" && mode !== "real") {
-      return res.status(400).json({
-        error: "Mode must be practice or real",
-      });
-    }
-
-    // Check the scores
-    if (
-      typeof total !== "number" ||
-      total <= 0 ||
-      typeof score !== "number" ||
-      score < 0 ||
-      score > total
-    ) {
-      return res.status(400).json({
-        error: "Invalid score or total",
-      });
-    }
-
-    // Check the number of questions
-    if (
-      !Number.isInteger(correct) || correct < 0 ||
-      !Number.isInteger(incorrect) || incorrect < 0 ||
-      !Number.isInteger(unanswered) || unanswered < 0
-    ) {
-      return res.status(400).json({
-        error: "Invalid question counts",
-      });
-    }
-
-    // Check the date format
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      isNaN(new Date(date)) ||
-      new Date(date).toISOString().startsWith(date) === false
-    ) {
-      return res.status(400).json({
-        error: "Date must be YYYY-MM-DD",
-      });
-    }
-
-    // Create the attempt object
-    const attempt = {id,code,title,mode,score,total,date,correct,incorrect,unanswered, average};
-
-    // Add question details if they exist
-    if (reviewQuestions !== undefined) {
-      if (!Array.isArray(reviewQuestions)) {
-        return res.status(400).json({
-          error: "reviewQuestions must be an array",
-        });
+    if (field === "profilePicture") {
+      if (
+        value !== null &&
+        (typeof value !== "string" || value.length > 700000)
+      ) {
+        return { error: "Invalid profilePicture" };
       }
-
-      attempt.reviewQuestions = reviewQuestions;
+    } else if (
+      typeof value !== "string" ||
+      !value.trim() ||
+      value.trim().length > (field === "email" ? 254 : 100)
+    ) {
+      return { error: `Invalid ${field}` };
     }
 
-    // Save the attempt in Firebase
-    await getUserAttempts(req.userId).doc(id).set(attempt);
+    fields[field] =
+      typeof value === "string" && field !== "profilePicture"
+        ? value.trim()
+        : value;
+  }
+
+  if (fields.email && !EMAIL_PATTERN.test(fields.email)) {
+    return {
+      error: "Invalid email",
+    };
+  }
+
+  return { fields };
+}
+
+function readProfileFields(req, res) {
+  const result = getValidProfileFields(req.body);
+
+  if (result.error) {
+    res.status(400).json({ error: result.error });
+    return null;
+  }
+
+  return result.fields;
+}
+
+function isMissingRequiredProfileField(field) {
+  return typeof field !== "string" || field.length === 0;
+}
+
+// Create a new user profile
+async function createProfile(req, res, next) {
+  const fields = readProfileFields(req, res);
+
+  if (!fields) {
+    return;
+  }
+
+  const { firstName, lastName, email, profilePicture } = fields;
+
+  if (
+    isMissingRequiredProfileField(firstName) ||
+    isMissingRequiredProfileField(lastName) ||
+    isMissingRequiredProfileField(email)
+  ) {
+    return res.status(400).json({
+      error: "firstName, lastName, and email are required",
+    });
+  }
+
+  try {
+    const profileRef = getProfileRef(req.userId);
+    const existingProfile = await profileRef.get();
+
+    if (existingProfile.exists && existingProfile.data()?.createdAt) {
+      return res.status(409).json({
+        error: "Profile already exists",
+      });
+    }
+
+    const profile = {
+      firstName,
+      lastName,
+      email,
+      ...(profilePicture !== undefined ? { profilePicture } : {}),
+      streak: existingProfile.data()?.streak ?? 0,
+      lastActivityDate: FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    await profileRef.set(profile, { merge: true });
+    const savedProfile = await profileRef.get();
 
     return res.status(201).json({
-      data: attempt,
+      data: serializeProfile(savedProfile.data()),
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
-};
+}
 
-
-// GET ALL ATTEMPTS
-const getAttempts = async (req, res, next) => {
+// Get the profile of the authenticated user
+async function getProfile(req, res, next) {
   try {
-    const snapshot = await getUserAttempts(req.userId)
-      .orderBy("date", "desc")
-      .get();
+    const snapshot = await getProfileRef(req.userId).get();
 
-    const attempts = snapshot.docs.map((doc) => doc.data());
-
-    return res.status(200).json({
-      data: attempts,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-// GET ONE ATTEMPT
-const getAttempt = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    if (!id || id.includes("/")) {
-      return res.status(400).json({
-        error: "Invalid attempt id",
-      });
-    }
-
-    const attempt = await getUserAttempts(req.userId).doc(id).get();
-
-    if (!attempt.exists) {
+    if (!snapshot.exists || !snapshot.data()?.createdAt) {
       return res.status(404).json({
-        error: "Attempt not found",
+        error: "Profile not found",
       });
     }
 
-    return res.status(200).json({
-      data: attempt.data(),
+    return res.json({
+      data: serializeProfile(snapshot.data()),
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
-};
+}
 
+// Update an existing user profile
+async function updateProfile(req, res, next) {
+  const updateData = readProfileFields(req, res);
 
-// DELETE ONE ATTEMPT
-const deleteAttempt = async (req, res, next) => {
+  if (!updateData) {
+    return;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({
+      error: "No valid fields to update",
+    });
+  }
+
   try {
-    const { id } = req.params;
+    const profileRef = getProfileRef(req.userId);
+    const snapshot = await profileRef.get();
 
-    if (!id || id.includes("/")) {
-      return res.status(400).json({
-        error: "Invalid attempt id",
-      });
-    }
-
-    const attemptRef = getUserAttempts(req.userId).doc(id);
-    const snap = await attemptRef.get();
-
-    if (!snap.exists) {
+    if (!snapshot.exists || !snapshot.data()?.createdAt) {
       return res.status(404).json({
-        error: "Attempt not found",
+        error: "Profile not found",
       });
     }
 
-    await attemptRef.delete();
+    await profileRef.update({
+      ...updateData,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
 
-    return res.status(204).end();
+    const updatedProfile = await profileRef.get();
+
+    return res.json({
+      data: serializeProfile(updatedProfile.data()),
+    });
   } catch (error) {
-    next(error);
+    return next(error);
   }
-};
+}
 
-
-export { createAttempt, getAttempts, getAttempt, deleteAttempt };
+export { getProfile, createProfile, updateProfile };

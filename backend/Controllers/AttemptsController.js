@@ -1,72 +1,117 @@
-
 import { db } from "../config/firebase.js";
 
-// Get the attempts collection for a specific user
-function getUserAttempts(userId) {
-  return db.collection("users").doc(userId).collection("attempts");
-}
+const getUserAttempts = (userId) =>
+  db.collection("users").doc(userId).collection("attempts");
 
+const sendError = (res, status, error) => res.status(status).json({ error });
 
-// CREATE ATTEMPT
-export async function createAttempt(req, res, next) {
+const isCount = (n) => Number.isInteger(n) && n >= 0;
+
+const isNonEmptyString = (value, maxLength) =>
+  typeof value === "string" &&
+  value.trim().length > 0 &&
+  value.length <= maxLength;
+
+const isValidId = (id) =>
+  isNonEmptyString(id, 128) && !id.includes("/") && !id.includes("\\");
+
+const isValidDate = (date) =>
+  typeof date === "string" &&
+  /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+  !Number.isNaN(Date.parse(`${date}T00:00:00.000Z`)) &&
+  new Date(date).toISOString().startsWith(date);
+
+const isValidScore = (score, total) =>
+  Number.isFinite(score) &&
+  Number.isFinite(total) &&
+  typeof total === "number" &&
+  total > 0 &&
+  typeof score === "number" &&
+  score >= 0 &&
+  score <= total;
+
+const isStringArray = (value) =>
+  Array.isArray(value) &&
+  value.length <= 20 &&
+  value.every((item) => isNonEmptyString(item, 500));
+
+const isValidReviewQuestion = (question) => {
+  if (!question || typeof question !== "object" || Array.isArray(question)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(question.id) &&
+    (question.number === undefined ||
+      (Number.isInteger(question.number) && question.number > 0)) &&
+    isNonEmptyString(question.question, 5000) &&
+    isStringArray(question.userAnswer) &&
+    isStringArray(question.correctAnswer) &&
+    typeof question.isCorrect === "boolean" &&
+    (question.explanation === undefined ||
+      (typeof question.explanation === "string" &&
+        question.explanation.length <= 10000))
+  );
+};
+
+const createAttempt = async (req, res, next) => {
   try {
-    const {id,code,title, mode,score, total, date,correct, incorrect, unanswered, reviewQuestions,average
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return sendError(res, 400, "Request body must be an object");
+    }
+
+    const {
+      id, code, title, mode, score, total, date,
+      correct, incorrect, unanswered, average, reviewQuestions,
     } = req.body;
 
-    // Check required fields
-    if (!id || !code || !title || !mode || !date) {
-      return res.status(400).json({
-        error: "Please provide all required fields"
-      });
+    if (!isValidId(id)) {
+      return sendError(res, 400, "Invalid attempt id");
     }
-
-    // Check the attempt mode
+    if (!isNonEmptyString(code, 50) || !isNonEmptyString(title, 200)) {
+      return sendError(res, 400, "Please provide all required fields");
+    }
     if (mode !== "practice" && mode !== "real") {
-      return res.status(400).json({
-        error: "Mode must be practice or real"
-      });
+      return sendError(res, 400, "Mode must be practice or real");
     }
-
-    // Check the scores
+    if (!isValidScore(score, total)) {
+      return sendError(res, 400, "Invalid score or total");
+    }
+    if (![correct, incorrect, unanswered].every(isCount)) {
+      return sendError(res, 400, "Invalid question counts");
+    }
+    if (!isValidDate(date)) {
+      return sendError(res, 400, "Date must be YYYY-MM-DD");
+    }
     if (
-      typeof total !== "number" ||
-      total <= 0 ||
-      typeof score !== "number" ||
-      score < 0 ||
-      score > total
+      average !== undefined &&
+      (!Number.isFinite(average) || average < 0 || average > total)
     ) {
-      return res.status(400).json({
-        error: "Invalid score or total"
-      });
+      return sendError(res, 400, "Invalid average");
     }
-
-    // Check the number of questions
     if (
-      !Number.isInteger(correct) || correct < 0 ||
-      !Number.isInteger(incorrect) || incorrect < 0 ||
-      !Number.isInteger(unanswered) || unanswered < 0
+      reviewQuestions !== undefined &&
+      (!Array.isArray(reviewQuestions) ||
+        reviewQuestions.length > 500 ||
+        !reviewQuestions.every(isValidReviewQuestion))
     ) {
-      return res.status(400).json({
-        error: "Invalid question counts"
-      });
+      return sendError(res, 400, "Invalid reviewQuestions");
     }
-
-    // Check the date format
     if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      isNaN(new Date(date)) ||
-      new Date(date).toISOString().startsWith(date) === false
+      reviewQuestions !== undefined &&
+      reviewQuestions.length !== correct + incorrect + unanswered
     ) {
-      return res.status(400).json({
-        error: "Date must be YYYY-MM-DD"
-      }); 
+      return sendError(
+        res,
+        400,
+        "reviewQuestions length must match the question counts",
+      );
     }
 
-    // Create the attempt object
     const attempt = {
       id,
-      code,
-      title,
+      code: code.trim(),
+      title: title.trim(),
       mode,
       score,
       total,
@@ -74,108 +119,60 @@ export async function createAttempt(req, res, next) {
       correct,
       incorrect,
       unanswered,
-      average
+      ...(average !== undefined && { average }),
+      ...(reviewQuestions !== undefined && { reviewQuestions }),
     };
 
-    // Add question details if they exist
-
-    if (reviewQuestions !== undefined) {
-      if (!Array.isArray(reviewQuestions)) {
-        return res.status(400).json({
-          error: "reviewQuestions must be an array"
-        });
-      }
-
-      attempt.reviewQuestions = reviewQuestions;
-    }
-
-    // Save the attempt in Firebase
     await getUserAttempts(req.userId).doc(id).set(attempt);
 
-    return res.status(201).json({
-      data: attempt
-    });
-
+    return res.status(201).json({ data: attempt });
   } catch (error) {
     next(error);
   }
-}
+};
 
-
-// GET ALL ATTEMPTS
-export async function getAttempts(req, res, next) {
+const getAttempts = async (req, res, next) => {
   try {
     const snapshot = await getUserAttempts(req.userId)
       .orderBy("date", "desc")
       .get();
 
-    const attempts = snapshot.docs.map(doc => doc.data());
-
-    return res.status(200).json({
-      data: attempts
-    });
-
+    return res.json({ data: snapshot.docs.map((doc) => doc.data()) });
   } catch (error) {
     next(error);
   }
-}
+};
 
-
-// GET ONE ATTEMPT
-export async function getAttempt(req, res, next) {
+const getAttempt = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!isValidId(id)) return sendError(res, 400, "Invalid attempt id");
 
-    if (!id || id.includes("/")) {
-      return res.status(400).json({
-        error: "Invalid attempt id"
-      });
-    }
+    const snap = await getUserAttempts(req.userId).doc(id).get();
+    if (!snap.exists) return sendError(res, 404, "Attempt not found");
 
-    const attempt = await getUserAttempts(req.userId).doc(id).get();
-
-    if (!attempt.exists) {
-      return res.status(404).json({
-        error: "Attempt not found"
-      });
-    }
-
-    return res.status(200).json({
-      data: attempt.data()
-    });
-
+    return res.json({ data: snap.data() });
   } catch (error) {
     next(error);
   }
-}
+};
 
-
-// DELETE ONE ATTEMPT
-export async function deleteAttempt(req, res, next) {
+const deleteAttempt = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!isValidId(id)) return sendError(res, 400, "Invalid attempt id");
 
-    if (!id || id.includes("/")) {
-      return res.status(400).json({
-        error: "Invalid attempt id"
-      });
-    }
+    const ref = getUserAttempts(req.userId).doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) return sendError(res, 404, "Attempt not found");
 
-    const attempt = getUserAttempts(req.userId).doc(id);
-
-    const result = await attempt.get();
-
-    if (!result.exists) {
-      return res.status(404).json({
-        error: "Attempt not found"
-      });
-    }
-
-    await attempt.delete();
+    await ref.delete();
 
     return res.status(204).end();
-
   } catch (error) {
     next(error);
   }
-}
+};
+
+
+export { createAttempt, getAttempts, getAttempt, deleteAttempt };
