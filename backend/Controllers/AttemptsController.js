@@ -10,7 +10,7 @@ function getUserAttempts(userId) {
 // CREATE ATTEMPT
 export async function createAttempt(req, res, next) {
   try {
-    const {id,code,title, mode,score, total, date,correct, incorrect, unanswered, incorrectQuestions, reviewQuestions,average
+    const {id,code,title, mode,score, total, date,correct, incorrect, unanswered, reviewQuestions,average
     } = req.body;
 
     // Check required fields
@@ -78,15 +78,6 @@ export async function createAttempt(req, res, next) {
     };
 
     // Add question details if they exist
-    if (incorrectQuestions !== undefined) {
-      if (!Array.isArray(incorrectQuestions)) {
-        return res.status(400).json({
-          error: "incorrectQuestions must be an array"
-        });
-      }
-
-      attempt.incorrectQuestions = incorrectQuestions;
-    }
 
     if (reviewQuestions !== undefined) {
       if (!Array.isArray(reviewQuestions)) {

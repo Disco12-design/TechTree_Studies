@@ -1,6 +1,6 @@
 import { clerkClient, getAuth } from "@clerk/express";
 
-export async function getCurrentUser(req, res) {
+const getCurrentUser = async (req, res) => {
   const { userId, sessionId } = getAuth(req);
 
   try {
@@ -16,7 +16,6 @@ export async function getCurrentUser(req, res) {
         firstName: user.firstName,
         lastName: user.lastName,
         email: primaryEmail?.emailAddress ?? null,
-        imageUrl: user.imageUrl,
       },
     });
   } catch (error) {
@@ -25,4 +24,6 @@ export async function getCurrentUser(req, res) {
       error: "Authentication provider unavailable",
     });
   }
-}
+};
+
+export { getCurrentUser };

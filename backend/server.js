@@ -25,6 +25,7 @@ const clerkOptions = {
     : {}),
 };
 
+// Middleware setup
 app.use(
   cors({
     origin(origin, callback) {
@@ -59,7 +60,6 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Error handler (must have 4 params and come last)
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   res
