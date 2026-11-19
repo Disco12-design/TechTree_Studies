@@ -352,7 +352,7 @@ function PbqList({
         </p>
       </header>
 
-// Progress overview section
+ {/* Progress overview section */}
       <section aria-label="Your progress" className="mb-8">
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard

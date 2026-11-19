@@ -9,7 +9,13 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { Toaster, toast } from "sonner";
+import {
+  BackendError,
+  getBackendProfile,
+  saveBackendProfile,
+} from "@/lib/backend";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -118,11 +124,16 @@ async function fileToAvatarDataUrl(file: File, size = 400): Promise<string> {
   return canvas.toDataURL("image/webp", 0.85);
 }
 
-/**
- * Local-only for now. Swap this body for your real API call later.
- * Throws if the localStorage quota is exceeded, which triggers the error toast.
- */
-async function saveProfileRequest(payload: Persisted) {
+async function saveProfileRequest(
+  payload: Persisted,
+  getToken: () => Promise<string | null>,
+) {
+  await saveBackendProfile(getToken, {
+    firstName: payload.form.name,
+    lastName: payload.form.surname,
+    email: payload.form.email,
+    profilePicture: payload.avatarDataUrl,
+  });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
 
@@ -462,6 +473,8 @@ function SecurityCard({
 
 export default function ProfileSettings() {
   const router = useRouter();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
   const [tab, setTab] = useState<Tab>("profile");
 
   // Working values + last saved values
@@ -493,17 +506,55 @@ export default function ProfileSettings() {
 
  
   useEffect(() => {
+    if (!isLoaded) return;
+
     setStreak(loadStreakCount());
     const saved = loadPersisted();
-    if (!saved) return;
-    setForm(saved.form);
-    setSavedForm(saved.form);
-    setNotifs(saved.notifs);
-    setSavedNotifs(saved.notifs);
-    setTwoFactor(saved.twoFactor);
-    setAvatarUrl(saved.avatarDataUrl);
-    setSavedAvatarUrl(saved.avatarDataUrl);
-  }, []);
+
+    if (saved) {
+      setForm(saved.form);
+      setSavedForm(saved.form);
+      setNotifs(saved.notifs);
+      setSavedNotifs(saved.notifs);
+      setTwoFactor(saved.twoFactor);
+      setAvatarUrl(saved.avatarDataUrl);
+      setSavedAvatarUrl(saved.avatarDataUrl);
+    } else if (user) {
+      const initialForm = {
+        name: user.firstName ?? "",
+        surname: user.lastName ?? "",
+        email: user.primaryEmailAddress?.emailAddress ?? "",
+      };
+      setForm(initialForm);
+      setSavedForm(initialForm);
+    }
+
+    if (!isSignedIn) return;
+
+    let cancelled = false;
+    getBackendProfile(getToken)
+      .then((profile) => {
+        if (cancelled) return;
+        const backendForm = {
+          name: profile.firstName,
+          surname: profile.lastName,
+          email: profile.email,
+        };
+        setForm(backendForm);
+        setSavedForm(backendForm);
+        setAvatarUrl(profile.profilePicture ?? null);
+        setSavedAvatarUrl(profile.profilePicture ?? null);
+      })
+      .catch((error: unknown) => {
+        if (!(error instanceof BackendError) || error.status !== 404) {
+          console.error("Failed to load profile from backend:", error);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getToken, isLoaded, isSignedIn, user]);
 
   const dirty =
     form.name !== savedForm.name ||
@@ -585,7 +636,10 @@ export default function ProfileSettings() {
         ? await fileToAvatarDataUrl(avatarFile)
         : avatarUrl;
 
-      await saveProfileRequest({ form: cleaned, notifs, twoFactor, avatarDataUrl });
+      await saveProfileRequest(
+        { form: cleaned, notifs, twoFactor, avatarDataUrl },
+        getToken,
+      );
 
       releaseUnsavedAvatar(); // free the blob preview before swapping it out
       setForm(cleaned);

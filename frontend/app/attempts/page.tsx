@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { getBackendAttempts } from "@/lib/backend";
 import {
   ATTEMPTS_UPDATED_EVENT,
   loadExamAttempts,
@@ -47,8 +49,7 @@ const getTone = (score: number): Tone => {
   };
 };
 
-// Used to sort newest first. Attempt ids end in a Date.now() timestamp;
-// falls back to the date string if the id has no numeric suffix.
+
 const stamp = (a: ExamAttempt) => {
   const n = Number(a.id.split("-").pop());
   return Number.isFinite(n) ? n : Date.parse(a.date) || 0;
@@ -90,22 +91,34 @@ const getReviewItems = (attempt: ExamAttempt): ReviewQuestion[] =>
   (attempt.incorrectQuestions ?? []).map((q) => ({ ...q, isCorrect: false }));
 
 export default function Attempts() {
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ReviewFilter>("all");
 
   useEffect(() => {
-    const loadAttempts = () => {
+    if (!isLoaded) return;
+
+    let cancelled = false;
+    const loadAttempts = async () => {
       try {
-        setAttempts(
-          [...loadExamAttempts()].sort((a, b) => stamp(b) - stamp(a)),
-        );
+        const storedAttempts = loadExamAttempts();
+        setAttempts([...storedAttempts].sort((a, b) => stamp(b) - stamp(a)));
+
+        if (isSignedIn) {
+          const backendAttempts = await getBackendAttempts(getToken);
+          if (!cancelled) {
+            setAttempts(
+              [...backendAttempts].sort((a, b) => stamp(b) - stamp(a)),
+            );
+          }
+        }
       } catch (e) {
-        console.error("Failed to load attempts:", e);
-        setAttempts([]);
+        console.error("Failed to load attempts from backend:", e);
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     const onVisible = () => {
@@ -119,11 +132,12 @@ export default function Attempts() {
     document.addEventListener("visibilitychange", onVisible); // tab refocus
 
     return () => {
+      cancelled = true;
       window.removeEventListener(ATTEMPTS_UPDATED_EVENT, loadAttempts);
       window.removeEventListener("storage", loadAttempts);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [getToken, isLoaded, isSignedIn]);
 
   const total = attempts.length;
   const average = total
