@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 
 import profileRoutes from "./Routes/ProfilePageRoute.js";
 import authRoutes from "./Routes/AuthRoute.js";
+import attemptsRoutes from "./Routes/AttemptsRoute.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ const clerkOptions = {
     : {}),
 };
 
+// Middleware setup
 app.use(
   cors({
     origin(origin, callback) {
@@ -51,13 +53,13 @@ app.get("/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/attempts", attemptsRoutes);
 
 // 404 handler for undefined routes (must come after all routes)
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Error handler (must have 4 params and come last)
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   res

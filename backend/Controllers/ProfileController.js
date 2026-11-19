@@ -1,139 +1,164 @@
 import { db } from "../config/firebase.js";
 
-const profiles = db.collection("profiles");
+// Get the attempts collection for a specific user
+function getUserAttempts(userId) {
+  return db.collection("users").doc(userId).collection("attempts");
+}
 
 
-// POST localhost:5000/api/profile/create-user
-const createProfile = async (req, res) => {
-  const { firstName, lastName, email, profilePicture = null } = req.body;
-
-  if (!firstName || !lastName || !email) {
-    return res.status(400).json({
-      success: false,
-      message: "firstName, lastName, and email required",
-    });
-  }
-
+// CREATE ATTEMPT
+const createAttempt = async (req, res, next) => {
   try {
-    const now = new Date();
-    const profile = {
-      firstName,
-      lastName,
-      email,
-      profilePicture,
-      streak: 0,
-      lastActivityDate: now,
-      createdAt: now,
-    };
+    const { id,code,title,mode,score,total,date,correct,incorrect,unanswered,reviewQuestions,average,} = req.body;
 
-    const { id: userId } = await profiles.add(profile);
-
-    res.status(201).json({
-      success: true,
-      message: "Profile created",
-      userId,
-      data: profile,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating profile",
-    });
-  }
-};
-
-
-// GET localhost:5000/api/profile/get-user?userId=xxx
-const getProfile = async (req, res) => {
-  const { userId } = req.query;
-
-  if (!userId) {
-    return res.status(400).json({
-      success: false,
-      message: "userId required",
-    });
-  }
-
-  try {
-    const snap = await profiles.doc(userId).get();
-
-    if (!snap.exists) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found",
+    // Check required fields
+    if (!id || !code || !title || !mode || !date) {
+      return res.status(400).json({
+        error: "Please provide all required fields",
       });
     }
 
-    const { lastActivityDate, createdAt, ...profile } = snap.data();
-
-    res.json({
-      success: true,
-      data: {
-        ...profile,
-        lastActivityDate: lastActivityDate.toDate(),
-        createdAt: createdAt.toDate(),
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving profile",
-    });
-  }
-};
-
-// PUT localhost:5000/api/profile/update-user
-const updateProfile = async (req, res) => {
-  const { userId, firstName, lastName, email, profilePicture } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({
-      success: false,
-      message: "userId required",
-    });
-  }
-
-  // Keep only the fields that were actually sent
-  const updateData = Object.fromEntries(
-    Object.entries({ firstName, lastName, email, profilePicture }).filter(
-      ([, value]) => value !== undefined
-    )
-  );
-
-  if (Object.keys(updateData).length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: "No fields to update",
-    });
-  }
-
-  try {
-    const profileRef = profiles.doc(userId);
-    const snap = await profileRef.get();
-
-    if (!snap.exists) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found",
+    // Check the attempt mode
+    if (mode !== "practice" && mode !== "real") {
+      return res.status(400).json({
+        error: "Mode must be practice or real",
       });
     }
 
-    await profileRef.update(updateData);
+    // Check the scores
+    if (
+      typeof total !== "number" ||
+      total <= 0 ||
+      typeof score !== "number" ||
+      score < 0 ||
+      score > total
+    ) {
+      return res.status(400).json({
+        error: "Invalid score or total",
+      });
+    }
 
-    res.json({
-      success: true,
-      message: "Profile updated",
-      data: updateData,
+    // Check the number of questions
+    if (
+      !Number.isInteger(correct) || correct < 0 ||
+      !Number.isInteger(incorrect) || incorrect < 0 ||
+      !Number.isInteger(unanswered) || unanswered < 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid question counts",
+      });
+    }
+
+    // Check the date format
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      isNaN(new Date(date)) ||
+      new Date(date).toISOString().startsWith(date) === false
+    ) {
+      return res.status(400).json({
+        error: "Date must be YYYY-MM-DD",
+      });
+    }
+
+    // Create the attempt object
+    const attempt = {id,code,title,mode,score,total,date,correct,incorrect,unanswered, average};
+
+    // Add question details if they exist
+    if (reviewQuestions !== undefined) {
+      if (!Array.isArray(reviewQuestions)) {
+        return res.status(400).json({
+          error: "reviewQuestions must be an array",
+        });
+      }
+
+      attempt.reviewQuestions = reviewQuestions;
+    }
+
+    // Save the attempt in Firebase
+    await getUserAttempts(req.userId).doc(id).set(attempt);
+
+    return res.status(201).json({
+      data: attempt,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Error updating profile",
-    });
+    next(error);
   }
 };
 
-export { getProfile, createProfile, updateProfile };
+
+// GET ALL ATTEMPTS
+const getAttempts = async (req, res, next) => {
+  try {
+    const snapshot = await getUserAttempts(req.userId)
+      .orderBy("date", "desc")
+      .get();
+
+    const attempts = snapshot.docs.map((doc) => doc.data());
+
+    return res.status(200).json({
+      data: attempts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// GET ONE ATTEMPT
+const getAttempt = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || id.includes("/")) {
+      return res.status(400).json({
+        error: "Invalid attempt id",
+      });
+    }
+
+    const attempt = await getUserAttempts(req.userId).doc(id).get();
+
+    if (!attempt.exists) {
+      return res.status(404).json({
+        error: "Attempt not found",
+      });
+    }
+
+    return res.status(200).json({
+      data: attempt.data(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// DELETE ONE ATTEMPT
+const deleteAttempt = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || id.includes("/")) {
+      return res.status(400).json({
+        error: "Invalid attempt id",
+      });
+    }
+
+    const attemptRef = getUserAttempts(req.userId).doc(id);
+    const snap = await attemptRef.get();
+
+    if (!snap.exists) {
+      return res.status(404).json({
+        error: "Attempt not found",
+      });
+    }
+
+    await attemptRef.delete();
+
+    return res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export { createAttempt, getAttempts, getAttempt, deleteAttempt };
