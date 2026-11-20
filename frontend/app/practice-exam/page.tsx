@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useReducer,
-  useRef,
+import {useAuth,} from "@clerk/nextjs";
+import {useEffect,useId, useMemo,useReducer,useRef,
   useState,
   type ButtonHTMLAttributes,
   type ReactNode,
@@ -22,11 +18,11 @@ import {
 } from "lucide-react";
 import { practiceExams, type PracticeExam } from "../types/assets";
 import {
-  saveExamAttempt,
   type IncorrectQuestion,
   type ReviewQuestion,
 } from "@/lib/storage";
 import { todayIso } from "@/lib/dates";
+import { saveBackendAttempt } from "@/lib/backend";
 
 type Mode = "practice" | "real";
 type Question = NonNullable<PracticeExam["questions"]>[number];
@@ -864,6 +860,7 @@ function ResultsView({
   onRetake: () => void;
   onExit: () => void;
 }) {
+  const { getToken, isSignedIn } = useAuth();
   const [filter, setFilter] = useState<ReviewFilter>("all");
   const headingRef = useRef<HTMLHeadingElement>(null);
   const savedRef = useRef(false);
@@ -923,7 +920,7 @@ function ResultsView({
     }));
 
     try {
-      const saved = saveExamAttempt({
+      const attempt = {
         id: `${exam.id}-${Date.now()}`,
         code: exam.code,
         title: exam.title,
@@ -936,8 +933,14 @@ function ResultsView({
         unanswered: unansweredCount,
         incorrectQuestions,
         reviewQuestions,
-      });
-      if (!saved) console.error("Attempt was not saved (see error above).");
+      };
+      if (!isSignedIn) {
+        console.error("Attempt was not saved because the user is signed out.");
+      } else {
+        void saveBackendAttempt(getToken, attempt).catch((error) => {
+          console.error("Attempt was not saved to backend:", error);
+        });
+      }
     } catch (e) {
       // Anything thrown before the save, e.g. from todayIso().
       console.error("Failed to prepare attempt:", e);
