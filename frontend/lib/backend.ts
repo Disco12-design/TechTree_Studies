@@ -6,6 +6,14 @@ const BACKEND_URL =
 
 type GetToken = () => Promise<string | null>;
 
+export type BackendProfile = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  profilePicture?: string | null;
+  streak?: number;
+};
+
 export class BackendError extends Error {
   constructor(
     message: string,
@@ -16,101 +24,81 @@ export class BackendError extends Error {
   }
 }
 
+/** Calls the backend and returns the `data` field of the response. */
 async function request<T>(
   path: string,
   getToken: GetToken,
-  options: RequestInit = {},
+  method = "GET",
+  body?: unknown,
 ): Promise<T> {
   const token = await getToken();
-
-  if (!token) {
-    throw new BackendError("You must be signed in to use the backend", 401);
-  }
+  if (!token) throw new BackendError("You must be signed in", 401);
 
   const response = await fetch(`${BACKEND_URL}${path}`, {
-    ...options,
+    method,
     headers: {
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
       Authorization: `Bearer ${token}`,
+      ...(body !== undefined && { "Content-Type": "application/json" }),
     },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {
-    let message = `Request failed with status ${response.status}`;
-
-    try {
-      const body = (await response.json()) as { error?: string };
-      if (body.error) message = body.error;
-    } catch {
-      // Keep the status-based message when the server did not return JSON.
-    }
-
-    throw new BackendError(message, response.status);
+    const json = await response.json().catch(() => null);
+    throw new BackendError(
+      json?.error ?? `Request failed with status ${response.status}`,
+      response.status,
+    );
   }
 
-  return response.json() as Promise<T>;
+  return (await response.json()).data;
 }
 
-export type BackendProfile = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  profilePicture?: string | null;
-};
-
-export async function getBackendProfile(
-  getToken: GetToken,
-): Promise<BackendProfile> {
-  const response = await request<{ data: BackendProfile }>(
-    "/api/profile/get-user",
-    getToken,
-  );
-  return response.data;
-}
+export const getBackendProfile = (getToken: GetToken) =>
+  request<BackendProfile>("/api/profile/get-user", getToken);
 
 export async function saveBackendProfile(
   getToken: GetToken,
   profile: BackendProfile,
-): Promise<BackendProfile> {
-  let method = "PUT";
-
-  try {
-    await getBackendProfile(getToken);
-  } catch (error) {
-    if (!(error instanceof BackendError) || error.status !== 404) {
+) {
+  const exists = await getBackendProfile(getToken).then(
+    () => true,
+    (error) => {
+      if (error instanceof BackendError && error.status === 404) return false;
       throw error;
-    }
-    method = "POST";
-  }
-
-  const endpoint =
-    method === "POST" ? "/api/profile/create-user" : "/api/profile/update-user";
-  const response = await request<{ data: BackendProfile }>(endpoint, getToken, {
-    method,
-    body: JSON.stringify(profile),
-  });
-
-  return response.data;
-}
-
-export async function getBackendAttempts(
-  getToken: GetToken,
-): Promise<ExamAttempt[]> {
-  const response = await request<{ data: ExamAttempt[] }>(
-    "/api/attempts",
-    getToken,
+    },
   );
-  return response.data;
+
+  return request<BackendProfile>(
+    exists ? "/api/profile/update-user" : "/api/profile/create-user",
+    getToken,
+    exists ? "PUT" : "POST",
+    profile,
+  );
 }
 
-export async function saveBackendAttempt(
+export async function getOrCreateBackendProfile(
   getToken: GetToken,
-  attempt: ExamAttempt,
-): Promise<ExamAttempt> {
-  const response = await request<{ data: ExamAttempt }>("/api/attempts", getToken, {
-    method: "POST",
-    body: JSON.stringify(attempt),
-  });
-  return response.data;
+  clerkUser: { firstName: string | null; lastName: string | null; primaryEmailAddress: { emailAddress: string } | null; imageUrl: string | null },
+): Promise<BackendProfile> {
+  try {
+    return await getBackendProfile(getToken);
+  } catch (error) {
+    if (error instanceof BackendError && error.status === 404) {
+      const newProfile: BackendProfile = {
+        firstName: clerkUser.firstName || "User",
+        lastName: clerkUser.lastName || "",
+        email: clerkUser.primaryEmailAddress?.emailAddress || "",
+        profilePicture: clerkUser.imageUrl || null,
+      };
+      return await saveBackendProfile(getToken, newProfile);
+    }
+    throw error;
+  }
 }
+
+export const getBackendAttempts = (getToken: GetToken) =>
+  request<ExamAttempt[]>("/api/attempts", getToken);
+
+export const saveBackendAttempt = (getToken: GetToken, attempt: ExamAttempt) =>
+  request<ExamAttempt>("/api/attempts", getToken, "POST", attempt);

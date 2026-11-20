@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { getBackendAttempts } from "@/lib/backend";
 import {
-  ATTEMPTS_UPDATED_EVENT,
-  loadExamAttempts,
   type ExamAttempt,
   type ReviewQuestion,
 } from "@/lib/storage";
@@ -103,16 +101,16 @@ export default function Attempts() {
     let cancelled = false;
     const loadAttempts = async () => {
       try {
-        const storedAttempts = loadExamAttempts();
-        setAttempts([...storedAttempts].sort((a, b) => stamp(b) - stamp(a)));
+        if (!isSignedIn) {
+          setAttempts([]);
+          return;
+        }
 
-        if (isSignedIn) {
-          const backendAttempts = await getBackendAttempts(getToken);
-          if (!cancelled) {
-            setAttempts(
-              [...backendAttempts].sort((a, b) => stamp(b) - stamp(a)),
-            );
-          }
+        const backendAttempts = await getBackendAttempts(getToken);
+        if (!cancelled) {
+          setAttempts(
+            [...backendAttempts].sort((a, b) => stamp(b) - stamp(a)),
+          );
         }
       } catch (e) {
         console.error("Failed to load attempts from backend:", e);
@@ -127,14 +125,10 @@ export default function Attempts() {
 
     loadAttempts();
 
-    window.addEventListener(ATTEMPTS_UPDATED_EVENT, loadAttempts); // same tab
-    window.addEventListener("storage", loadAttempts); // other tabs
     document.addEventListener("visibilitychange", onVisible); // tab refocus
 
     return () => {
       cancelled = true;
-      window.removeEventListener(ATTEMPTS_UPDATED_EVENT, loadAttempts);
-      window.removeEventListener("storage", loadAttempts);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [getToken, isLoaded, isSignedIn]);

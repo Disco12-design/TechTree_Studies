@@ -72,44 +72,16 @@ const INITIAL_NOTIFS: Notifs = {
   weeklySummary: true,
 };
 
-/* ------------------------------------------------------------------ */
-/* Local persistence (temporary, swap for your API later)              */
-/* ------------------------------------------------------------------ */
-
-const STORAGE_KEY = "profile-settings:v1";
-const STREAK_STORAGE_KEY = "study-streak:v1";
-
-/** Reads the current streak count from localStorage (read-only, does not update). */
-function loadStreakCount(): number {
-  try {
-    const raw = localStorage.getItem(STREAK_STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      return typeof data.count === "number" ? data.count : 0;
-    }
-  } catch { /* ignore */ }
-  return 0;
-}
-
-type Persisted = {
+type ProfilePayload = {
   form: Form;
   notifs: Notifs;
   twoFactor: boolean;
   avatarDataUrl: string | null;
 };
 
-function loadPersisted(): Persisted | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Persisted) : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
  * blob: URLs from createObjectURL die on refresh, so we store the avatar as a
- * data URL. Resize + center-crop to a square so it fits in localStorage.
+ * data URL. Resize and center-crop it before sending it to the backend.
  */
 async function fileToAvatarDataUrl(file: File, size = 400): Promise<string> {
   const bitmap = await createImageBitmap(file);
@@ -125,7 +97,7 @@ async function fileToAvatarDataUrl(file: File, size = 400): Promise<string> {
 }
 
 async function saveProfileRequest(
-  payload: Persisted,
+  payload: ProfilePayload,
   getToken: () => Promise<string | null>,
 ) {
   await saveBackendProfile(getToken, {
@@ -134,7 +106,6 @@ async function saveProfileRequest(
     email: payload.form.email,
     profilePicture: payload.avatarDataUrl,
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
 
 /* ------------------------------------------------------------------ */
@@ -508,18 +479,7 @@ export default function ProfileSettings() {
   useEffect(() => {
     if (!isLoaded) return;
 
-    setStreak(loadStreakCount());
-    const saved = loadPersisted();
-
-    if (saved) {
-      setForm(saved.form);
-      setSavedForm(saved.form);
-      setNotifs(saved.notifs);
-      setSavedNotifs(saved.notifs);
-      setTwoFactor(saved.twoFactor);
-      setAvatarUrl(saved.avatarDataUrl);
-      setSavedAvatarUrl(saved.avatarDataUrl);
-    } else if (user) {
+    if (user) {
       const initialForm = {
         name: user.firstName ?? "",
         surname: user.lastName ?? "",
@@ -544,6 +504,7 @@ export default function ProfileSettings() {
         setSavedForm(backendForm);
         setAvatarUrl(profile.profilePicture ?? null);
         setSavedAvatarUrl(profile.profilePicture ?? null);
+        setStreak(profile.streak ?? 0);
       })
       .catch((error: unknown) => {
         if (!(error instanceof BackendError) || error.status !== 404) {
@@ -667,21 +628,8 @@ export default function ProfileSettings() {
     toast("Changes discarded");
   };
 
-  // Applies immediately (not via Save), so persist it right away
   const toggleTwoFactor = (next: boolean) => {
     setTwoFactor(next);
-    try {
-      const current = loadPersisted();
-      const payload: Persisted = {
-        form: current?.form ?? savedForm,
-        notifs: current?.notifs ?? savedNotifs,
-        avatarDataUrl: current?.avatarDataUrl ?? savedAvatarUrl,
-        twoFactor: next,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      /* storage unavailable, ignore */
-    }
     toast.success(next ? "Two-factor authentication on" : "Two-factor authentication off");
   };
 

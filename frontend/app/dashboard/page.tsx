@@ -6,8 +6,9 @@ import { toast } from "sonner";
 import { profile, metrics, examAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
-import { loadSavedProfile, loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
-import { useUser } from "@clerk/nextjs";
+import { loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
+import { getOrCreateBackendProfile } from "@/lib/backend";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 
 7
@@ -95,15 +96,45 @@ export default function Dashboard() {
   const [ready, setReady] = useState(false);
   const [streak, setStreak] = useState(0);
   const { isLoaded, user } = useUser();
+  const { getToken, isSignedIn } = useAuth();
   const displayName = saved.name ?? profile.name;
   const nameVisibility = ready ? "" : "invisible";
 
   useEffect(() => {
-    setSaved(loadSavedProfile());
     setReady(true);
     setExamIso(localStorage.getItem("examDate"));
     setStreak(loadAndUpdateStreak());
   }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return;
+
+    let cancelled = false;
+    
+    const loadOrCreateProfile = async () => {
+      try {
+        const profile = await getOrCreateBackendProfile(getToken, {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          primaryEmailAddress: user.primaryEmailAddress,
+          imageUrl: user.imageUrl,
+        });
+        if (cancelled) return;
+        setSaved({
+          name: `${profile.firstName} ${profile.lastName}`.trim(),
+          avatar: profile.profilePicture ?? null,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard profile:", error);
+      }
+    };
+
+    loadOrCreateProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getToken, isLoaded, isSignedIn, user]);
 
   // Welcome toast once per browser session after Clerk loads the user
   useEffect(() => {

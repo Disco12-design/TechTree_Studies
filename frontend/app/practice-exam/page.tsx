@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { practiceExams, type PracticeExam } from "../types/assets";
 import {
-  saveExamAttempt,
   type IncorrectQuestion,
   type ReviewQuestion,
 } from "@/lib/storage";
@@ -935,10 +934,9 @@ function ResultsView({
         incorrectQuestions,
         reviewQuestions,
       };
-      const saved = saveExamAttempt(attempt);
-      if (!saved) console.error("Attempt was not saved (see error above).");
-
-      if (isSignedIn) {
+      if (!isSignedIn) {
+        console.error("Attempt was not saved because the user is signed out.");
+      } else {
         void saveBackendAttempt(getToken, attempt).catch((error) => {
           console.error("Attempt was not saved to backend:", error);
         });
