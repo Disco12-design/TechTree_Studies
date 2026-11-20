@@ -3,11 +3,11 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { profile, metrics, examAttempts } from "../types/assets";
+import { profile, metrics, examAttempts as mockExamAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
-import { loadAndUpdateStreak, type SavedProfile } from "@/lib/storage";
-import { getOrCreateBackendProfile } from "@/lib/backend";
+import { loadAndUpdateStreak, type SavedProfile, type ExamAttempt } from "@/lib/storage";
+import { getOrCreateBackendProfile, getBackendAttempts } from "@/lib/backend";
 import { useAuth, useUser } from "@clerk/nextjs";
 
 
@@ -86,6 +86,15 @@ function ActionCard({
   );
 }
 
+function formatAttemptScore(score: number, total: number): string {
+  return `${Math.round((score / total) * 100)}%`;
+}
+
+function getAttemptResult(score: number, total: number): "pass" | "fail" {
+  const percentage = (score / total) * 100;
+  return percentage >= 70 ? "pass" : "fail";
+}
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -95,6 +104,7 @@ export default function Dashboard() {
   const [saved, setSaved] = useState<SavedProfile>({ name: null, avatar: null });
   const [ready, setReady] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
   const { isLoaded, user } = useUser();
   const { getToken, isSignedIn } = useAuth();
   const displayName = saved.name ?? profile.name;
@@ -135,6 +145,29 @@ export default function Dashboard() {
       cancelled = true;
     };
   }, [getToken, isLoaded, isSignedIn, user]);
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+
+    let cancelled = false;
+
+    const loadAttempts = async () => {
+      try {
+        const backendAttempts = await getBackendAttempts(getToken);
+        if (!cancelled) {
+          setAttempts(backendAttempts.slice(0, 5)); // Show 5 most recent attempts
+        }
+      } catch (error) {
+        console.error("Failed to load attempts:", error);
+      }
+    };
+
+    loadAttempts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getToken, isLoaded, isSignedIn]);
 
   // Welcome toast once per browser session after Clerk loads the user
   useEffect(() => {
@@ -325,106 +358,116 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold text-brand-900 sm:text-2xl">
               Recent practice exam attempts
             </h2>
-            <button className="rounded-full bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
+            <button onClick={() => router.push("/attempts")} className="rounded-full bg-brand-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-800">
               View all attempts
             </button>
           </div>
 
-          {/* Mobile: card list */}
-          <ul className="space-y-3 md:hidden">
-            {examAttempts.map((attempt) => (
-              <li
-                key={attempt.id}
-                className="rounded-xl border border-brand-200 bg-white p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-brand-900">
-                      {attempt.examName}
-                    </p>
-                    <p className="text-xs text-brand-600">{attempt.examNumber}</p>
-                  </div>
-                  <ResultBadge status={attempt.status}>{attempt.result}</ResultBadge>
-                </div>
-
-                <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <dt className="text-brand-600">Date</dt>
-                    <dd className="font-semibold text-brand-900">{attempt.date}</dd>
-                    <dd className="text-brand-600">{attempt.time}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-brand-600">Score</dt>
-                    <dd className="font-semibold text-brand-900">
-                      {attempt.score}{" "}
-                      <span className="font-normal text-brand-600">/ {attempt.maxScore}</span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-brand-600">Duration</dt>
-                    <dd className="font-semibold text-brand-900">{attempt.duration}</dd>
-                  </div>
-                </dl>
-
-                <button className={`${primaryBtn} mt-4 w-full`}>
-                  View results
-                  <Eye size={16} />
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          {/* Desktop: table */}
-          <div className="hidden overflow-x-auto rounded-xl border border-brand-200 bg-white md:block">
-            <table className="w-full min-w-180">
-              <thead className="border-b border-brand-200 bg-brand-50">
-                <tr>
-                  {["Exam date", "Exam completed", "Score", "Result", "Duration", "Actions"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="px-5 py-3.5 text-left text-xs font-semibold text-brand-600 lg:px-6"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-100">
-                {examAttempts.map((attempt) => (
-                  <tr key={attempt.id} className="transition hover:bg-brand-50">
-                    <td className="px-5 py-4 lg:px-6">
-                      <div className="text-sm font-semibold text-brand-900">{attempt.date}</div>
-                      <div className="text-xs text-brand-600">{attempt.time}</div>
-                    </td>
-                    <td className="px-5 py-4 lg:px-6">
-                      <div className="text-sm font-semibold text-brand-900">
-                        {attempt.examName}
+          {attempts.length === 0 ? (
+            <div className="rounded-xl border border-brand-200 bg-brand-50 p-8 text-center">
+              <p className="text-sm text-brand-600">No attempts yet. Start a practice test to see your results here.</p>
+            </div>
+          ) : (
+            <>
+              {/* Mobile: card list */}
+              <ul className="space-y-3 md:hidden">
+                {attempts.map((attempt) => (
+                  <li
+                    key={attempt.id}
+                    className="rounded-xl border border-brand-200 bg-white p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-brand-900">
+                          {attempt.title}
+                        </p>
+                        <p className="text-xs text-brand-600">{attempt.code}</p>
                       </div>
-                      <div className="text-xs text-brand-600">{attempt.examNumber}</div>
-                    </td>
-                    <td className="px-5 py-4 lg:px-6">
-                      <div className="text-sm font-bold text-brand-900">{attempt.score}</div>
-                      <div className="text-xs text-brand-600">/ {attempt.maxScore}</div>
-                    </td>
-                    <td className="px-5 py-4 lg:px-6">
-                      <ResultBadge status={attempt.status}>{attempt.result}</ResultBadge>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-brand-900 lg:px-6">
-                      {attempt.duration}
-                    </td>
-                    <td className="px-5 py-4 lg:px-6">
-                      <button className={primaryBtn}>
-                        View results
-                        <Eye size={16} />
-                      </button>
-                    </td>
-                  </tr>
+                      <ResultBadge status={getAttemptResult(attempt.score, attempt.total)}>
+                        {formatAttemptScore(attempt.score, attempt.total)}
+                      </ResultBadge>
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <dt className="text-brand-600">Date</dt>
+                        <dd className="font-semibold text-brand-900">{formatLongDate(attempt.date)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-brand-600">Score</dt>
+                        <dd className="font-semibold text-brand-900">
+                          {attempt.score}{" "}
+                          <span className="font-normal text-brand-600">/ {attempt.total}</span>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-brand-600">Mode</dt>
+                        <dd className="font-semibold text-brand-900 capitalize">{attempt.mode}</dd>
+                      </div>
+                    </dl>
+
+                    <button onClick={() => router.push("/attempts")} className={`${primaryBtn} mt-4 w-full`}>
+                      View results
+                      <Eye size={16} />
+                    </button>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+
+              {/* Desktop: table */}
+              <div className="hidden overflow-x-auto rounded-xl border border-brand-200 bg-white md:block">
+                <table className="w-full min-w-180">
+                  <thead className="border-b border-brand-200 bg-brand-50">
+                    <tr>
+                      {["Date", "Exam", "Score", "Result", "Mode", "Actions"].map(
+                        (h) => (
+                          <th
+                            key={h}
+                            className="px-5 py-3.5 text-left text-xs font-semibold text-brand-600 lg:px-6"
+                          >
+                            {h}
+                          </th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-100">
+                    {attempts.map((attempt) => (
+                      <tr key={attempt.id} className="transition hover:bg-brand-50">
+                        <td className="px-5 py-4 lg:px-6">
+                          <div className="text-sm font-semibold text-brand-900">{formatLongDate(attempt.date)}</div>
+                        </td>
+                        <td className="px-5 py-4 lg:px-6">
+                          <div className="text-sm font-semibold text-brand-900">
+                            {attempt.title}
+                          </div>
+                          <div className="text-xs text-brand-600">{attempt.code}</div>
+                        </td>
+                        <td className="px-5 py-4 lg:px-6">
+                          <div className="text-sm font-bold text-brand-900">{attempt.score}</div>
+                          <div className="text-xs text-brand-600">/ {attempt.total}</div>
+                        </td>
+                        <td className="px-5 py-4 lg:px-6">
+                          <ResultBadge status={getAttemptResult(attempt.score, attempt.total)}>
+                            {formatAttemptScore(attempt.score, attempt.total)}
+                          </ResultBadge>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-brand-900 lg:px-6 capitalize">
+                          {attempt.mode}
+                        </td>
+                        <td className="px-5 py-4 lg:px-6">
+                          <button onClick={() => router.push("/attempts")} className={primaryBtn}>
+                            View results
+                            <Eye size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </section>
       </main>
     </div>
