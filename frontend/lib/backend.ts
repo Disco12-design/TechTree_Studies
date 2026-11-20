@@ -102,3 +102,26 @@ export const getBackendAttempts = (getToken: GetToken) =>
 
 export const saveBackendAttempt = (getToken: GetToken, attempt: ExamAttempt) =>
   request<ExamAttempt>("/api/attempts", getToken, "POST", attempt);
+
+export const deleteBackendAttempt = async (
+  getToken: GetToken,
+  attemptId: string,
+): Promise<void> => {
+  const token = await getToken();
+  if (!token) throw new BackendError("You must be signed in", 401);
+
+  const response = await fetch(`${BACKEND_URL}/api/attempts/${attemptId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const json = await response.json().catch(() => null);
+    throw new BackendError(
+      json?.error ?? `Failed to delete attempt with status ${response.status}`,
+      response.status,
+    );
+  }
+};
