@@ -3,11 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import {
-  BackendError,
-  getBackendAttempts,
-  deleteBackendAttempt,
-} from "@/lib/backend";
+import {BackendError, getBackendAttempts,deleteBackendAttempt} from "@/lib/backend";
 import { type ExamAttempt, type ReviewQuestion } from "@/lib/storage";
 import { formatLongDate } from "@/lib/dates";
 
@@ -317,10 +313,7 @@ export default function Attempts() {
     }
   };
 
-  // ----------------------------------------
-  // LOAD ATTEMPTS
-  // ----------------------------------------
-
+// Load attempts from the backend when the component mounts or visibility changes.
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -365,9 +358,6 @@ export default function Attempts() {
     };
   }, [getToken, isLoaded, isSignedIn]);
 
-  // ----------------------------------------
-  // STATISTICS
-  // ----------------------------------------
 
   const total = attempts.length;
 
@@ -381,9 +371,6 @@ export default function Attempts() {
     ? Math.max(...attempts.map((a) => a.score))
     : 0;
 
-  // ----------------------------------------
-  // RENDER
-  // ----------------------------------------
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
@@ -393,7 +380,7 @@ export default function Attempts() {
 
         <div className="mb-9">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-gray-400">
-            <GraduationCap className="h-4 w-4" />
+            <GraduationCap className="h-4 w-4 text-brand-600" />
             Learning dashboard
           </div>
 
@@ -463,7 +450,7 @@ export default function Attempts() {
 
         {isLoading && total === 0 && (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-24">
-            <Loader2 className="h-7 w-7 animate-spin text-gray-500" />
+            <Loader2 className="h-7 w-7 animate-spin text-brand-600" />
             <p className="mt-4 text-sm text-gray-500">
               Loading your exam history...
             </p>
