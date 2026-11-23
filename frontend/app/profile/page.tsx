@@ -182,24 +182,18 @@ function Switch({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${
-        checked ? "bg-brand-600" : "bg-slate-300"
-      }`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${checked ? "bg-brand-600" : "bg-slate-300"
+        }`}
     >
       <span
-        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-5" : ""
-        }`}
+        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-5" : ""
+          }`}
       />
     </button>
   );
 }
 
-/**
- * Lazy-loaded avatar: native lazy loading + async decoding, a pulsing
- * skeleton while the image loads, a fade-in once it's ready, and a fallback
- * icon if it fails. Render with key={src} so state resets when the image changes.
- */
+
 function AvatarImage({ src, alt }: { src: string; alt: string }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -239,9 +233,8 @@ function AvatarImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
-        className={`h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
+        className={`h-full w-full object-cover transition-opacity duration-300 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"
+          }`}
       />
     </>
   );
@@ -289,63 +282,7 @@ function PasswordDialog({ onClose }: { onClose: () => void }) {
       toast.error("Couldn't update your password. Try again.");
       setBusy(false);
     }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-950/40 p-4"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <form
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pw-title"
-        onSubmit={submit}
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
-      >
-        <div className="flex items-center justify-between">
-          <h3 id="pw-title" className="text-base font-bold text-brand-950">
-            Change password
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-md p-1 text-slate-500 hover:bg-brand-50"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {PASSWORD_FIELDS.map((f, i) => (
-            <Field key={f.key} label={f.label} error={errors[f.key]}>
-              <TextInput
-                type="password"
-                autoFocus={i === 0}
-                autoComplete={f.autoComplete}
-                value={values[f.key]}
-                error={errors[f.key]}
-                onChange={(e) =>
-                  setValues((v) => ({ ...v, [f.key]: e.target.value }))
-                }
-              />
-            </Field>
-          ))}
-        </div>
-
-        <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className={`${ui.outlineBtn} px-3 py-2 text-sm`}>
-            Cancel
-          </button>
-          <button type="submit" disabled={busy} className={ui.primaryBtn}>
-            {busy && <Loader2 size={14} className="animate-spin" />}
-            Update password
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+  };;
 }
 
 /* ------------------------------------------------------------------ */
@@ -398,48 +335,6 @@ function SecurityCard({
 }) {
   const row = "flex items-center justify-between rounded-lg bg-brand-50 px-3 py-2.5";
 
-  return (
-    <section className={`${ui.panel} p-5`}>
-      <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-bold text-brand-950">
-          <ShieldCheck size={15} className="text-brand-600" /> Security &amp; Auth
-        </h3>
-        <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-            twoFactor ? "bg-brand-100 text-brand-700" : "bg-amber-100 text-amber-800"
-          }`}
-        >
-          {twoFactor ? "OPTIMAL" : "AT RISK"}
-        </span>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <div className={row}>
-          <div>
-            <p className={ui.tinyLabel}>PASSWORD</p>
-            <p className="mt-0.5 text-sm tracking-widest text-slate-700">••••••••••••••</p>
-          </div>
-          <button type="button" onClick={onChangePassword} className={ui.outlineBtn}>
-            Change
-          </button>
-        </div>
-
-      
-      
-
-        <div>
-          <p className={`mb-1.5 ${ui.tinyLabel}`}>ACTIVE SESSION</p>
-          <div className="flex items-start gap-2 rounded-lg bg-brand-50 px-3 py-2.5 text-xs text-slate-700">
-            <Monitor size={14} className="mt-0.5 shrink-0" />
-            <div>
-              <p>macOS • Chrome 124</p>
-              <p className="text-slate-500">Chicago, US • Current active IP</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
 }
 
 export default function ProfileSettings() {
@@ -465,7 +360,6 @@ export default function ProfileSettings() {
 
   // Other UI state
   const [saving, setSaving] = useState(false);
-  const [passwordOpen, setPasswordOpen] = useState(false);
   const [twoFactor, setTwoFactor] = useState(true);
   const [streak, setStreak] = useState(0);
 
@@ -475,7 +369,7 @@ export default function ProfileSettings() {
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
 
- 
+
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -637,7 +531,7 @@ export default function ProfileSettings() {
     <main className="min-h-screen bg-brand-50/50 px-4 py-6 font-sans text-slate-900 sm:px-8">
       {/* Move <Toaster /> to your root layout if you want it app-wide */}
       <Toaster richColors closeButton position="top-right" />
-      {passwordOpen && <PasswordDialog onClose={() => setPasswordOpen(false)} />}
+    
 
       <form onSubmit={handleSave} noValidate className="mx-auto max-w-5xl">
         {/* Back */}
@@ -761,9 +655,8 @@ export default function ProfileSettings() {
               role="tab"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition ${
-                tab === id ? "bg-brand-600 text-white" : "text-slate-600 hover:bg-white"
-              }`}
+              className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition ${tab === id ? "bg-brand-600 text-white" : "text-slate-600 hover:bg-white"
+                }`}
             >
               <Icon size={13} /> {label}
             </button>
@@ -822,9 +715,8 @@ export default function ProfileSettings() {
                         />
                         <MailCheck
                           size={16}
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                            EMAIL_RE.test(form.email.trim()) ? "text-brand-600" : "text-slate-300"
-                          }`}
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${EMAIL_RE.test(form.email.trim()) ? "text-brand-600" : "text-slate-300"
+                            }`}
                         />
                       </div>
                     </Field>
@@ -832,11 +724,6 @@ export default function ProfileSettings() {
                 </div>
               </section>
 
-              <SecurityCard
-                twoFactor={twoFactor}
-                onToggleTwoFactor={toggleTwoFactor}
-                onChangePassword={() => setPasswordOpen(true)}
-              />
             </div>
           )}
         </div>
