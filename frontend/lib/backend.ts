@@ -24,7 +24,7 @@ export class BackendError extends Error {
   }
 }
 
-/** Calls the backend and returns the `data` field of the response. */
+// Makes an HTTP request to the backend and returns the `data` field of the response. Throws a BackendError if the request fails.
 async function request<T>(
   path: string,
   getToken: GetToken,
@@ -77,6 +77,7 @@ export async function saveBackendProfile(
   );
 }
 
+// 
 export async function getOrCreateBackendProfile(
   getToken: GetToken,
   clerkUser: { firstName: string | null; lastName: string | null; primaryEmailAddress: { emailAddress: string } | null; imageUrl: string | null },
