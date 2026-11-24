@@ -78,3 +78,18 @@ export function loadAndUpdateStreak(): number {
   }
   return count;
 }
+
+export function cacheStreak(lastVisit: string, count: number): void {
+  if (!isIsoDate(lastVisit) || !Number.isInteger(count) || count < 1) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      STREAK_STORAGE_KEY,
+      JSON.stringify({ lastVisit, count }),
+    );
+  } catch (e) {
+    console.error("Failed to cache streak:", e);
+  }
+}

@@ -15,7 +15,9 @@ import {
   BackendError,
   getBackendProfile,
   saveBackendProfile,
+  updateBackendStreak,
 } from "@/lib/backend";
+import { cacheStreak } from "@/lib/storage";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -399,6 +401,16 @@ export default function ProfileSettings() {
         setAvatarUrl(profile.profilePicture ?? null);
         setSavedAvatarUrl(profile.profilePicture ?? null);
         setStreak(profile.streak ?? 0);
+        return updateBackendStreak(getToken);
+      })
+      .then((updatedStreak) => {
+        if (!cancelled && updatedStreak) {
+          cacheStreak(
+            updatedStreak.lastActivityDate,
+            updatedStreak.streak,
+          );
+          setStreak(updatedStreak.streak);
+        }
       })
       .catch((error: unknown) => {
         if (!(error instanceof BackendError) || error.status !== 404) {
