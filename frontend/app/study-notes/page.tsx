@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { Search, Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { studyNotes } from '../types/assets';
 import StudyNoteCard from '../components/StudyNoteCard';
 import StudyNotesFilter from '../components/StudyNotesFilter';
@@ -37,7 +36,7 @@ export default function StudyNotes() {
       {/* Header */}
       <header className="border-b border-brand-200 bg-white sticky top-0 z-10">
         <div className="px-8 py-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 text-center">
             <div>
               <h1 className="text-3xl font-bold text-brand-900">Study Notes</h1>
               {/* Fixed typo: "m  t-1" -> "mt-1" */}
@@ -45,19 +44,10 @@ export default function StudyNotes() {
                 Comprehensive cybersecurity learning materials
               </p>
             </div>
-
-            {/* Navigates to the notes page */}
-            <Link
-              href="/study-notes/notes"
-              className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition"
-            >
-              <Plus size={20} />
-              New Note
-            </Link>
           </div>
 
           {/* Search Bar */}
-          <div className="max-w-2xl">
+          <div className="mx-auto max-w-2xl">
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brand-400"

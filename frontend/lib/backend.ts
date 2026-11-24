@@ -1,8 +1,7 @@
 import type { ExamAttempt } from "./storage";
-import { todayIso } from "./dates";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "") ??
+  process.env.NEXT_PUBLIC_BACKEND_URL?.trim().replace(/\/+$/, "") ||
   "http://localhost:5000";
 
 type GetToken = () => Promise<string | null>;
@@ -12,6 +11,7 @@ export type BackendProfile = {
   lastName: string;
   email: string;
   profilePicture?: string | null;
+  examDate?: string | null;
   streak?: number;
   lastActivityDate?: string;
 };
@@ -105,12 +105,11 @@ export async function getOrCreateBackendProfile(
   }
 }
 
-export const updateBackendStreak = (getToken: GetToken, date = todayIso()) =>
+export const updateBackendStreak = (getToken: GetToken) =>
   request<BackendStreak>(
     "/api/profile/update-streak",
     getToken,
     "POST",
-    { date },
   );
 
 export const getBackendAttempts = (getToken: GetToken) =>
@@ -138,6 +137,14 @@ export const savePBQAttempt = (
     getToken,
     "PUT",
     { score, maxPoints },
+  );
+
+export const updateBackendExamDate = (getToken: GetToken, examDate: string) =>
+  request<{ examDate: string }>(
+    "/api/profile/exam-date",
+    getToken,
+    "PUT",
+    { examDate },
   );
 
 export const getPBQAttempts = (getToken: GetToken) =>

@@ -17,7 +17,6 @@ import {
   saveBackendProfile,
   updateBackendStreak,
 } from "@/lib/backend";
-import { cacheStreak } from "@/lib/storage";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -405,10 +404,6 @@ export default function ProfileSettings() {
       })
       .then((updatedStreak) => {
         if (!cancelled && updatedStreak) {
-          cacheStreak(
-            updatedStreak.lastActivityDate,
-            updatedStreak.streak,
-          );
           setStreak(updatedStreak.streak);
         }
       })
