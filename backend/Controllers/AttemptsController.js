@@ -61,8 +61,18 @@ const createAttempt = async (req, res, next) => {
     }
 
     const {
-      id, code, title, mode, score, total, date,
-      correct, incorrect, unanswered, average, reviewQuestions,
+      id,
+      code,
+      title,
+      mode,
+      score,
+      total,
+      date,
+      correct,
+      incorrect,
+      unanswered,
+      average,
+      reviewQuestions,
     } = req.body;
 
     if (!isValidId(id)) {
@@ -173,6 +183,5 @@ const deleteAttempt = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export { createAttempt, getAttempts, getAttempt, deleteAttempt };

@@ -1,4 +1,5 @@
 import type { ExamAttempt } from "./storage";
+import { todayIso } from "./dates";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "") ??
@@ -12,6 +13,12 @@ export type BackendProfile = {
   email: string;
   profilePicture?: string | null;
   streak?: number;
+  lastActivityDate?: string;
+};
+
+export type BackendStreak = {
+  streak: number;
+  lastActivityDate: string;
 };
 
 export class BackendError extends Error {
@@ -97,6 +104,14 @@ export async function getOrCreateBackendProfile(
     throw error;
   }
 }
+
+export const updateBackendStreak = (getToken: GetToken, date = todayIso()) =>
+  request<BackendStreak>(
+    "/api/profile/update-streak",
+    getToken,
+    "POST",
+    { date },
+  );
 
 export const getBackendAttempts = (getToken: GetToken) =>
   request<ExamAttempt[]>("/api/attempts", getToken);

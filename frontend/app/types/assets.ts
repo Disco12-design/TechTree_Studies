@@ -1210,7 +1210,7 @@ export const practiceExams: PracticeExam[] = [
       "Focus on malware analysis, social engineering attacks, cloud threats, and security monitoring practices.",
     access: "Pro",
     items: 80,
-    timeCap: 100,
+    timeCap: 165,
     targetPass: 750,
     maxScore: 900,
     domains: [

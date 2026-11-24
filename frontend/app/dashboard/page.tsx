@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { profile, metrics, examAttempts as mockExamAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
-import { loadAndUpdateStreak, type SavedProfile, type ExamAttempt } from "@/lib/storage";
-import { getOrCreateBackendProfile, getBackendAttempts } from "@/lib/backend";
+import { cacheStreak, loadAndUpdateStreak, type SavedProfile, type ExamAttempt } from "@/lib/storage";
+import { getOrCreateBackendProfile, getBackendAttempts, updateBackendStreak } from "@/lib/backend";
 import { useAuth, useUser } from "@clerk/nextjs";
 
 
@@ -134,8 +134,12 @@ export default function Dashboard() {
           name: `${profile.firstName} ${profile.lastName}`.trim(),
           avatar: profile.profilePicture ?? null,
         });
+        const updatedStreak = await updateBackendStreak(getToken);
+        if (cancelled) return;
+        cacheStreak(updatedStreak.lastActivityDate, updatedStreak.streak);
+        setStreak(updatedStreak.streak);
       } catch (error) {
-        console.error("Failed to load dashboard profile:", error);
+        console.error("Failed to load dashboard profile or streak:", error);
       }
     };
 

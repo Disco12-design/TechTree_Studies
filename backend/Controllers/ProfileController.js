@@ -18,6 +18,32 @@ const serializeProfile = (profile) => {
   return serialized;
 };
 
+const isValidActivityDate = (value) =>
+  typeof value === "string" &&
+  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`)) &&
+  new Date(`${value}T00:00:00.000Z`).toISOString().startsWith(value);
+
+const previousDate = (date) => {
+  const previous = new Date(`${date}T00:00:00.000Z`);
+  previous.setUTCDate(previous.getUTCDate() - 1);
+  return previous.toISOString().slice(0, 10);
+};
+
+const activityDateFromProfile = (profile) => {
+  const value = profile?.lastActivityDate;
+
+  if (isValidActivityDate(value)) {
+    return value;
+  }
+
+  if (value?.toDate) {
+    return value.toDate().toISOString().slice(0, 10);
+  }
+
+  return null;
+};
+
 const getValidProfileFields = (body) => {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { error: "Request body must be an object" };
@@ -34,6 +60,10 @@ const getValidProfileFields = (body) => {
     if (field === "examDate") {
       if (value !== null && typeof value !== "string") {
         return { error: "Invalid examDate" };
+      }
+    } else if (field === "lastName") {
+      if (typeof value !== "string" || value.trim().length > 100) {
+        return { error: "Invalid lastName" };
       }
     } else if (
       typeof value !== "string" ||
@@ -53,7 +83,7 @@ const readProfileFields = (req, res) => {
   const result = getValidProfileFields(req.body);
 
   if (result.error) {
-    res.json({ success: false, message: result.error });
+    res.status(400).json({ error: result.error });
     return null;
   }
 
@@ -75,12 +105,10 @@ const createProfile = async (req, res) => {
 
   if (
     isMissingRequiredProfileField(firstName) ||
-    isMissingRequiredProfileField(lastName) ||
     isMissingRequiredProfileField(email)
   ) {
-    return res.json({
-      success: false,
-      message: "firstName, lastName, and email are required",
+    return res.status(400).json({
+      error: "firstName and email are required",
     });
   }
 
@@ -89,7 +117,7 @@ const createProfile = async (req, res) => {
     const existingProfile = await profileRef.get();
 
     if (existingProfile.exists && existingProfile.data()?.createdAt) {
-      return res.json({ success: false, message: "Profile already exists" });
+      return res.status(409).json({ error: "Profile already exists" });
     }
 
     const profile = {
@@ -109,7 +137,7 @@ const createProfile = async (req, res) => {
     res.json({ success: true, data: serializeProfile(savedProfile.data()) });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error when creating profile" });
+    res.status(500).json({ error: "Error when creating profile" });
   }
 };
 
@@ -119,13 +147,13 @@ const getProfile = async (req, res) => {
     const snapshot = await getProfileRef(req.userId).get();
 
     if (!snapshot.exists || !snapshot.data()?.createdAt) {
-      return res.json({ success: false, message: "Profile not found" });
+      return res.status(404).json({ error: "Profile not found" });
     }
 
     res.json({ success: true, data: serializeProfile(snapshot.data()) });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error when getting profile" });
+    res.status(500).json({ error: "Error when getting profile" });
   }
 };
 
@@ -139,7 +167,7 @@ const updateProfile = async (req, res) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return res.json({ success: false, message: "No valid fields to update" });
+    return res.status(400).json({ error: "No valid fields to update" });
   }
 
   try {
@@ -147,7 +175,7 @@ const updateProfile = async (req, res) => {
     const snapshot = await profileRef.get();
 
     if (!snapshot.exists || !snapshot.data()?.createdAt) {
-      return res.json({ success: false, message: "Profile not found" });
+      return res.status(404).json({ error: "Profile not found" });
     }
 
     await profileRef.update({
@@ -160,8 +188,60 @@ const updateProfile = async (req, res) => {
     res.json({ success: true, data: serializeProfile(updatedProfile.data()) });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error when updating profile" });
+    res.status(500).json({ error: "Error when updating profile" });
   }
 };
 
-export { getProfile, createProfile, updateProfile };
+const updateStreak = async (req, res) => {
+  const { date } = req.body ?? {};
+
+  if (!isValidActivityDate(date)) {
+    return res.status(400).json({ error: "date must be YYYY-MM-DD" });
+  }
+
+  try {
+    const profileRef = getProfileRef(req.userId);
+    const result = await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(profileRef);
+
+      if (!snapshot.exists || !snapshot.data()?.createdAt) {
+        return null;
+      }
+
+      const profile = snapshot.data();
+      const lastActivityDate = activityDateFromProfile(profile);
+      const storedStreak =
+        Number.isInteger(profile.streak) && profile.streak >= 0
+          ? profile.streak
+          : 0;
+
+      let streak;
+      if (lastActivityDate === date) {
+        streak = Math.max(1, storedStreak);
+      } else if (lastActivityDate === previousDate(date)) {
+        streak = storedStreak + 1;
+      } else {
+        streak = 1;
+      }
+
+      transaction.update(profileRef, {
+        streak,
+        lastActivityDate: date,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      return { streak, lastActivityDate: date };
+    });
+
+    if (!result) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Error when updating streak" });
+  }
+};
+
+export { getProfile, createProfile, updateProfile, updateStreak };
