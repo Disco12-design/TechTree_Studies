@@ -119,6 +119,30 @@ export const getBackendAttempts = (getToken: GetToken) =>
 export const saveBackendAttempt = (getToken: GetToken, attempt: ExamAttempt) =>
   request<ExamAttempt>("/api/attempts", getToken, "POST", attempt);
 
+export type PBQAttempt = {
+  id: string;
+  pbqId: string;
+  score: number;
+  maxPoints: number;
+  percentage: number;
+};
+
+export const savePBQAttempt = (
+  getToken: GetToken,
+  pbqId: string,
+  score: number,
+  maxPoints: number,
+) =>
+  request<PBQAttempt>(
+    `/api/pbq/${encodeURIComponent(pbqId)}/attempt`,
+    getToken,
+    "PUT",
+    { score, maxPoints },
+  );
+
+export const getPBQAttempts = (getToken: GetToken) =>
+  request<PBQAttempt[]>("/api/pbq/attempts", getToken);
+
 export const deleteBackendAttempt = async (
   getToken: GetToken,
   attemptId: string,

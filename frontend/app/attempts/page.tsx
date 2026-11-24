@@ -256,18 +256,14 @@ export default function Attempts() {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ReviewFilter>("all");
-
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // ----------------------------------------
-  // DELETE OPERATIONS
-  // ----------------------------------------
+
 
   const removeFromList = (attemptId: string) => {
     setAttempts((prev) => prev.filter((a) => a.id !== attemptId));
-
     setExpandedId((current) =>
       current === attemptId ? null : current
     );
@@ -407,7 +403,8 @@ export default function Attempts() {
         {/* SUMMARY STATISTICS */}
 
         {total > 0 && (
-          <div className="mb-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mb-9 grid grid-cols-1 gap-4 sm:grid-cols-3 ">
+
             <StatCard
               icon={ClipboardList}
               label="Total attempts"
