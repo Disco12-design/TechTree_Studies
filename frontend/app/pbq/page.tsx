@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import {
   ArrowLeft,
@@ -15,6 +16,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { useSidebar } from '../providers/SidebarProvider';
+import { getPBQAttempts, savePBQAttempt } from '@/lib/backend';
 
 import { pbqs } from '../data/pbq';
 import { pbq04 } from '../data/pbq_2';
@@ -392,6 +394,7 @@ function PbqList({
 
 export default function PBQPage() {
   const { collapsed } = useSidebar();
+  const { getToken, isSignedIn } = useAuth();
   const [selectedId, setSelectedId] = useLocalStorage<string | null>('pbq:selected', null);
   const [scores, setScores] = useLocalStorage<Record<string, Score>>('pbq:scores', {});
   const topRef = useRef<HTMLDivElement>(null);
@@ -399,8 +402,33 @@ export default function PBQPage() {
   const currentIndex = allPbqs.findIndex((p) => p.id === selectedId);
   const current = allPbqs[currentIndex];
 
-  const handleScore: ScoreHandler = (id, score, maxPoints) =>
+  useEffect(() => {
+    if (!isSignedIn) return;
+
+    void getPBQAttempts(getToken)
+      .then((attempts) => {
+        setScores((previous) => {
+          const savedScores = Object.fromEntries(
+            attempts.map((attempt) => [
+              attempt.pbqId,
+              { score: attempt.score, maxPoints: attempt.maxPoints },
+            ]),
+          );
+          return { ...previous, ...savedScores };
+        });
+      })
+      .catch((error) => console.error('Unable to load PBQ attempts', error));
+  }, [getToken, isSignedIn, setScores]);
+
+  const handleScore: ScoreHandler = (id, score, maxPoints) => {
     setScores((prev) => ({ ...prev, [id]: { score, maxPoints } }));
+    if (!isSignedIn) return;
+
+    void savePBQAttempt(getToken, id, score, maxPoints).catch((error) => {
+      console.error('Unable to save PBQ attempt', error);
+      toast.error('Your PBQ score could not be saved. Please try again.');
+    });
+  };
 
   const goTo = (target?: AnyPbq) => {
     if (!target) return;
