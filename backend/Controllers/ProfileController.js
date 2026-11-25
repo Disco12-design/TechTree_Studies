@@ -135,6 +135,7 @@ const createProfile = async (req, res) => {
       return res.status(409).json({ error: "Profile already exists" });
     }
 
+    // 
     const profile = {
       firstName,
       lastName,
