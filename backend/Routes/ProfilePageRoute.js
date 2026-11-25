@@ -4,6 +4,7 @@ import {
   createProfile,
   updateProfile,
   updateStreak,
+  updateExamDate,
 } from "../Controllers/ProfileController.js";
 import { requireAuthentication } from "../middleware/requireAuthentication.js";
 
@@ -14,5 +15,6 @@ profileRouter.post("/create-user", createProfile);
 profileRouter.get("/get-user", getProfile);
 profileRouter.put("/update-user", updateProfile);
 profileRouter.post("/update-streak", updateStreak);
+profileRouter.put("/exam-date", updateExamDate);
 
 export default profileRouter;

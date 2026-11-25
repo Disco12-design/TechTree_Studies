@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { updateBackendExamDate } from "@/lib/backend";
 
 
 interface CalendarDay {
@@ -15,7 +17,6 @@ interface CalendarDay {
 
 // Labels shown at the top of each column in the grid
 const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const EXAM_DATE_STORAGE_KEY = "examDate";
 const REDIRECT_DELAY_MS = 1000;
 const TOTAL_GRID_CELLS = 42;
 
@@ -28,7 +29,7 @@ const padWithZero = (value: number): string => {
   return String(value).padStart(2, "0");
 };
 
-// Formats a Date object into a "YYYY-MM-DD" string for storage in localStorage
+// Formats a Date object into a "YYYY-MM-DD" string for the profile API.
 const formatDateForStorage = (date: Date): string => {
   const year = date.getFullYear();
   const month = padWithZero(date.getMonth() + 1); 
@@ -70,8 +71,10 @@ const buildCalendarDays = (month: Date): CalendarDay[] => {
 export default function Calendar() {
 
   const router = useRouter();
+  const { getToken, isSignedIn } = useAuth();
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -109,13 +112,20 @@ export default function Calendar() {
   };
 
   
-  const handleSetExamDate = () => {
-    if (!selectedDate) return;
+  const handleSetExamDate = async () => {
+    if (!selectedDate || !isSignedIn || isSaving) return;
 
-  
     const dateToStore = formatDateForStorage(selectedDate);
+    setIsSaving(true);
+    try {
+      await updateBackendExamDate(getToken, dateToStore);
+    } catch (error) {
+      console.error("Unable to save exam date", error);
+      toast.error("Your exam date could not be saved. Please try again.");
+      setIsSaving(false);
+      return;
+    }
 
-    localStorage.setItem(EXAM_DATE_STORAGE_KEY, dateToStore);
     toast.success(`Exam date set to ${formatDateForDisplay(selectedDate)}`);
 
     if (redirectTimerRef.current !== null) {
@@ -219,10 +229,10 @@ export default function Calendar() {
       {/* ---------- Confirm button (disabled until a day is selected) ---------- */}
       <button
         onClick={handleSetExamDate}
-        disabled={!selectedDate}
+        disabled={!selectedDate || !isSignedIn || isSaving}
         className="mt-12 w-full bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-600"
       >
-        Set Exam Date
+        {isSaving ? "Saving..." : "Set Exam Date"}
       </button>
     </div>
   );

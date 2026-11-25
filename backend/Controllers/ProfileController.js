@@ -30,6 +30,21 @@ const previousDate = (date) => {
   return previous.toISOString().slice(0, 10);
 };
 
+const activityDateToday = () => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Johannesburg",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(
+    parts
+      .filter(({ type }) => type !== "literal")
+      .map(({ type, value }) => [type, value]),
+  );
+  return `${values.year}-${values.month}-${values.day}`;
+};
+
 const activityDateFromProfile = (profile) => {
   const value = profile?.lastActivityDate;
 
@@ -120,6 +135,7 @@ const createProfile = async (req, res) => {
       return res.status(409).json({ error: "Profile already exists" });
     }
 
+    // 
     const profile = {
       firstName,
       lastName,
@@ -193,11 +209,7 @@ const updateProfile = async (req, res) => {
 };
 
 const updateStreak = async (req, res) => {
-  const { date } = req.body ?? {};
-
-  if (!isValidActivityDate(date)) {
-    return res.status(400).json({ error: "date must be YYYY-MM-DD" });
-  }
+  const date = activityDateToday();
 
   try {
     const profileRef = getProfileRef(req.userId);
@@ -244,4 +256,31 @@ const updateStreak = async (req, res) => {
   }
 };
 
-export { getProfile, createProfile, updateProfile, updateStreak };
+const updateExamDate = async (req, res) => {
+  const { examDate } = req.body ?? {};
+
+  if (!isValidActivityDate(examDate)) {
+    return res.status(400).json({ error: "examDate must be YYYY-MM-DD" });
+  }
+
+  try {
+    const profileRef = getProfileRef(req.userId);
+    const snapshot = await profileRef.get();
+
+    if (!snapshot.exists || !snapshot.data()?.createdAt) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    await profileRef.update({
+      examDate,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    return res.json({ success: true, data: { examDate } });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Error when updating exam date" });
+  }
+};
+
+export { getProfile, createProfile, updateProfile, updateStreak, updateExamDate };

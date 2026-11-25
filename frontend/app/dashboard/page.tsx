@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { profile, metrics, examAttempts as mockExamAttempts } from "../types/assets";
 import { Calendar, Award, Plus, Eye, Flame, type LucideIcon } from "lucide-react";
 import { daysUntil, countdownLabel, formatLongDate } from "@/lib/dates";
-import { cacheStreak, loadAndUpdateStreak, type SavedProfile, type ExamAttempt } from "@/lib/storage";
+import { type SavedProfile, type ExamAttempt } from "@/lib/storage";
 import { getOrCreateBackendProfile, getBackendAttempts, updateBackendStreak } from "@/lib/backend";
 import { useAuth, useUser } from "@clerk/nextjs";
 
@@ -112,8 +112,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     setReady(true);
-    setExamIso(localStorage.getItem("examDate"));
-    setStreak(loadAndUpdateStreak());
   }, []);
 
   useEffect(() => {
@@ -134,9 +132,9 @@ export default function Dashboard() {
           name: `${profile.firstName} ${profile.lastName}`.trim(),
           avatar: profile.profilePicture ?? null,
         });
+        setExamIso(profile.examDate ?? null);
         const updatedStreak = await updateBackendStreak(getToken);
         if (cancelled) return;
-        cacheStreak(updatedStreak.lastActivityDate, updatedStreak.streak);
         setStreak(updatedStreak.streak);
       } catch (error) {
         console.error("Failed to load dashboard profile or streak:", error);
