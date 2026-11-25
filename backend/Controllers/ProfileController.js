@@ -157,7 +157,7 @@ const createProfile = async (req, res) => {
   }
 };
 
-// Get the user's profile from Firestore 
+// Get the user's profile from Fire-store 
 const getProfile = async (req, res) => {
   try {
     const snapshot = await getProfileRef(req.userId).get();
@@ -174,7 +174,7 @@ const getProfile = async (req, res) => {
 };
 
 
-// Update the user's profile in Firestore 
+// Update the user's profile in Fire-store 
 const updateProfile = async (req, res) => {
   const updateData = readProfileFields(req, res);
 

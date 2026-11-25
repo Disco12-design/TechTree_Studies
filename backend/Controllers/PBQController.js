@@ -1,68 +1,49 @@
 import { db } from "../config/firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
 
-async function saveAttempt(userId, pbqId, payload) {
-  if (
-    typeof userId !== "string" ||
-    typeof pbqId !== "string" ||
-    !payload ||
-    typeof payload !== "object" ||
-    !Number.isFinite(payload.score) ||
-    !Number.isFinite(payload.maxPoints) ||
-    payload.maxPoints <= 0 ||
-    payload.score < 0 ||
-    payload.score > payload.maxPoints
-  ) {
-    const error = new Error("Invalid request payload");
-    error.status = 400;
-    throw error;
-  }
+const getPBQAttemptsRef = (userId) =>
+  db.collection("users").doc(userId).collection("pbqAttempts");
 
-  const attempt = {
-    pbqId,
-    score: payload.score,
-    maxPoints: payload.maxPoints,
-    percentage: Math.round((payload.score / payload.maxPoints) * 100),
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
+const savePBQAttempt = async (req, res, next) => {
   try {
-    const docRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("pbqAttempts")
-      .doc(pbqId);
-    await docRef.set(attempt, { merge: true });
-    return { id: docRef.id, ...attempt };
-  } catch (cause) {
-    console.error("Failed to save PBQ attempt:", cause);
-    const error = new Error("Unable to save PBQ attempt");
-    error.status = 500;
-    throw error;
-  }
-}
+    const { pbqId } = req.params;
+    const { score, maxPoints } = req.body ?? {};
 
-async function savePBQAttempt(req, res, next) {
-  try {
-    const attempt = await saveAttempt(req.userId, req.params.pbqId, req.body);
-    return res.status(200).json({ data: attempt });
+    const isValid =
+      typeof pbqId === "string" &&
+      Number.isFinite(score) &&
+      Number.isFinite(maxPoints) &&
+      maxPoints > 0 &&
+      score >= 0 &&
+      score <= maxPoints;
+
+    if (!isValid) {
+      return res.status(400).json({ error: "Invalid request payload" });
+    }
+
+    const attempt = {
+      pbqId,
+      score,
+      maxPoints,
+      percentage: Math.round((score / maxPoints) * 100),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    await getPBQAttemptsRef(req.userId).doc(pbqId).set(attempt, { merge: true });
+
+    return res.json({ data: { id: pbqId, ...attempt } });
   } catch (error) {
-    return next(error);
+    next(error);
   }
-}
+};
 
-async function getPBQAttempts(req, res, next) {
+const getPBQAttempts = async (req, res, next) => {
   try {
-    const snapshot = await db
-      .collection("users")
-      .doc(req.userId)
-      .collection("pbqAttempts")
-      .get();
-
+    const snapshot = await getPBQAttemptsRef(req.userId).get();
     return res.json({ data: snapshot.docs.map((doc) => doc.data()) });
   } catch (error) {
-    return next(error);
+    next(error);
   }
-}
+};
 
-export { saveAttempt, savePBQAttempt, getPBQAttempts };
+export { savePBQAttempt, getPBQAttempts };
