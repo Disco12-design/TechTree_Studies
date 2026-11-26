@@ -1,11 +1,5 @@
 import express from "express";
-import {
-  getProfile,
-  createProfile,
-  updateProfile,
-  updateStreak,
-  updateExamDate,
-} from "../Controllers/ProfileController.js";
+import {getProfile, createProfile, updateProfile, updateStreak,updateExamDate} from "../Controllers/ProfileController.js";
 import { requireAuthentication } from "../middleware/requireAuthentication.js";
 
 const profileRouter = express.Router();

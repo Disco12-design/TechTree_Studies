@@ -18,7 +18,7 @@ const savePBQAttempt = async (req, res, next) => {
       score <= maxPoints;
 
     if (!isValid) {
-      return res.status(400).json({ error: "Invalid request payload" });
+      return ({ error: "Invalid request payload" });
     }
 
     const attempt = {
