@@ -54,50 +54,39 @@ const isValidReviewQuestion = (question) => {
   );
 };
 
+
+// Create a new attempt for the authenticated user
 const createAttempt = async (req, res, next) => {
   try {
     if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
-      return sendError(res, 400, "Request body must be an object");
+      return sendError("Request body must be an object");
     }
 
-    const {
-      id,
-      code,
-      title,
-      mode,
-      score,
-      total,
-      date,
-      correct,
-      incorrect,
-      unanswered,
-      average,
-      reviewQuestions,
-    } = req.body;
+    const {id,code,title,mode,score,total,date,correct,incorrect,unanswered,average,reviewQuestions,} = req.body;
 
     if (!isValidId(id)) {
-      return sendError(res, 400, "Invalid attempt id");
+      return sendError("Invalid attempt id");
     }
     if (!isNonEmptyString(code, 50) || !isNonEmptyString(title, 200)) {
-      return sendError(res, 400, "Please provide all required fields");
+      return sendError("Please provide all required fields");
     }
     if (mode !== "practice" && mode !== "real") {
-      return sendError(res, 400, "Mode must be practice or real");
+      return sendError("Mode must be practice or real");
     }
     if (!isValidScore(score, total)) {
-      return sendError(res, 400, "Invalid score or total");
+      return sendError("Invalid score or total");
     }
     if (![correct, incorrect, unanswered].every(isCount)) {
-      return sendError(res, 400, "Invalid question counts");
+      return sendError("Invalid question counts");
     }
     if (!isValidDate(date)) {
-      return sendError(res, 400, "Date must be YYYY-MM-DD");
+      return sendError("Date must be YYYY-MM-DD");
     }
     if (
       average !== undefined &&
       (!Number.isFinite(average) || average < 0 || average > total)
     ) {
-      return sendError(res, 400, "Invalid average");
+      return sendError("Invalid average");
     }
     if (
       reviewQuestions !== undefined &&
@@ -105,7 +94,7 @@ const createAttempt = async (req, res, next) => {
         reviewQuestions.length > 500 ||
         !reviewQuestions.every(isValidReviewQuestion))
     ) {
-      return sendError(res, 400, "Invalid reviewQuestions");
+      return sendError("Invalid reviewQuestions");
     }
     if (
       reviewQuestions !== undefined &&
@@ -141,6 +130,7 @@ const createAttempt = async (req, res, next) => {
   }
 };
 
+// Get all attempts for the user, ordered by date descending
 const getAttempts = async (req, res, next) => {
   try {
     const snapshot = await getUserAttempts(req.userId)
@@ -156,10 +146,10 @@ const getAttempts = async (req, res, next) => {
 const getAttempt = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return sendError(res, 400, "Invalid attempt id");
+    if (!isValidId(id)) return sendError("Invalid attempt id");
 
     const snap = await getUserAttempts(req.userId).doc(id).get();
-    if (!snap.exists) return sendError(res, 404, "Attempt not found");
+    if (!snap.exists) return sendError ("Attempt not found");
 
     return res.json({ data: snap.data() });
   } catch (error) {
@@ -170,11 +160,11 @@ const getAttempt = async (req, res, next) => {
 const deleteAttempt = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return sendError(res, 400, "Invalid attempt id");
+    if (!isValidId(id)) return sendError("Invalid attempt id");
 
     const ref = getUserAttempts(req.userId).doc(id);
     const snap = await ref.get();
-    if (!snap.exists) return sendError(res, 404, "Attempt not found");
+    if (!snap.exists) return sendError ("Attempt not found");
 
     await ref.delete();
 
