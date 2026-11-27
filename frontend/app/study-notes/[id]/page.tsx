@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { StudyNote, NoteSection,  } from "../../types/assets";
 
-type TabName = "sections" | "quick-review" | "glossary";
+type TabName = "sections" | "quick-review" 
 
 function StudyNoteReaderContent() {
   const params = useParams();
@@ -258,18 +258,7 @@ function StudyNoteReaderContent() {
             </button>
           )}
 
-          {hasGlossary && (
-            <button
-              onClick={() => handleTabChange("glossary")}
-              className={`w-full px-4 py-3 text-sm font-semibold text-left border-t border-brand-200 transition ${
-                activeTab === "glossary"
-                  ? "bg-brand-100 text-brand-900 border-l-4 border-brand-600"
-                  : "text-brand-700 hover:bg-brand-50"
-              }`}
-            >
-              Glossary
-            </button>
-          )}
+         
         </div>
 
         {/* Section list */}
@@ -308,24 +297,7 @@ function StudyNoteReaderContent() {
           </div>
         )}
 
-        {/* Glossary preview */}
-        {activeTab === "glossary" && hasGlossary && (
-          <div className="hidden lg:block p-4 space-y-3">
-            {selectedNote.glossary!.map((item, index) => (
-              <div
-                key={index}
-                className="border-l-2 border-brand-600 pl-3"
-              >
-                <p className="text-xs font-bold text-brand-900 break-word">
-                  {item.term}
-                </p>
-                <p className="text-xs leading-relaxed text-brand-700 mt-1 break-word">
-                  {item.meaning}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+       
       </aside>
 
       {/* Main area */}
@@ -465,30 +437,6 @@ function StudyNoteReaderContent() {
               </section>
             )}
 
-            {/* Glossary */}
-            {activeTab === "glossary" && hasGlossary && (
-              <section>
-                <h2 className="text-2xl sm:text-3xl font-bold text-brand-900 mb-4 sm:mb-6">
-                  Glossary
-                </h2>
-
-                <div className="space-y-4">
-                  {selectedNote.glossary!.map((item, index) => (
-                    <div
-                      key={index}
-                      className="border-l-4 border-brand-600 pl-3 sm:pl-4 py-2"
-                    >
-                      <p className="text-lg font-bold text-brand-900 break-word">
-                        {item.term}
-                      </p>
-                      <p className="text-brand-700 mt-1 leading-7 break-word">
-                        {item.meaning}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Reading progress */}
             {hasSections && selectedSection && (
